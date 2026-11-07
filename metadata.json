@@ -1,0 +1,6 @@
+{
+  "name": "Aura GlossLab - Cuci & Salon Mobil iOS",
+  "description": "Aplikasi mobile-first cuci & salon mobil dengan reservasi jadwal pintar, live tracking pengerjaan real-time, pembayaran digital QRIS/E-Wallet, loyalty ulasan, dan dashboard admin komprehensif.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
