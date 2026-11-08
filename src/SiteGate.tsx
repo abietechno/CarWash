@@ -6,7 +6,7 @@ import { SiteContext } from './lib/siteContext';
 
 type State = { status: 'loading' } | { status: 'ready'; site: Site } | { status: 'missing' } | { status: 'error' };
 
-const LANDING_URL = import.meta.env.VITE_LANDING_URL || 'https://carwash.cloudbizz.my.id';
+const LANDING_URL = import.meta.env.VITE_LANDING_URL || 'https://washwuzz.cloudbizz.my.id';
 
 // Muat data tenant dari subdomain yang dibuka, lalu tampilkan app (atau halaman "tidak ditemukan").
 export function SiteGate() {

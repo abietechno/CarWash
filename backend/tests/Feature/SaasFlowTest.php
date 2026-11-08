@@ -242,6 +242,13 @@ class SaasFlowTest extends TestCase
         $this->assertSame('Electric Vehicle (Molis)', $tenant->vehicleTypes()->where('code', 'motor_listrik')->value('name'));
     }
 
+    public function test_the_landing_page_subdomains_cannot_be_claimed_by_a_tenant(): void
+    {
+        foreach (['washwuzz', 'carwash'] as $name) {
+            $this->getJson("/api/subdomains/check?name=$name")->assertJsonPath('available', false);
+        }
+    }
+
     public function test_subdomain_checks_do_not_use_up_the_registration_limit(): void
     {
         for ($i = 0; $i < 10; $i++) {

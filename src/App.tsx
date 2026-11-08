@@ -6,7 +6,7 @@ import { BookingPage } from './pages/BookingPage';
 import { HomePage } from './pages/HomePage';
 import { StatusPage } from './pages/StatusPage';
 
-const LANDING_URL = import.meta.env.VITE_LANDING_URL || 'https://carwash.cloudbizz.my.id';
+const LANDING_URL = import.meta.env.VITE_LANDING_URL || 'https://washwuzz.cloudbizz.my.id';
 
 // Halaman dibaca dari hash supaya link #reservasi / #status bisa dibagikan.
 const PAGE_HASH: Record<Page, string> = { home: '', booking: '#reservasi', status: '#status' };

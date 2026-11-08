@@ -3,7 +3,7 @@
 use App\Services\Subscriptions;
 use Illuminate\Support\Facades\Route;
 
-// Landing page SaaS (carwash.cloudbizz.my.id). Situs tenant & dash-admin dilayani frontend masing-masing.
+// Landing page SaaS (washwuzz.cloudbizz.my.id). Situs tenant & dash-admin dilayani frontend masing-masing.
 Route::get('/', function () {
     $demo = config('saas.demo_subdomain');
 

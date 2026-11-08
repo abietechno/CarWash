@@ -310,7 +310,7 @@
     <div class="max-w-5xl mx-auto px-5 lg:px-8">
         <div class="text-center max-w-2xl mx-auto reveal">
             <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">Mulai gratis, <span class="text-brand-500">tanpa kartu kredit.</span></h2>
-            <p class="mt-5 text-lg text-ink-500">Paket Gratis cukup untuk mulai online. Upgrade ke Pro untuk reservasi online, 25 foto promo, dan paket tanpa batas.</p>
+            <p class="mt-5 text-lg text-ink-500">Paket Gratis cukup untuk mulai online. Upgrade ke Pro untuk reservasi online, 25 foto promo, paket tanpa batas, manajemen transaksi keuangan, dan laporan akurat tiap bulan.</p>
         </div>
         <div class="mt-14 grid md:grid-cols-2 gap-6">
             <div class="reveal rounded-3xl border border-platinum-200 bg-white p-8">

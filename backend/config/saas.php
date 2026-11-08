@@ -23,7 +23,7 @@ return [
 
     // Subdomain yang tidak boleh dipakai tenant.
     'reserved_subdomains' => [
-        'www', 'carwash', 'dash-admin', 'admin', 'api', 'app', 'auth', 'login', 'register',
+        'www', 'carwash', 'washwuzz', 'dash-admin', 'admin', 'api', 'app', 'auth', 'login', 'register',
         'dashboard', 'panel', 'cpanel', 'webmail', 'mail', 'smtp', 'ftp', 'vps', 'ns1', 'ns2',
         'cdn', 'static', 'assets', 'blog', 'help', 'support', 'status', 'dev', 'staging', 'test', 'demo',
     ],

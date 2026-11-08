@@ -5,7 +5,7 @@
 # - user deploy (abie) masuk grup www, supaya deploy berikutnya tidak perlu sudo;
 # - backend/storage bisa ditulis PHP-FPM (user www) dan user deploy;
 # - backend/.env hanya bisa dibaca abie + www;
-# - pasang config nginx untuk carwash, dash-admin, dan *.cloudbizz.my.id, lalu reload.
+# - pasang config nginx untuk washwuzz, dash-admin, dan *.cloudbizz.my.id, lalu reload.
 # Aman dijalankan ulang (mis. setelah deploy/nginx-carwash.conf berubah).
 set -euo pipefail
 

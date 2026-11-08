@@ -3,7 +3,7 @@
 Multi-tenant: setiap bisnis cuci mobil mendaftar, mendapat subdomain sendiri, mengatur profil & harga dari dashboard, lalu mempublikasikan situsnya.
 
 ```
-carwash.cloudbizz.my.id       landing page + form daftar         backend/ (Laravel, Blade)
+washwuzz.cloudbizz.my.id       landing page + form daftar         backend/ (Laravel, Blade)
 dash-admin.cloudbizz.my.id    dashboard pemilik bisnis           dash-admin/ (Vue 3 + TS, gaya Threads)
 {subdomain}.cloudbizz.my.id   situs publik tenant                root repo (React, app CarWash)
 /api di semua domain          satu API Laravel; tenant dikenali dari subdomain host
@@ -98,7 +98,7 @@ Test backend: `cd backend && php artisan test` (alur daftar, publish, isolasi da
 | `SAAS_BASE_DOMAIN` | `localhost` | `cloudbizz.my.id` |
 | `SAAS_TENANT_URL` | `http://{subdomain}.localhost:3000` | `https://{subdomain}.cloudbizz.my.id` |
 | `SAAS_ADMIN_URL` | `http://dash-admin.localhost:5173` | `https://dash-admin.cloudbizz.my.id` |
-| `SAAS_LANDING_URL` | `http://carwash.localhost:8000` | `https://carwash.cloudbizz.my.id` |
+| `SAAS_LANDING_URL` | `http://carwash.localhost:8000` | `https://washwuzz.cloudbizz.my.id` |
 | `DB_CONNECTION` | `sqlite` | `mysql` (MariaDB di aaPanel) |
 
 Subdomain yang dicadangkan (tidak bisa dipakai tenant) ada di `backend/config/saas.php`.
@@ -118,7 +118,7 @@ Server: aaPanel (nginx + PHP 8.4 + MariaDB), repo di `/www/wwwroot/carwash/CarWa
 
 | File | Isi |
 |---|---|
-| `deploy/nginx-carwash.conf` | tiga site: `carwash` → `backend/public`; `dash-admin` → `dash-admin/dist`; `*.cloudbizz.my.id` → `dist`. `/api` di semua site → Laravel, Host asli dipertahankan |
+| `deploy/nginx-carwash.conf` | tiga site: `washwuzz` → `backend/public`; `dash-admin` → `dash-admin/dist`; `*.cloudbizz.my.id` → `dist`. `/api` di semua site → Laravel, Host asli dipertahankan; alamat lama `carwash` dialihkan (301) ke `washwuzz` |
 | `deploy/server-setup.sh` | sekali, dengan sudo: user deploy masuk grup `www`, izin `backend/storage` & `.env`, pasang config nginx + reload |
 | `deploy/deploy.sh` | tiap update, tanpa sudo: `git pull`, composer, migrasi, cache config/route, build kedua frontend |
 
@@ -127,7 +127,7 @@ Pertama kali:
 1. aaPanel: PHP 8.4 → pasang ekstensi **fileinfo**; buat database `carwash_cloud` (user `carwash_cloud`, akses lokal).
 2. `cp backend/.env.production.example backend/.env`, isi `DB_PASSWORD` dan `APP_KEY`.
 3. `sudo bash deploy/server-setup.sh`, lalu `bash deploy/deploy.sh`.
-4. Cloudflare Tunnel → public hostname `carwash`, `dash-admin`, dan `*` (paling bawah) → `http://localhost:80`.
+4. Cloudflare Tunnel → public hostname `washwuzz`, `carwash` (untuk pengalihan), `dash-admin`, dan `*` (paling bawah) → `http://localhost:80`.
 5. `cd backend && php artisan saas:superadmin email@anda` (jangan jalankan seeder di production — isinya akun demo).
 
 ## Catatan teknis
