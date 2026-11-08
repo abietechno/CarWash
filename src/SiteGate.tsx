@@ -23,8 +23,18 @@ export function SiteGate() {
 
   useEffect(() => {
     if (state.status === 'ready') {
-      const { name, tagline } = state.site.business;
+      const { name, tagline, logo } = state.site.business;
       document.title = tagline ? `${name} — ${tagline}` : name;
+      // Logo tenant (Pro) juga jadi ikon tab browser.
+      if (logo) {
+        let icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+        if (!icon) {
+          icon = document.createElement('link');
+          icon.rel = 'icon';
+          document.head.appendChild(icon);
+        }
+        icon.href = logo;
+      }
     }
   }, [state]);
 

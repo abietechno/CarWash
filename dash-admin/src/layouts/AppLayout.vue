@@ -16,6 +16,7 @@ import {
   Sun,
   Tags,
 } from '@lucide/vue'
+import RenewalBanner from '@/components/RenewalBanner.vue'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useDarkMode } from '@/composables/useDarkMode'
 import { useAuthStore } from '@/stores/auth'
@@ -154,6 +155,7 @@ async function backToSuper() {
               Kembali ke super-admin
             </button>
           </div>
+          <RenewalBanner v-if="!auth.isSuperadmin" />
           <slot />
         </div>
       </div>

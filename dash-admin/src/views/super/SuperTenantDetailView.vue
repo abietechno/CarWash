@@ -23,6 +23,7 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { api, errorMessage } from '@/lib/api'
 import { daysUntil, PAYMENT_METHODS, rupiah, shortDate } from '@/lib/format'
+import { whatsappUrl } from '@/lib/plans'
 import { useAuthStore } from '@/stores/auth'
 import type { SuperTenantDetail } from '@/types'
 
@@ -55,13 +56,6 @@ function describe(meta: Record<string, unknown> | null): string {
   if (meta.reason) return String(meta.reason)
   if (meta.owner) return String(meta.owner)
   return ''
-}
-
-function waLink(phone: string | null | undefined) {
-  if (!phone) return null
-  let digits = phone.replace(/\D/g, '')
-  if (digits.startsWith('0')) digits = `62${digits.slice(1)}`
-  return `https://wa.me/${digits}`
 }
 
 onMounted(async () => {
@@ -159,8 +153,8 @@ async function runConfirmed(action: 'suspend' | 'activate' | 'impersonate') {
           <p class="text-muted-foreground">{{ tenant.owner?.email }}</p>
           <p class="text-muted-foreground">{{ [tenant.address, tenant.city].filter(Boolean).join(', ') || 'Alamat belum diisi' }}</p>
           <a
-            v-if="waLink(tenant.whatsapp ?? tenant.owner?.phone)"
-            :href="waLink(tenant.whatsapp ?? tenant.owner?.phone)!"
+            v-if="whatsappUrl(tenant.whatsapp ?? tenant.owner?.phone)"
+            :href="whatsappUrl(tenant.whatsapp ?? tenant.owner?.phone)!"
             target="_blank"
             rel="noopener"
             class="inline-flex items-center gap-1 pt-1 text-emerald-500 hover:underline"

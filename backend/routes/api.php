@@ -38,6 +38,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/tenant', [TenantController::class, 'show']);
     Route::put('/tenant', [TenantController::class, 'update']);
+    Route::post('/tenant/logo', [TenantController::class, 'uploadLogo']);
+    Route::delete('/tenant/logo', [TenantController::class, 'deleteLogo']);
     Route::post('/tenant/publish', [TenantController::class, 'publish']);
     Route::post('/tenant/unpublish', [TenantController::class, 'unpublish']);
 

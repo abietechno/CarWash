@@ -26,6 +26,7 @@ import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { api, errorMessage } from '@/lib/api'
 import { ADDON_CATEGORIES, duration, PACKAGE_CATEGORIES, PROMO_THEMES, rupiah } from '@/lib/format'
+import { PRO_MAX_PROMOS } from '@/lib/plans'
 import { useAuthStore } from '@/stores/auth'
 import type { Promo, ServiceAddon, ServicePackage, VehicleType } from '@/types'
 
@@ -35,6 +36,7 @@ type Kind = 'packages' | 'addons' | 'promos'
 const auth = useAuthStore()
 const features = computed(() => auth.tenant?.features)
 const activePackages = computed(() => packages.value.filter((p) => p.is_active).length)
+const promosFull = computed(() => promos.value.length >= (features.value?.max_promos ?? 0))
 
 const tab = ref<Tab>('packages')
 const loaded = ref(false)
@@ -148,7 +150,7 @@ async function saveVehicles() {
     <template #actions>
       <Button v-if="tab === 'packages'" :disabled="!loaded" @click="openPackage(null)"><Plus /> Paket</Button>
       <Button v-else-if="tab === 'addons'" :disabled="!loaded" @click="openAddon(null)"><Plus /> Add-on</Button>
-      <Button v-else-if="tab === 'promos'" :disabled="!loaded || !features?.promos" @click="openPromo(null)"><Plus /> Promo</Button>
+      <Button v-else-if="tab === 'promos'" :disabled="!loaded || promosFull" @click="openPromo(null)"><Plus /> Promo</Button>
       <Button v-else :disabled="!loaded || savingVehicles" @click="saveVehicles">
         <LoaderCircle v-if="savingVehicles" class="animate-spin" />
         Simpan
@@ -254,7 +256,13 @@ async function saveVehicles() {
         </TabsContent>
 
         <TabsContent value="promos" class="space-y-3">
-          <UpgradeNotice v-if="!features?.promos" message="Promo slider di beranda situs khusus paket Pro." />
+          <UpgradeNotice
+            v-if="features && features.max_promos < PRO_MAX_PROMOS"
+            :message="`${promos.length}/${features.max_promos} foto promo (batas Gratis).${promos.length > features.max_promos ? ' Hanya promo aktif teratas yang tampil di situs.' : ''} Pro: sampai ${PRO_MAX_PROMOS} foto.`"
+          />
+          <p v-else-if="features && promosFull" class="text-sm text-muted-foreground">
+            Sudah {{ features.max_promos }} foto promo (batas Pro). Hapus promo lama untuk menambah yang baru.
+          </p>
           <p v-if="!promos.length" class="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
             Belum ada promo. Tanpa promo, slider di situs menampilkan nama & tagline bisnismu.
           </p>

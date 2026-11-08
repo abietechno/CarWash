@@ -2,6 +2,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { LoaderCircle } from '@lucide/vue'
+import LogoCard from '@/components/LogoCard.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -109,6 +110,8 @@ function hourError(index: number) {
   </div>
 
   <form v-else class="space-y-4 p-4 sm:p-6" @submit.prevent="save">
+    <LogoCard />
+
     <Card>
       <CardHeader>
         <CardTitle class="text-base">Informasi bisnis</CardTitle>

@@ -24,6 +24,11 @@ class Tenant extends Model
     // Batas paket Gratis; Pro tanpa batas.
     public const FREE_MAX_PACKAGES = 3;
 
+    // Jumlah foto promo slider (1 promo = 1 slide).
+    public const FREE_MAX_PROMOS = 1;
+
+    public const PRO_MAX_PROMOS = 25;
+
     protected function casts(): array
     {
         return [
@@ -54,7 +59,7 @@ class Tenant extends Model
     /**
      * Fitur yang aktif sesuai paket langganan.
      *
-     * @return array{max_packages: ?int, online_booking: bool, promos: bool, branding: bool}
+     * @return array{max_packages: ?int, max_promos: int, online_booking: bool, custom_logo: bool, branding: bool}
      */
     public function features(): array
     {
@@ -62,8 +67,9 @@ class Tenant extends Model
 
         return [
             'max_packages' => $pro ? null : self::FREE_MAX_PACKAGES,
+            'max_promos' => $pro ? self::PRO_MAX_PROMOS : self::FREE_MAX_PROMOS,
             'online_booking' => $pro,
-            'promos' => $pro,
+            'custom_logo' => $pro, // logo sendiri di header situs
             'branding' => ! $pro, // label "Dibuat dengan CarWash Cloud"
         ];
     }
@@ -119,6 +125,11 @@ class Tenant extends Model
         $time = $local->format('H:i');
 
         return $time >= $day['open'] && $time < $day['close'];
+    }
+
+    public function logoUrl(): ?string
+    {
+        return $this->logo_path ? '/api/media/'.$this->logo_path : null;
     }
 
     public function url(): string

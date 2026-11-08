@@ -32,11 +32,14 @@ Subdomain tenant tidak dibuat satu per satu di DNS: satu record wildcard `*.clou
 | Situs + papan antrian + walk-in | ✓ | ✓ |
 | Paket layanan aktif | maks. 3 | tanpa batas |
 | Reservasi online | — (tombol "Pesan" → WhatsApp) | ✓ |
-| Promo slider | — | ✓ |
+| Foto promo slider | 1 | 25 |
+| Logo sendiri di header situs | — | ✓ |
 | Label "Dibuat dengan CarWash Cloud" | tampil | tidak |
 
-Pembayaran **manual**: tenant membayar sesuai instruksi di menu **Langganan**, lalu super-admin mencatatnya.
-Pro aktif sampai `tenants.pro_until`; lewat dari itu otomatis kembali Gratis (tanpa cron). Batas paket dicek di backend.
+Pembayaran **manual**: menu **Langganan** berisi tata cara (pilih periode → transfer → kirim bukti via WhatsApp → admin mengaktifkan)
+dan tombol WhatsApp melayang ke admin (nomor dari Pengaturan super-admin, bawaan 081233741899). Super-admin lalu mencatat pembayarannya.
+Pro aktif sampai `tenants.pro_until`; lewat dari itu otomatis kembali Gratis (tanpa cron). Batas paket, promo, dan logo dicek di backend.
+Dashboard tenant menampilkan peringatan 7 hari sebelum Pro habis, dan masih 30 hari setelahnya.
 
 ## Super-admin
 

@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class PromoController extends Controller
 {
@@ -25,14 +26,18 @@ class PromoController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $promo = $this->proTenant($request)->promos()->create($this->validated($request));
+        $tenant = $this->tenant($request);
+        $data = $this->validated($request);
+        $this->ensureWithinPlan($tenant);
+
+        $promo = $tenant->promos()->create($data);
 
         return response()->json($promo, 201);
     }
 
     public function update(Request $request, int $promo): Promo
     {
-        $model = $this->proTenant($request)->promos()->findOrFail($promo);
+        $model = $this->tenant($request)->promos()->findOrFail($promo);
         $model->update($this->validated($request));
 
         return $model;
@@ -49,7 +54,7 @@ class PromoController extends Controller
 
     public function uploadImage(Request $request, int $promo, TenantImages $images): Promo
     {
-        $tenant = $this->proTenant($request);
+        $tenant = $this->tenant($request);
         $model = $tenant->promos()->findOrFail($promo);
         $request->validate(['image' => TenantImages::RULES]);
 
@@ -70,13 +75,18 @@ class PromoController extends Controller
         return $model;
     }
 
-    // Promo slider khusus Pro; tenant Gratis masih boleh melihat & menghapus promo lama.
-    private function proTenant(Request $request): Tenant
+    // Gratis 1 foto promo, Pro 25. Promo lama di atas batas (mis. setelah Pro habis) tetap bisa diedit & dihapus.
+    private function ensureWithinPlan(Tenant $tenant): void
     {
-        $tenant = $this->tenant($request);
-        abort_unless($tenant->isPro(), 403, 'Promo slider khusus paket Pro.');
+        $max = $tenant->features()['max_promos'];
 
-        return $tenant;
+        if ($tenant->promos()->count() >= $max) {
+            throw ValidationException::withMessages([
+                'promo' => $tenant->isPro()
+                    ? "Maksimal {$max} foto promo. Hapus promo lama untuk menambah yang baru."
+                    : "Paket Gratis maksimal {$max} foto promo. Upgrade ke Pro untuk sampai ".Tenant::PRO_MAX_PROMOS.' foto.',
+            ]);
+        }
     }
 
     private function validated(Request $request): array

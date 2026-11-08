@@ -290,14 +290,14 @@
     <div class="max-w-5xl mx-auto px-5 lg:px-8">
         <div class="text-center max-w-2xl mx-auto reveal">
             <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">Mulai gratis, <span class="text-brand-500">tanpa kartu kredit.</span></h2>
-            <p class="mt-5 text-lg text-ink-500">Paket Gratis cukup untuk mulai online. Upgrade ke Pro untuk reservasi online, promo, dan paket tanpa batas.</p>
+            <p class="mt-5 text-lg text-ink-500">Paket Gratis cukup untuk mulai online. Upgrade ke Pro untuk reservasi online, 25 foto promo, dan paket tanpa batas.</p>
         </div>
         <div class="mt-14 grid md:grid-cols-2 gap-6">
             <div class="reveal rounded-3xl border border-platinum-200 bg-white p-8">
                 <h3 class="text-xl font-bold">Gratis</h3>
                 <p class="mt-3"><span class="font-display text-5xl font-extrabold">Rp0</span><span class="text-ink-500"> / bulan</span></p>
                 <ul class="mt-6 space-y-3 text-sm text-ink-700">
-                    @foreach (['Situs bisnis dengan subdomain sendiri', 'Papan antrian realtime & pelanggan walk-in', 'Maks. 3 paket layanan aktif', 'Profil, jam buka, WhatsApp & Maps'] as $item)
+                    @foreach (['Situs bisnis dengan subdomain sendiri', 'Papan antrian realtime & pelanggan walk-in', 'Maks. 3 paket layanan aktif', 'Promo slider 1 foto', 'Profil, jam buka, WhatsApp & Maps'] as $item)
                     <li class="flex gap-2"><svg class="w-5 h-5 shrink-0 text-accent-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{{ $item }}</li>
                     @endforeach
                 </ul>
@@ -309,7 +309,7 @@
                 <p class="mt-3"><span class="font-display text-5xl font-extrabold">Rp{{ number_format($prices['monthly'] / 1000, 0, ',', '.') }}rb</span><span class="text-ink-500"> / bulan</span></p>
                 <p class="mt-1 text-sm text-ink-500">atau Rp{{ number_format($prices['yearly'], 0, ',', '.') }} / tahun</p>
                 <ul class="mt-6 space-y-3 text-sm text-ink-700">
-                    @foreach (['Semua fitur Gratis', 'Reservasi online dengan nomor antrian', 'Promo slider di beranda', 'Paket layanan tanpa batas', 'Tanpa label "Dibuat dengan CarWash Cloud"'] as $item)
+                    @foreach (['Semua fitur Gratis', 'Reservasi online dengan nomor antrian', 'Promo slider sampai 25 foto', 'Logo sendiri di header situs', 'Paket layanan tanpa batas', 'Tanpa label "Dibuat dengan CarWash Cloud"'] as $item)
                     <li class="flex gap-2"><svg class="w-5 h-5 shrink-0 text-accent-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{{ $item }}</li>
                     @endforeach
                 </ul>

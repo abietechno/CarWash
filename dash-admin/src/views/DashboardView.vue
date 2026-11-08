@@ -143,7 +143,7 @@ async function copyUrl() {
       <span class="min-w-0 flex-1">
         <span class="block font-medium">Paket {{ tenant.plan === 'pro' ? 'Pro' : 'Gratis' }}</span>
         <span class="block truncate text-sm text-muted-foreground">
-          {{ tenant.plan === 'pro' ? `Aktif sampai ${shortDate(tenant.pro_until)}` : 'Upgrade untuk reservasi online & promo slider' }}
+          {{ tenant.plan === 'pro' ? `Aktif sampai ${shortDate(tenant.pro_until)}` : 'Upgrade untuk reservasi online, 25 foto promo & logo sendiri' }}
         </span>
       </span>
       <PlanBadge :plan="tenant.plan" :pro-until="tenant.pro_until" />

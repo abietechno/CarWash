@@ -65,12 +65,15 @@ class SuperAdminTest extends TestCase
             ->assertUnprocessable()->assertJsonValidationErrors('is_active');
         $this->postJson('/api/packages', ['name' => 'Draft', 'category' => 'wash', 'price' => 50000, 'duration_minutes' => 30, 'is_active' => false])
             ->assertCreated();
-        $this->postJson('/api/promos', ['title' => 'Promo', 'theme' => 'blue'])->assertForbidden();
+        // Promo slider Gratis: 1 foto.
+        $this->postJson('/api/promos', ['title' => 'Promo', 'theme' => 'blue'])->assertCreated();
+        $this->postJson('/api/promos', ['title' => 'Promo 2', 'theme' => 'rose'])
+            ->assertUnprocessable()->assertJsonValidationErrors('promo');
 
         $this->getJson('http://putrajayawash.localhost/api/public/site')
             ->assertOk()
             ->assertJsonPath('features', ['online_booking' => false, 'branding' => true])
-            ->assertJsonCount(0, 'promos');
+            ->assertJsonCount(1, 'promos');
 
         $this->postJson('http://putrajayawash.localhost/api/public/bookings', [
             'customer_name' => 'Budi', 'phone' => '081211112222', 'vehicle_type' => 'compact', 'package_id' => $tenant->packages()->first()->id,

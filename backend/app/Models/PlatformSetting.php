@@ -19,7 +19,7 @@ class PlatformSetting extends Model
         'pro_monthly_price' => 99000,
         'pro_yearly_price' => 990000,
         'payment_instructions' => '',
-        'contact_whatsapp' => '',
+        'contact_whatsapp' => '081233741899',
     ];
 
     /** @return array<string, mixed> */

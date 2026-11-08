@@ -23,6 +23,7 @@ export interface Tenant {
   address: string | null
   city: string | null
   maps_url: string | null
+  logo_url: string | null
   opening_hours: OpeningHour[]
   bay_count: number
   published_at: string | null
@@ -37,8 +38,9 @@ export type Plan = 'free' | 'pro'
 
 export interface PlanFeatures {
   max_packages: number | null
+  max_promos: number
   online_booking: boolean
-  promos: boolean
+  custom_logo: boolean
   branding: boolean
 }
 

@@ -23,6 +23,7 @@ export interface Business {
   address: string | null;
   city: string | null;
   mapsUrl: string | null;
+  logo: string | null; // logo sendiri (paket Pro); null = inisial nama
   openingHours: OpeningHour[];
   openNow: boolean;
 }
@@ -82,6 +83,7 @@ interface ApiSite {
     address: string | null;
     city: string | null;
     maps_url: string | null;
+    logo_url: string | null;
     opening_hours: OpeningHour[] | null;
     open_now: boolean;
   };
@@ -145,6 +147,7 @@ export async function fetchSite(): Promise<Site | null> {
       address: t.address,
       city: t.city,
       mapsUrl: t.maps_url,
+      logo: t.logo_url,
       openingHours: t.opening_hours ?? [],
       openNow: t.open_now,
     },

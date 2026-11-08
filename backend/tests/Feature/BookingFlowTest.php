@@ -164,4 +164,49 @@ class BookingFlowTest extends TestCase
             ->assertJsonPath('packages.0.image_url', $url)
             ->assertJsonMissingPath('packages.0.image_path');
     }
+
+    public function test_promo_slider_limit_follows_plan(): void
+    {
+        Storage::fake('public');
+        ['tenant' => $tenant, 'user' => $user] = $this->publishedTenant();
+        Sanctum::actingAs($user);
+
+        foreach (range(1, Tenant::PRO_MAX_PROMOS) as $i) {
+            $this->postJson('/api/promos', ['title' => "Promo $i", 'theme' => 'blue'])->assertCreated();
+        }
+        $this->postJson('/api/promos', ['title' => 'Kelebihan', 'theme' => 'blue'])
+            ->assertUnprocessable()->assertJsonValidationErrors('promo');
+        $this->getJson(self::SITE.'/api/public/site')->assertJsonCount(Tenant::PRO_MAX_PROMOS, 'promos');
+
+        // Pro habis: promo lama tetap ada & bisa diganti fotonya, tapi situs hanya menampilkan 1.
+        $tenant->update(['pro_until' => now()->subDay()]);
+        $first = $tenant->promos()->first();
+        $this->post("/api/promos/{$first->id}/image", ['image' => UploadedFile::fake()->image('promo.jpg', 1200, 600)], ['Accept' => 'application/json'])
+            ->assertOk();
+        $this->getJson(self::SITE.'/api/public/site')
+            ->assertJsonCount(Tenant::FREE_MAX_PROMOS, 'promos')
+            ->assertJsonPath('promos.0.title', 'Promo 1');
+    }
+
+    public function test_custom_logo_is_pro_only(): void
+    {
+        Storage::fake('public');
+        ['tenant' => $tenant, 'user' => $user] = $this->publishedTenant();
+        Sanctum::actingAs($user);
+        $upload = fn () => $this->post('/api/tenant/logo', ['image' => UploadedFile::fake()->image('logo.png', 400, 160)], ['Accept' => 'application/json']);
+
+        $logo = $upload()->assertOk()->json('logo_url');
+        $this->assertStringStartsWith("/api/media/tenants/{$tenant->id}/", $logo);
+        $this->getJson(self::SITE.'/api/public/site')->assertJsonPath('tenant.logo_url', $logo);
+        $this->get($logo)->assertOk();
+
+        // Pro habis: logo disembunyikan dari situs, upload baru ditolak, hapus tetap boleh.
+        // Lewat $user->tenant: relasi itu yang dipakai request berikutnya (actingAs memakai instance user yang sama).
+        $user->tenant->update(['pro_until' => now()->subDay()]);
+        $this->getJson(self::SITE.'/api/public/site')->assertJsonPath('tenant.logo_url', null);
+        $upload()->assertForbidden();
+        $this->deleteJson('/api/tenant/logo')->assertOk()->assertJsonPath('logo_url', null);
+        $this->assertNull($tenant->fresh()->logo_path);
+        Storage::disk('public')->assertMissing(substr($logo, strlen('/api/media/')));
+    }
 }

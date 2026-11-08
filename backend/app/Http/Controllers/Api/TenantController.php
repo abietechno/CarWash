@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Concerns\ResolvesTenant;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TenantResource;
 use App\Models\Tenant;
+use App\Services\TenantImages;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -65,6 +66,30 @@ class TenantController extends Controller
             ->all();
 
         $tenant->update($data);
+
+        return new TenantResource($tenant);
+    }
+
+    // Logo di header situs khusus Pro; menghapus tetap boleh setelah Pro habis.
+    public function uploadLogo(Request $request, TenantImages $images): TenantResource
+    {
+        $tenant = $this->tenant($request);
+        abort_unless($tenant->features()['custom_logo'], 403, 'Logo sendiri di header situs khusus paket Pro.');
+        $request->validate(['image' => TenantImages::RULES]);
+
+        $images->delete($tenant->logo_path);
+        $tenant->logo_path = $images->store($tenant, $request->file('image'));
+        $tenant->save();
+
+        return new TenantResource($tenant);
+    }
+
+    public function deleteLogo(Request $request, TenantImages $images): TenantResource
+    {
+        $tenant = $this->tenant($request);
+        $images->delete($tenant->logo_path);
+        $tenant->logo_path = null;
+        $tenant->save();
 
         return new TenantResource($tenant);
     }
