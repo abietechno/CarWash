@@ -92,15 +92,32 @@ Test backend: `cd backend && php artisan test` (alur daftar, publish, isolasi da
 
 Subdomain yang dicadangkan (tidak bisa dipakai tenant) ada di `backend/config/saas.php`.
 
-## Deploy (rencana)
+File env per aplikasi:
 
-1. **Cloudflare DNS** (proxied): `carwash`, `dash-admin`, dan `*` → IP server.
-2. **SSL**: Cloudflare Origin Certificate untuk `cloudbizz.my.id` + `*.cloudbizz.my.id` di nginx, mode SSL **Full (strict)**.
-3. **nginx (aaPanel)**:
-   - `carwash.cloudbizz.my.id` → `backend/public` (PHP-FPM).
-   - `dash-admin.cloudbizz.my.id` → `dash-admin/dist` (fallback `index.html`), `/api` → Laravel.
-   - `*.cloudbizz.my.id` → `dist` (situs tenant, fallback `index.html`), `/api` → Laravel dengan header `Host` asli.
-4. **Backend**: MariaDB, `.env` production (`APP_DEBUG=false`, nilai `SAAS_*` di atas), `php artisan migrate --force`, `config:cache`, `route:cache`.
+| Aplikasi | Lokal | Production |
+|---|---|---|
+| Backend (landing + API) | `backend/.env` dari `.env.example` | `backend/.env` dari `.env.production.example` (berisi rahasia, tidak di-commit) |
+| Dash-admin | `dash-admin/.env` dari `.env.example` | `dash-admin/.env.production` (otomatis dipakai `npm run build`) |
+| Situs tenant | `.env.development` | `.env.production` (otomatis dipakai `npm run build`) |
+
+## Deploy
+
+Server: aaPanel (nginx + PHP 8.4 + MariaDB), repo di `/www/wwwroot/carwash/CarWash`, trafik publik lewat **Cloudflare Tunnel**
+(HTTPS selesai di Cloudflare, tunnel → `http://localhost:80`).
+
+| File | Isi |
+|---|---|
+| `deploy/nginx-carwash.conf` | tiga site: `carwash` → `backend/public`; `dash-admin` → `dash-admin/dist`; `*.cloudbizz.my.id` → `dist`. `/api` di semua site → Laravel, Host asli dipertahankan |
+| `deploy/server-setup.sh` | sekali, dengan sudo: user deploy masuk grup `www`, izin `backend/storage` & `.env`, pasang config nginx + reload |
+| `deploy/deploy.sh` | tiap update, tanpa sudo: `git pull`, composer, migrasi, cache config/route, build kedua frontend |
+
+Pertama kali:
+
+1. aaPanel: PHP 8.4 → pasang ekstensi **fileinfo**; buat database `carwash_cloud` (user `carwash_cloud`, akses lokal).
+2. `cp backend/.env.production.example backend/.env`, isi `DB_PASSWORD` dan `APP_KEY`.
+3. `sudo bash deploy/server-setup.sh`, lalu `bash deploy/deploy.sh`.
+4. Cloudflare Tunnel → public hostname `carwash`, `dash-admin`, dan `*` (paling bawah) → `http://localhost:80`.
+5. `cd backend && php artisan saas:superadmin email@anda` (jangan jalankan seeder di production — isinya akun demo).
 
 ## Catatan teknis
 

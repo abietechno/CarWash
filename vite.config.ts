@@ -1,9 +1,12 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig} from 'vite';
+import {defineConfig, loadEnv} from 'vite';
 
-export default defineConfig(() => {
+export default defineConfig(({mode}) => {
+  // Nilai dari .env.development / .env.production (process.env tidak membaca file .env).
+  const env = loadEnv(mode, process.cwd(), '');
+
   return {
     plugins: [react(), tailwindcss()],
     resolve: {
@@ -19,7 +22,7 @@ export default defineConfig(() => {
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
       proxy: {
         // changeOrigin false: host asli (mis. putrajayawash.localhost) diteruskan supaya backend mengenali tenant.
-        '/api': { target: process.env.VITE_API_PROXY || 'http://127.0.0.1:8000', changeOrigin: false },
+        '/api': { target: env.VITE_API_PROXY || 'http://127.0.0.1:8000', changeOrigin: false },
       },
     },
   };
