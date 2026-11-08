@@ -1,54 +1,76 @@
 @import "tailwindcss";
-@custom-variant dark (&:where(.dark, .dark *));
+@source not "../backend";
+@source not "../dash-admin";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Biru air, sama dengan landing page CarWash Cloud */
+  --color-brand-50: #eef6ff;
+  --color-brand-100: #d9eaff;
+  --color-brand-200: #bcdaff;
+  --color-brand-300: #8ec2ff;
+  --color-brand-400: #599fff;
+  --color-brand-500: #2f7bf6;
+  --color-brand-600: #1a5fe0;
+  --color-brand-700: #154bb5;
+  --color-brand-800: #173f8e;
+  --color-brand-900: #183870;
+  --color-ink-900: #0b1a2e;
+}
 
 @layer base {
-  :root {
-    --font-sf: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "San Francisco", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
-    font-family: var(--font-sf);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    @apply bg-slate-50 font-sans text-ink-900 antialiased;
     -webkit-tap-highlight-color: transparent;
-    user-select: none;
   }
 
-  /* Smooth custom iOS scrollbar */
-  ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: rgba(150, 150, 150, 0.3);
-    border-radius: 9999px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(150, 150, 150, 0.5);
+  h1,
+  h2,
+  h3 {
+    @apply font-display tracking-tight;
   }
 }
 
-/* Cupertino blurred background effect */
-.cupertino-blur {
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+@utility input {
+  @apply w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-100;
 }
 
-.cupertino-subtle-shadow {
-  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+/* Bay cuci di papan antrian: aspal dengan garis jalur kuning putus-putus */
+.bay-lane {
+  background:
+    repeating-linear-gradient(90deg, #facc15 0 14px, transparent 14px 26px) top 10px left 0 / 100% 3px no-repeat,
+    repeating-linear-gradient(90deg, #facc15 0 14px, transparent 14px 26px) bottom 10px left 0 / 100% 3px no-repeat,
+    #3a4250;
 }
 
-.cupertino-card-shadow {
-  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+/* Busa sabun yang naik pelan di atas mobil yang sedang dicuci */
+@keyframes foam {
+  0% {
+    transform: translateY(6px) scale(0.5);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-34px) scale(1.15);
+    opacity: 0;
+  }
 }
 
-.cupertino-press {
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
+.foam-bubble {
+  animation: foam 2.8s ease-out infinite;
 }
-.cupertino-press:active {
-  transform: scale(0.97);
-  opacity: 0.85;
+
+@media (prefers-reduced-motion: reduce) {
+  .foam-bubble {
+    animation: none;
+    opacity: 0;
+  }
 }
