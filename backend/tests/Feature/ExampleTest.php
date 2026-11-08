@@ -21,6 +21,17 @@ class ExampleTest extends TestCase
             ->assertSee('Rp1.490.000');
     }
 
+    public function test_landing_page_embeds_the_promo_video_without_downloading_it_up_front(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('src="/video/washwuzz-promo.mp4"', false)
+            ->assertSee('preload="none"', false);
+
+        $this->assertFileExists(public_path('video/washwuzz-promo.mp4'));
+        $this->assertFileExists(public_path('video/washwuzz-promo-poster.jpg'));
+    }
+
     public function test_landing_page_uses_washwuzz_brand_and_whatsapp_button(): void
     {
         $this->get('/')

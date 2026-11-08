@@ -259,7 +259,7 @@
 
 <!-- Cara kerja -->
 <section id="cara-kerja" class="relative py-24 lg:py-32 bg-gradient-to-b from-brand-50 via-white to-accent-50 overflow-hidden">
-    <div class="max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_20rem] gap-x-16 gap-y-12">
         <div class="max-w-2xl reveal">
             <span class="inline-flex items-center gap-2 rounded-full border border-accent-300 bg-accent-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent-600">
                 <span class="w-1.5 h-1.5 rounded-full bg-accent-500"></span> Cara Kerja
@@ -267,8 +267,28 @@
             <h2 class="mt-5 text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">
                 Empat langkah, <span class="text-brand-500">situs langsung online.</span>
             </h2>
+            <p class="mt-5 text-lg text-ink-500">Tonton alur lengkapnya dalam video kurang dari semenit, dari pelanggan reservasi sampai laporan uang.</p>
         </div>
-        <ol class="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+        <div class="reveal w-full max-w-[300px] mx-auto lg:max-w-none lg:col-start-2 lg:row-start-1 lg:row-span-2 lg:self-center">
+            <div class="relative rounded-[2.5rem] bg-ink-950 p-3 shadow-2xl glow">
+                <video
+                    id="promo-video"
+                    src="/video/washwuzz-promo.mp4"
+                    poster="/video/washwuzz-promo-poster.jpg"
+                    preload="none"
+                    controls
+                    playsinline
+                    aria-label="Video promo alur WashWuzz"
+                    class="block w-full aspect-[9/16] rounded-[2rem] bg-ink-900"
+                ></video>
+                <button id="promo-play" type="button" aria-label="Putar video promo" class="absolute inset-0 m-auto w-20 h-20 flex items-center justify-center rounded-full bg-white/90 text-brand-600 shadow-xl transition-colors hover:bg-white">
+                    <svg class="w-9 h-9 ml-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <ol class="grid sm:grid-cols-2 gap-5">
             @foreach ([
                 ['Daftar & pilih subdomain', 'Isi nama bisnis dan pilih alamat situs, misalnya putrajayawash.'.$baseDomain.'.'],
                 ['Lengkapi profil', 'Masuk ke dashboard, isi alamat, WhatsApp, deskripsi, dan jam buka.'],
@@ -452,6 +472,12 @@
         entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
     }, { threshold: 0.12 });
     document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+    // Tombol putar besar di atas sampul; setelah video jalan, kontrol bawaan browser yang dipakai.
+    const promoVideo = document.getElementById('promo-video');
+    const promoPlay = document.getElementById('promo-play');
+    promoPlay.addEventListener('click', () => promoVideo.play());
+    promoVideo.addEventListener('play', () => promoPlay.remove(), { once: true });
 
     const form = document.getElementById('register-form');
     const nameInput = form.elements.business_name;
