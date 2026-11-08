@@ -20,13 +20,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { api, errorMessage } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth'
 import PlanBadge from '@/components/super/PlanBadge.vue'
-import { shortDate } from '@/lib/format'
-import type { QueueBoard, Tenant } from '@/types'
+import { rupiah, shortDate } from '@/lib/format'
+import type { QueueBoard, ReportSummary, Tenant } from '@/types'
 
 const auth = useAuthStore()
 const tenant = computed(() => auth.tenant)
 const busy = ref(false)
 const queue = ref<QueueBoard | null>(null)
+const today = ref<ReportSummary | null>(null)
 
 const firstName = computed(() => auth.user?.name.split(' ')[0] ?? '')
 const isOnline = computed(() => tenant.value?.status === 'published')
@@ -36,9 +37,10 @@ const statusLabel = computed(
 
 onMounted(async () => {
   try {
-    const [t, q] = await Promise.all([api.get<Tenant>('/tenant'), api.get<QueueBoard>('/bookings')])
+    const [t, q, r] = await Promise.all([api.get<Tenant>('/tenant'), api.get<QueueBoard>('/bookings'), api.get<ReportSummary>('/reports/summary')])
     auth.setTenant(t.data)
     queue.value = q.data
+    today.value = r.data
   } catch (e) {
     toast.error(errorMessage(e))
   }
@@ -166,6 +168,23 @@ async function copyUrl() {
       </span>
       <ChevronRight class="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
     </RouterLink>
+
+    <Card v-if="today" size="sm">
+      <CardContent class="flex flex-wrap items-center gap-x-8 gap-y-3">
+        <div>
+          <p class="text-sm text-muted-foreground">Uang masuk hari ini</p>
+          <p class="mt-1 font-display text-2xl font-bold tabular-nums">{{ rupiah(today.income) }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-muted-foreground">Uang keluar hari ini</p>
+          <p class="mt-1 font-display text-2xl font-bold tabular-nums">{{ rupiah(today.expense) }}</p>
+        </div>
+        <div class="flex gap-2 sm:ml-auto">
+          <Button as-child><RouterLink to="/kasir">Buka kasir</RouterLink></Button>
+          <Button variant="outline" as-child><RouterLink to="/laporan">Laporan</RouterLink></Button>
+        </div>
+      </CardContent>
+    </Card>
 
     <div class="grid grid-cols-2 gap-4">
       <Card size="sm">

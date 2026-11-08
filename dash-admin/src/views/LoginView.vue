@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Droplets, LoaderCircle } from '@lucide/vue'
+import { LoaderCircle } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -38,9 +38,7 @@ async function submit() {
   <main class="flex min-h-svh items-center justify-center bg-background p-4">
     <div class="w-full max-w-sm">
       <div class="mb-8 flex flex-col items-center text-center">
-        <span class="flex h-14 w-14 items-center justify-center rounded-2xl border border-border/60">
-          <Droplets class="h-7 w-7" :stroke-width="1.5" />
-        </span>
+        <img src="/logo.png" alt="CarWash Cloud" class="h-14 w-auto" />
         <h1 class="mt-5 text-2xl font-bold">Masuk Dashboard</h1>
         <p class="mt-1 text-sm text-muted-foreground">Kelola situs bisnis cuci mobilmu</p>
       </div>

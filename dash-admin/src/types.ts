@@ -175,6 +175,7 @@ export interface BoardBooking {
   remaining_minutes: number | null
   est_wait_minutes: number | null
   est_start_at: string | null
+  transaction_id: number | null
 }
 
 export interface QueueBoard {
@@ -199,6 +200,91 @@ export interface ServiceAddon {
   description: string | null
   is_active: boolean
   sort_order: number
+}
+
+export type TransactionType = 'income' | 'expense'
+
+export type TransactionMethod = 'cash' | 'qris' | 'transfer' | 'debit' | 'other'
+
+export interface TransactionItem {
+  id: number
+  item_type: 'booking' | 'package' | 'addon' | 'custom'
+  name: string
+  qty: number
+  unit_price: number
+  subtotal: number
+}
+
+export interface Transaction {
+  id: number
+  type: TransactionType
+  number: string
+  business_date: string
+  category: string
+  description: string | null
+  booking_id: number | null
+  customer_name: string | null
+  customer_phone: string | null
+  subtotal: number
+  discount: number
+  amount: number
+  payment_method: TransactionMethod
+  paid_amount: number | null
+  change: number
+  created_at: string
+  voided_at: string | null
+  void_reason: string | null
+  items: TransactionItem[]
+}
+
+export interface Paginated<T> {
+  data: T[]
+  meta: { current_page: number; last_page: number; total: number }
+}
+
+export interface UnpaidBooking {
+  id: number
+  ticket: string
+  customer_name: string
+  phone: string | null
+  plate: string | null
+  vehicle_type: VehicleCode
+  vehicle_color: string
+  package_name: string
+  price: number
+  status: BookingStatus
+  queue_date: string
+}
+
+export interface PosCatalog {
+  packages: { id: number; name: string; category: PackageCategory; price: number }[]
+  addons: { id: number; name: string; category: AddonCategory; price: number }[]
+  vehicle_types: { code: VehicleCode; name: string; price_multiplier: number }[]
+  unpaid: UnpaidBooking[]
+}
+
+export interface ReportPoint {
+  date: string
+  income: number
+  expense: number
+}
+
+export interface ReportSummary {
+  from: string
+  to: string
+  income: number
+  expense: number
+  net: number
+  sales_count: number
+  expense_count: number
+  average_sale: number
+  discount: number
+  voided_count: number
+  granularity: 'day' | 'month'
+  series: ReportPoint[]
+  by_method: { key: TransactionMethod; total: number; count: number }[]
+  by_category: { key: string; total: number; count: number }[]
+  top_items: { name: string; qty: number; total: number }[]
 }
 
 export type VehicleCode = 'compact' | 'medium' | 'large' | 'luxury'

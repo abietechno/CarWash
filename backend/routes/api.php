@@ -3,10 +3,12 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\MediaController;
+use App\Http\Controllers\Api\PosController;
 use App\Http\Controllers\Api\PromoController;
 use App\Http\Controllers\Api\PublicBookingController;
 use App\Http\Controllers\Api\PublicSiteController;
 use App\Http\Controllers\Api\RegistrationController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ServiceAddonController;
 use App\Http\Controllers\Api\ServicePackageController;
 use App\Http\Controllers\Api\SubscriptionController;
@@ -14,6 +16,7 @@ use App\Http\Controllers\Api\Super\OverviewController;
 use App\Http\Controllers\Api\Super\SettingsController;
 use App\Http\Controllers\Api\Super\TenantController as SuperTenantController;
 use App\Http\Controllers\Api\TenantController;
+use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\VehicleTypeController;
 use App\Http\Controllers\HealthController;
 use Illuminate\Support\Facades\Route;
@@ -59,6 +62,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bookings', [BookingController::class, 'index']);
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus']);
+
+    Route::get('/pos/catalog', [PosController::class, 'catalog']);
+    Route::post('/pos/sales', [PosController::class, 'sale']);
+
+    Route::get('/transactions', [TransactionController::class, 'index']);
+    Route::post('/transactions/expenses', [TransactionController::class, 'storeExpense']);
+    Route::get('/transactions/{transaction}', [TransactionController::class, 'show']);
+    Route::post('/transactions/{transaction}/void', [TransactionController::class, 'void']);
+
+    Route::get('/reports/summary', [ReportController::class, 'summary']);
+    Route::get('/reports/export', [ReportController::class, 'export']);
 
     Route::get('/subscription', SubscriptionController::class);
 });

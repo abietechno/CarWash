@@ -52,6 +52,14 @@ class QueueBoard
         }
         sort($bayFreeIn);
 
+        // Status bayar hanya untuk dashboard, tidak pernah ke papan publik.
+        if ($forAdmin) {
+            $paid = $tenant->transactions()->active()->whereIn('booking_id', $today->pluck('id'))->pluck('id', 'booking_id');
+            foreach ($paid as $bookingId => $transactionId) {
+                $computed[$bookingId]['transaction_id'] = $transactionId;
+            }
+        }
+
         $present = fn (Collection $list) => $list
             ->map(fn (Booking $b) => $this->present($b, $computed[$b->id] ?? [], $forAdmin))
             ->all();
@@ -124,6 +132,7 @@ class QueueBoard
                 'source' => $b->source,
                 'price' => $b->price,
                 'service_package_id' => $b->service_package_id,
+                'transaction_id' => $computed['transaction_id'] ?? null,
             ];
         }
 

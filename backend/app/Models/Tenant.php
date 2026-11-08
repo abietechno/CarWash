@@ -110,6 +110,12 @@ class Tenant extends Model
         return $this->hasMany(Booking::class);
     }
 
+    /** @return HasMany<Transaction, $this> */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
     /**
      * Apakah sedang jam buka (zona waktu bisnis, config saas.timezone).
      */

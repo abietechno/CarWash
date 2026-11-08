@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Check, CircleX, Phone, Play, Undo2 } from '@lucide/vue'
+import { Check, CircleCheck, CircleX, Phone, Play, Undo2, Wallet } from '@lucide/vue'
 import CarTop from '@/components/CarTop.vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { clock } from '@/lib/format'
+import { clock, rupiah } from '@/lib/format'
 import type { BoardBooking, BookingStatus } from '@/types'
 
 const props = defineProps<{ booking: BoardBooking; vehicleName: string; busy?: boolean }>()
@@ -36,7 +36,10 @@ const b = computed(() => props.booking)
       </div>
     </div>
 
-    <p class="mt-2 truncate text-sm">{{ b.package_name }}</p>
+    <div class="mt-2 flex items-center justify-between gap-2 text-sm">
+      <span class="min-w-0 truncate">{{ b.package_name }}</span>
+      <span class="shrink-0 font-medium tabular-nums">{{ rupiah(b.price) }}</span>
+    </div>
 
     <div v-if="b.status === 'in_progress'" class="mt-2">
       <div class="h-1.5 overflow-hidden rounded-full bg-muted">
@@ -54,7 +57,7 @@ const b = computed(() => props.booking)
     <div class="mt-3 flex gap-2">
       <template v-if="b.status === 'waiting'">
         <Button size="sm" class="flex-1" :disabled="busy" @click="emit('move', 'in_progress')"><Play /> Mulai</Button>
-        <Button size="sm" variant="ghost" :disabled="busy" aria-label="Batalkan" @click="emit('move', 'cancelled')"><CircleX /></Button>
+        <Button v-if="!b.transaction_id" size="sm" variant="ghost" :disabled="busy" aria-label="Batalkan" @click="emit('move', 'cancelled')"><CircleX /></Button>
       </template>
       <template v-else-if="b.status === 'in_progress'">
         <Button size="sm" class="flex-1" :disabled="busy" @click="emit('move', 'done')"><Check /> Selesai</Button>
@@ -64,6 +67,10 @@ const b = computed(() => props.booking)
         <Button size="sm" class="flex-1" :disabled="busy" @click="emit('move', 'picked_up')"><Check /> Sudah diambil</Button>
         <Button size="sm" variant="ghost" :disabled="busy" aria-label="Kembalikan ke dikerjakan" @click="emit('move', 'in_progress')"><Undo2 /></Button>
       </template>
+      <Badge v-if="b.transaction_id" variant="secondary" class="self-center"><CircleCheck /> Lunas</Badge>
+      <Button v-else size="sm" variant="outline" as-child>
+        <RouterLink :to="{ name: 'pos', query: { booking: b.id } }"><Wallet /> Bayar</RouterLink>
+      </Button>
     </div>
   </div>
 </template>

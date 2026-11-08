@@ -1,4 +1,4 @@
-import type { AddonCategory, Day, PackageCategory, PromoTheme } from '@/types'
+import type { AddonCategory, Day, PackageCategory, PromoTheme, TransactionMethod } from '@/types'
 
 // Warna slide promo; nilai gradient yang sama dipakai situs tenant (src/lib/site.ts).
 export const PROMO_THEMES: Record<PromoTheme, { label: string; swatch: string }> = {
@@ -52,6 +52,36 @@ export const PAYMENT_METHODS: Record<string, string> = {
   qris: 'QRIS',
   cash: 'Tunai',
   other: 'Lainnya',
+}
+
+export const TRANSACTION_METHODS: Record<TransactionMethod, string> = {
+  cash: 'Tunai',
+  qris: 'QRIS',
+  transfer: 'Transfer',
+  debit: 'Debit',
+  other: 'Lainnya',
+}
+
+export const EXPENSE_CATEGORIES: Record<string, string> = {
+  supplies: 'Bahan & perlengkapan',
+  salary: 'Gaji karyawan',
+  utilities: 'Listrik & air',
+  rent: 'Sewa tempat',
+  equipment: 'Peralatan',
+  other: 'Lainnya',
+}
+
+// Angka ringkas untuk sumbu grafik, mis. "500 rb", "1,5 jt".
+export function compactRupiah(value: number): string {
+  const short = (n: number) => n.toLocaleString('id-ID', { maximumFractionDigits: 1 })
+  if (value >= 1_000_000) return `${short(value / 1_000_000)} jt`
+  if (value >= 1_000) return `${short(value / 1_000)} rb`
+  return String(value)
+}
+
+// Tanggal + jam, mis. "8 Nov 2026 14:30".
+export function dateTime(iso: string | null): string {
+  return iso ? `${shortDate(iso)} ${clock(iso)}` : '-'
 }
 
 export const TENANT_STATUS: Record<string, string> = {

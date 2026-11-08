@@ -133,6 +133,9 @@ const columns = computed(() => [
             <span class="text-xs text-muted-foreground">
               {{ b.status === 'cancelled' ? 'Batal' : `Diambil ${clock(b.finished_at)}` }}
             </span>
+            <Button v-if="b.status !== 'cancelled' && !b.transaction_id" size="sm" variant="outline" as-child>
+              <RouterLink :to="{ name: 'pos', query: { booking: b.id } }">Bayar</RouterLink>
+            </Button>
             <Button
               size="sm"
               variant="ghost"

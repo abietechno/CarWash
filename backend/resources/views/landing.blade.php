@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="CarWash Cloud — website & katalog layanan online untuk bisnis cuci dan salon mobil. Daftar gratis, dapat subdomain sendiri, atur harga dari dashboard." />
     <title>CarWash Cloud — Website Bisnis Cuci Mobil dalam 5 Menit</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -89,9 +91,7 @@
 <header class="sticky top-0 z-50 backdrop-blur-md bg-white/85 border-b border-platinum-200">
     <nav class="max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between">
         <a href="#" class="flex items-center gap-2.5">
-            <span class="grid place-items-center w-9 h-9 rounded-xl bg-brand-500 text-white glow">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
-            </span>
+            <img src="/logo.png" alt="" class="h-9 w-auto">
             <span class="font-display font-bold text-lg">CarWash Cloud</span>
         </a>
         <div class="hidden md:flex items-center gap-8 text-sm text-ink-700">
@@ -421,9 +421,7 @@
 <footer class="bg-ink-950 text-white/70">
     <div class="max-w-7xl mx-auto px-5 lg:px-8 py-12 flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
         <div class="flex items-center gap-2.5">
-            <span class="grid place-items-center w-9 h-9 rounded-xl bg-brand-500 text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
-            </span>
+            <img src="/logo-white.png" alt="" class="h-9 w-auto">
             <span class="font-display font-bold text-white">CarWash Cloud</span>
         </div>
         <p class="text-sm">© {{ date('Y') }} CarWash Cloud · cloudbizz.my.id</p>

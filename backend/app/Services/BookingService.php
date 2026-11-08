@@ -72,6 +72,12 @@ class BookingService
             ]);
         }
 
+        if ($status === Booking::CANCELLED && $booking->payments()->active()->exists()) {
+            throw ValidationException::withMessages([
+                'status' => "Antrian {$booking->ticket()} sudah dibayar. Batalkan dulu transaksinya di Laporan.",
+            ]);
+        }
+
         $from = $booking->status;
         $changes = ['status' => $status];
 
