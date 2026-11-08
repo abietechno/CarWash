@@ -19,6 +19,11 @@ class VehicleType extends Model
         ];
     }
 
+    public function isMotor(): bool
+    {
+        return str_starts_with($this->code, 'motor_');
+    }
+
     /** @return BelongsTo<Tenant, $this> */
     public function tenant(): BelongsTo
     {

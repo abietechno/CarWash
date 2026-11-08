@@ -37,7 +37,7 @@ class PosController extends Controller
 
         return response()->json([
             'packages' => $tenant->packages()->where('is_active', true)->get()
-                ->map(fn (ServicePackage $p) => $p->only(['id', 'name', 'category', 'price'])),
+                ->map(fn (ServicePackage $p) => $p->only(['id', 'name', 'category', 'vehicle_scope', 'price'])),
             'addons' => $tenant->addons()->where('is_active', true)->get()
                 ->map(fn (ServiceAddon $a) => $a->only(['id', 'name', 'category', 'price'])),
             'vehicle_types' => $tenant->vehicleTypes()->get(['code', 'name', 'price_multiplier']),

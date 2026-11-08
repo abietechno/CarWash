@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { LoaderCircle, Minus, Plus, ShoppingCart, Trash2, X } from '@lucide/vue'
@@ -14,7 +14,8 @@ import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { api, errorMessage } from '@/lib/api'
 import { rupiah, TRANSACTION_METHODS } from '@/lib/format'
-import type { PosCatalog, Transaction, TransactionMethod, UnpaidBooking, VehicleCode } from '@/types'
+import { fitsVehicle, scopedPrice } from '@/lib/vehicles'
+import type { PosCatalog, Transaction, TransactionMethod, UnpaidBooking, VehicleCode, VehicleScope } from '@/types'
 
 interface CartLine {
   key: string
@@ -22,6 +23,7 @@ interface CartLine {
   id?: number
   name: string
   basePrice: number
+  scope?: VehicleScope
   qty: number
 }
 
@@ -84,18 +86,31 @@ function pickBooking(item: UnpaidBooking) {
 
 const activeVehicle = computed(() => booking.value?.vehicle_type ?? vehicle.value)
 const multiplier = computed(() => catalog.value?.vehicle_types.find((v) => v.code === activeVehicle.value)?.price_multiplier ?? 1)
-const unitPrice = (line: Pick<CartLine, 'type' | 'basePrice'>) =>
-  line.type === 'package' ? Math.round(line.basePrice * multiplier.value) : line.basePrice
+const unitPrice = (line: Pick<CartLine, 'type' | 'basePrice' | 'scope'>) =>
+  line.type === 'package' ? scopedPrice(line.basePrice, line.scope ?? 'car', multiplier.value) : line.basePrice
+const vehiclePackages = computed(() => {
+  const code = activeVehicle.value
+  return code ? (catalog.value?.packages ?? []).filter((p) => fitsVehicle(p.vehicle_scope, code)) : []
+})
+
+// Paket yang tidak berlaku untuk kendaraan baru dikeluarkan supaya tidak ditolak saat bayar.
+watch(activeVehicle, (code) => {
+  if (!code) return
+  const kept = lines.value.filter((l) => l.type !== 'package' || fitsVehicle(l.scope ?? 'car', code))
+  if (kept.length === lines.value.length) return
+  lines.value = kept
+  toast.info('Paket yang tidak berlaku untuk kendaraan ini dikeluarkan dari pesanan.')
+})
 
 function qtyOf(key: string) {
   return lines.value.find((l) => l.key === key)?.qty ?? 0
 }
 
-function add(type: CartLine['type'], id: number, name: string, basePrice: number) {
+function add(type: CartLine['type'], id: number, name: string, basePrice: number, scope?: VehicleScope) {
   const key = `${type}-${id}`
   const existing = lines.value.find((l) => l.key === key)
   if (existing) existing.qty = Math.min(99, existing.qty + 1)
-  else lines.value.push({ key, type, id, name, basePrice, qty: 1 })
+  else lines.value.push({ key, type, id, name, basePrice, scope, qty: 1 })
 }
 
 function addCustom() {
@@ -213,17 +228,17 @@ async function pay() {
 
           <div v-if="tab === 'packages'" class="grid grid-cols-2 gap-2 sm:grid-cols-3">
             <button
-              v-for="p in catalog.packages"
+              v-for="p in vehiclePackages"
               :key="p.id"
               type="button"
               class="relative rounded-xl border border-border/60 p-3 text-left transition-colors hover:bg-accent"
-              @click="add('package', p.id, p.name, p.price)"
+              @click="add('package', p.id, p.name, p.price, p.vehicle_scope)"
             >
               <span class="block text-sm leading-snug font-medium">{{ p.name }}</span>
-              <span class="mt-1 block text-sm tabular-nums text-muted-foreground">{{ rupiah(unitPrice({ type: 'package', basePrice: p.price })) }}</span>
+              <span class="mt-1 block text-sm tabular-nums text-muted-foreground">{{ rupiah(unitPrice({ type: 'package', basePrice: p.price, scope: p.vehicle_scope })) }}</span>
               <span v-if="qtyOf(`package-${p.id}`)" class="absolute top-2 right-2 grid h-5 min-w-5 place-items-center rounded-full bg-foreground px-1 text-xs font-bold text-background">{{ qtyOf(`package-${p.id}`) }}</span>
             </button>
-            <p v-if="!catalog.packages.length" class="col-span-full text-sm text-muted-foreground">Belum ada paket aktif.</p>
+            <p v-if="!vehiclePackages.length" class="col-span-full text-sm text-muted-foreground">Belum ada paket untuk kendaraan ini. Atur di Layanan &amp; Harga.</p>
           </div>
 
           <div v-else-if="tab === 'addons'" class="grid grid-cols-2 gap-2 sm:grid-cols-3">

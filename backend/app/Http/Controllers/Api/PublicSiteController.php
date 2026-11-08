@@ -31,7 +31,7 @@ class PublicSiteController extends Controller
             ],
             'vehicle_types' => $tenant->vehicleTypes()->get(['code', 'name', 'examples', 'price_multiplier']),
             'packages' => $tenant->packages()->where('is_active', true)->get([
-                'id', 'name', 'category', 'tagline', 'price', 'duration_minutes', 'description', 'features',
+                'id', 'name', 'category', 'vehicle_scope', 'tagline', 'price', 'duration_minutes', 'description', 'features',
                 'is_popular', 'image_path',
             ]),
             'addons' => $tenant->addons()->where('is_active', true)->get([

@@ -81,6 +81,19 @@ class BookingFlowTest extends TestCase
         $this->assertSame(19500, $booking->price);
     }
 
+    public function test_package_scope_limits_vehicles_and_motor_packages_skip_the_multiplier(): void
+    {
+        ['tenant' => $tenant] = $this->publishedTenant();
+        $motor = $tenant->packages()->create(['name' => 'Cuci Motor', 'category' => 'wash', 'vehicle_scope' => 'motor', 'price' => 25000, 'duration_minutes' => 20]);
+        $car = $tenant->packages()->where('vehicle_scope', 'car')->first();
+
+        $this->book($motor->id, ['vehicle_type' => 'large'])->assertUnprocessable()->assertJsonValidationErrors('package_id');
+        $this->book($car->id, ['vehicle_type' => 'motor_manual'])->assertUnprocessable()->assertJsonValidationErrors('package_id');
+
+        $this->book($motor->id, ['vehicle_type' => 'motor_manual'])->assertCreated();
+        $this->assertSame(25000, $tenant->bookings()->first()->price);
+    }
+
     public function test_booking_is_rejected_when_closed_or_phone_has_too_many_active(): void
     {
         ['tenant' => $tenant] = $this->publishedTenant();

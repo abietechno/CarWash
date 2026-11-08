@@ -39,6 +39,10 @@ class BookingService
         $package = $tenant->packages()->findOrFail($data['package_id']);
         $vehicle = $tenant->vehicleTypes()->where('code', $data['vehicle_type'])->firstOrFail();
 
+        if (! $package->fits($vehicle)) {
+            throw ValidationException::withMessages(['package_id' => "Paket {$package->name} tidak tersedia untuk {$vehicle->name}."]);
+        }
+
         return DB::transaction(function () use ($tenant, $data, $source, $package, $vehicle) {
             $date = $this->today();
 
@@ -57,7 +61,7 @@ class BookingService
                 'plate' => isset($data['plate']) ? strtoupper(trim($data['plate'])) : null,
                 'service_package_id' => $package->id,
                 'package_name' => $package->name,
-                'price' => (int) round($package->price * $vehicle->price_multiplier),
+                'price' => $package->priceFor($vehicle),
                 'duration_minutes' => $package->duration_minutes,
                 'status' => Booking::WAITING,
             ]);

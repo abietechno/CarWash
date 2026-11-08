@@ -25,10 +25,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { api, errorMessage } from '@/lib/api'
-import { ADDON_CATEGORIES, duration, PACKAGE_CATEGORIES, PROMO_THEMES, rupiah } from '@/lib/format'
+import { ADDON_CATEGORIES, duration, PACKAGE_CATEGORIES, PROMO_THEMES, rupiah, VEHICLE_SCOPES } from '@/lib/format'
 import { PRO_MAX_PROMOS } from '@/lib/plans'
+import { fitsVehicle } from '@/lib/vehicles'
 import { useAuthStore } from '@/stores/auth'
-import type { Promo, ServiceAddon, ServicePackage, VehicleType } from '@/types'
+import type { Promo, ServiceAddon, ServicePackage, VehicleCode, VehicleType } from '@/types'
 
 type Tab = 'packages' | 'addons' | 'promos' | 'vehicles'
 type Kind = 'packages' | 'addons' | 'promos'
@@ -119,10 +120,12 @@ async function confirmDelete() {
   }
 }
 
-// Contoh harga per kendaraan dari paket aktif termurah.
-const cheapest = computed(() =>
-  packages.value.filter((p) => p.is_active).reduce<ServicePackage | null>((min, p) => (!min || p.price < min.price ? p : min), null),
-)
+// Contoh harga per kendaraan dari paket aktif termurah yang kena pengali.
+function examplePrice(code: VehicleCode) {
+  return packages.value
+    .filter((p) => p.is_active && p.vehicle_scope !== 'motor' && fitsVehicle(p.vehicle_scope, code))
+    .reduce<number | null>((min, p) => (min === null || p.price < min ? p.price : min), null)
+}
 
 async function saveVehicles() {
   savingVehicles.value = true
@@ -188,6 +191,7 @@ async function saveVehicles() {
                 <div class="flex flex-wrap items-center gap-2">
                   <p class="font-medium">{{ item.name }}</p>
                   <Badge variant="secondary">{{ PACKAGE_CATEGORIES[item.category] }}</Badge>
+                  <Badge variant="secondary">{{ VEHICLE_SCOPES[item.vehicle_scope] }}</Badge>
                   <Badge v-if="item.is_popular" variant="outline"><Star class="fill-current" /> Terlaris</Badge>
                 </div>
                 <p v-if="item.tagline" class="mt-1 truncate text-sm text-muted-foreground">{{ item.tagline }}</p>
@@ -308,8 +312,8 @@ async function saveVehicles() {
             <CardHeader>
               <CardTitle class="text-base">Pengali harga per jenis kendaraan</CardTitle>
               <CardDescription>
-                Harga paket = harga dasar × pengali.
-                <template v-if="cheapest">Contoh di bawah memakai paket "{{ cheapest.name }}".</template>
+                Harga paket = harga dasar × pengali, kecuali paket Motor yang memakai harganya sendiri. Contoh memakai paket aktif termurah.
+                Jenis kendaraan tampil di reservasi situs kalau ada paket untuknya.
               </CardDescription>
             </CardHeader>
             <CardContent class="divide-y divide-border/50">
@@ -326,7 +330,7 @@ async function saveVehicles() {
                   />
                 </div>
                 <div class="flex items-center text-sm text-muted-foreground sm:justify-end">
-                  <span v-if="cheapest">≈ {{ rupiah(Math.round(cheapest.price * Number(type.price_multiplier))) }}</span>
+                  <span v-if="examplePrice(type.code) !== null">≈ {{ rupiah(Math.round(examplePrice(type.code)! * Number(type.price_multiplier))) }}</span>
                 </div>
                 <div class="flex items-center gap-1">
                   <span class="text-sm text-muted-foreground">×</span>

@@ -1,4 +1,4 @@
-import type { AddonCategory, Day, PackageCategory, PromoTheme, TransactionMethod } from '@/types'
+import type { AddonCategory, Day, PackageCategory, PromoTheme, TransactionMethod, VehicleScope } from '@/types'
 
 // Warna slide promo; nilai gradient yang sama dipakai situs tenant (src/lib/site.ts).
 export const PROMO_THEMES: Record<PromoTheme, { label: string; swatch: string }> = {
@@ -104,6 +104,12 @@ export const PACKAGE_CATEGORIES: Record<PackageCategory, string> = {
   wash: 'Cuci',
   salon: 'Salon',
   coating: 'Coating',
+}
+
+export const VEHICLE_SCOPES: Record<VehicleScope, string> = {
+  car: 'Mobil',
+  motor: 'Motor',
+  all: 'Semua kendaraan',
 }
 
 export const ADDON_CATEGORIES: Record<AddonCategory, string> = {

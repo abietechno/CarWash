@@ -6,7 +6,7 @@ import { Page } from '../components/SiteNav';
 import { VEHICLE_COLORS } from '../lib/carSvg';
 import { clock, duration, rupiah } from '../lib/format';
 import { BookingError, createBooking, QueueItem, saveMyTicket } from '../lib/queue';
-import { formatHours, priceFor, todayHours, whatsappLink } from '../lib/site';
+import { fitsVehicle, formatHours, priceFor, todayHours, VehicleType, whatsappLink } from '../lib/site';
 import { useSite } from '../lib/siteContext';
 
 interface Props {
@@ -18,10 +18,14 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
   const { business, features, packages, vehicleTypes } = useSite();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [vehicleCode, setVehicleCode] = useState(vehicleTypes[0]?.code ?? 'compact');
+  // Jenis kendaraan hanya ditawarkan kalau ada paket untuknya.
+  const vehicleChoices = vehicleTypes.filter((v) => packages.some((p) => fitsVehicle(p, v)));
+  const startPackage = packages.find((p) => p.id === initialPackageId) ?? packages.find((p) => p.popular) ?? packages[0];
+  const startVehicle = vehicleChoices.find((v) => !startPackage || fitsVehicle(startPackage, v)) ?? vehicleChoices[0];
+  const [vehicleCode, setVehicleCode] = useState(startVehicle?.code ?? 'compact');
   const [color, setColor] = useState('white');
   const [packageId, setPackageId] = useState<number | null>(
-    initialPackageId ?? packages.find((p) => p.popular)?.id ?? packages[0]?.id ?? null,
+    startPackage?.id ?? null,
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -29,9 +33,17 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
   const [result, setResult] = useState<QueueItem | null>(null);
 
   const vehicle = vehicleTypes.find((v) => v.code === vehicleCode);
+  const vehiclePackages = vehicle ? packages.filter((p) => fitsVehicle(p, vehicle)) : packages;
   const pkg = packages.find((p) => p.id === packageId);
   const total = pkg ? priceFor(pkg, vehicle) : 0;
   const today = todayHours(business.openingHours);
+
+  function chooseVehicle(next: VehicleType) {
+    setVehicleCode(next.code);
+    if (pkg && fitsVehicle(pkg, next)) return;
+    const fitting = packages.filter((p) => fitsVehicle(p, next));
+    setPackageId((fitting.find((p) => p.popular) ?? fitting[0])?.id ?? null);
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -114,13 +126,13 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
 
         <Step number={2} title="Jenis kendaraan">
           <div className="grid grid-cols-2 gap-3">
-            {vehicleTypes.map((v) => {
+            {vehicleChoices.map((v) => {
               const active = v.code === vehicleCode;
               return (
                 <button
                   key={v.code}
                   type="button"
-                  onClick={() => setVehicleCode(v.code)}
+                  onClick={() => chooseVehicle(v)}
                   aria-pressed={active}
                   className={`rounded-2xl border-2 p-3 text-left transition-all ${
                     active ? 'border-brand-500 bg-brand-50' : 'border-slate-200 bg-white hover:border-slate-300'
@@ -153,7 +165,7 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
 
         <Step number={3} title="Pilih paket">
           <div className="space-y-3">
-            {packages.map((p) => {
+            {vehiclePackages.map((p) => {
               const active = p.id === packageId;
               return (
                 <label

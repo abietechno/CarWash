@@ -200,6 +200,19 @@ class SaasFlowTest extends TestCase
         ]])->assertOk()->assertJsonFragment(['code' => 'medium', 'name' => 'SUV Sedang', 'price_multiplier' => 1.25]);
     }
 
+    public function test_packages_default_to_cars_and_the_starter_wash_covers_every_vehicle(): void
+    {
+        ['tenant' => $tenant, 'user' => $user] = $this->provision('putrajayawash', 'owner@example.com');
+        $tenant->update(['pro_until' => now()->addMonth()]);
+        Sanctum::actingAs($user);
+        $package = ['name' => 'Coating', 'category' => 'coating', 'price' => 1000000, 'duration_minutes' => 240];
+
+        $this->assertSame(['all', 'car', 'car'], $tenant->packages()->pluck('vehicle_scope')->all());
+        $this->postJson('/api/packages', $package)->assertCreated()->assertJsonPath('vehicle_scope', 'car');
+        $this->postJson('/api/packages', $package + ['vehicle_scope' => 'motor'])->assertCreated()->assertJsonPath('vehicle_scope', 'motor');
+        $this->postJson('/api/packages', $package + ['vehicle_scope' => 'truk'])->assertUnprocessable()->assertJsonValidationErrors('vehicle_scope');
+    }
+
     public function test_motorcycle_multiplier_can_go_below_half_but_not_below_the_minimum(): void
     {
         ['user' => $user] = $this->provision('putrajayawash', 'owner@example.com');

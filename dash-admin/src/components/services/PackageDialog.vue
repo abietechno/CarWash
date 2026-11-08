@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { LoaderCircle } from '@lucide/vue'
 import ImageField from '@/components/ImageField.vue'
@@ -11,9 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { api, errorMessage, fieldErrors, type FieldErrors } from '@/lib/api'
-import { PACKAGE_CATEGORIES } from '@/lib/format'
+import { PACKAGE_CATEGORIES, VEHICLE_SCOPES } from '@/lib/format'
 import { syncImage } from '@/lib/images'
-import type { PackageCategory, ServicePackage } from '@/types'
+import type { PackageCategory, ServicePackage, VehicleScope } from '@/types'
 
 const props = defineProps<{ item: ServicePackage | null }>()
 const open = defineModel<boolean>('open', { required: true })
@@ -26,6 +26,7 @@ const imageRemoved = ref(false)
 const form = reactive({
   name: '',
   category: 'wash' as PackageCategory,
+  vehicle_scope: 'car' as VehicleScope,
   tagline: '',
   price: '' as string | number,
   duration_minutes: '' as string | number,
@@ -34,6 +35,13 @@ const form = reactive({
   is_popular: false,
   is_active: true,
 })
+
+const PRICE_HINTS: Record<VehicleScope, string> = {
+  car: 'Harga untuk sedan/hatchback; jenis mobil lain mengikuti pengali harga.',
+  motor: 'Harga ini berlaku untuk semua jenis motor, tanpa pengali.',
+  all: 'Harga untuk sedan/hatchback; jenis lain, termasuk motor, mengikuti pengali harga.',
+}
+const priceHint = computed(() => PRICE_HINTS[form.vehicle_scope])
 
 watch(open, (isOpen) => {
   if (!isOpen) return
@@ -44,6 +52,7 @@ watch(open, (isOpen) => {
   Object.assign(form, {
     name: item?.name ?? '',
     category: item?.category ?? 'wash',
+    vehicle_scope: item?.vehicle_scope ?? 'car',
     tagline: item?.tagline ?? '',
     price: item?.price ?? '',
     duration_minutes: item?.duration_minutes ?? 60,
@@ -87,7 +96,7 @@ async function submit() {
     <DialogContent class="max-h-[90svh] overflow-y-auto sm:max-w-lg">
       <DialogHeader>
         <DialogTitle>{{ item ? 'Edit paket' : 'Tambah paket' }}</DialogTitle>
-        <DialogDescription>Harga dasar untuk sedan/hatchback; kendaraan lain mengikuti pengali harga.</DialogDescription>
+        <DialogDescription>Nama, harga, dan jenis kendaraan yang dilayani paket ini.</DialogDescription>
       </DialogHeader>
 
       <form id="package-form" class="space-y-4" @submit.prevent="submit">
@@ -117,8 +126,19 @@ async function submit() {
           </div>
         </div>
         <div class="space-y-2">
-          <Label for="pkg-price">Harga dasar (Rp)</Label>
+          <Label>Untuk kendaraan</Label>
+          <Select v-model="form.vehicle_scope">
+            <SelectTrigger class="w-full" aria-label="Untuk kendaraan"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="(label, value) in VEHICLE_SCOPES" :key="value" :value="value">{{ label }}</SelectItem>
+            </SelectContent>
+          </Select>
+          <p v-if="errors.vehicle_scope" class="text-xs text-destructive">{{ errors.vehicle_scope[0] }}</p>
+        </div>
+        <div class="space-y-2">
+          <Label for="pkg-price">Harga (Rp)</Label>
           <Input id="pkg-price" v-model="form.price" type="number" min="0" step="1000" required />
+          <p class="text-xs text-muted-foreground">{{ priceHint }}</p>
           <p v-if="errors.price" class="text-xs text-destructive">{{ errors.price[0] }}</p>
         </div>
         <div class="space-y-2">

@@ -98,6 +98,7 @@ class ServicePackageController extends Controller
         return $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'category' => ['required', Rule::in(ServicePackage::CATEGORIES)],
+            'vehicle_scope' => ['sometimes', Rule::in(ServicePackage::SCOPES)],
             'tagline' => ['nullable', 'string', 'max:150'],
             'price' => ['required', 'integer', 'min:0', 'max:100000000'],
             'duration_minutes' => ['required', 'integer', 'min:5', 'max:1440'],

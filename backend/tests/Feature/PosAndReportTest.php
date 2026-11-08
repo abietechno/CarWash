@@ -110,6 +110,23 @@ class PosAndReportTest extends TestCase
             ->assertJsonPath('change', 0);
     }
 
+    public function test_direct_sale_respects_package_vehicle_scope(): void
+    {
+        ['tenant' => $tenant, 'user' => $user] = $this->tenant();
+        $motor = $tenant->packages()->create(['name' => 'Cuci Motor', 'category' => 'wash', 'vehicle_scope' => 'motor', 'price' => 25000, 'duration_minutes' => 20]);
+        $car = $tenant->packages()->where('vehicle_scope', 'car')->first();
+        Sanctum::actingAs($user);
+        $sell = fn ($package, string $vehicle) => $this->postJson('/api/pos/sales', [
+            'vehicle_type' => $vehicle,
+            'items' => [['type' => 'package', 'id' => $package->id, 'qty' => 1]],
+            'payment_method' => 'qris',
+        ]);
+
+        $sell($car, 'motor_matic')->assertUnprocessable()->assertJsonValidationErrors('items');
+        $sell($motor, 'compact')->assertUnprocessable()->assertJsonValidationErrors('items');
+        $sell($motor, 'motor_matic')->assertCreated()->assertJsonPath('amount', 25000);
+    }
+
     public function test_invalid_sales_are_rejected(): void
     {
         ['tenant' => $tenant, 'user' => $user] = $this->tenant();

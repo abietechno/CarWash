@@ -61,6 +61,7 @@ class TenantProvisioner
             [
                 'name' => 'Cuci Hidrolik Snow Foam',
                 'category' => 'wash',
+                'vehicle_scope' => 'all',
                 'tagline' => 'Bersih menyeluruh luar dalam',
                 'price' => 65000,
                 'duration_minutes' => 45,

@@ -1,6 +1,6 @@
 import { Check, Clock, Star } from 'lucide-react';
 import { duration, rupiah } from '../lib/format';
-import { CATEGORY_LABELS, Package } from '../lib/site';
+import { Package, packageLabel } from '../lib/site';
 
 export function PackageCard({ pkg, onBook }: { pkg: Package; onBook: (packageId: number) => void }) {
   return (
@@ -8,7 +8,7 @@ export function PackageCard({ pkg, onBook }: { pkg: Package; onBook: (packageId:
       <div className="relative aspect-[16/10] overflow-hidden">
         <img src={pkg.image} alt={pkg.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
         <span className="absolute top-3 left-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-ink-900 backdrop-blur">
-          {CATEGORY_LABELS[pkg.category]}
+          {packageLabel(pkg)}
         </span>
         {pkg.popular && (
           <span className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 text-xs font-bold text-amber-950">

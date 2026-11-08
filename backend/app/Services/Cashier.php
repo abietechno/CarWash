@@ -142,18 +142,21 @@ class Cashier
         }
 
         $vehicleCode = $booking?->vehicle_type ?? ($data['vehicle_type'] ?? null);
-        $multiplier = $vehicleCode ? ($tenant->vehicleTypes()->where('code', $vehicleCode)->value('price_multiplier') ?? 1.0) : null;
+        $vehicle = $vehicleCode ? $tenant->vehicleTypes()->where('code', $vehicleCode)->first() : null;
 
         foreach ($data['items'] ?? [] as $item) {
             $qty = (int) $item['qty'];
 
             switch ($item['type']) {
                 case 'package':
-                    if ($multiplier === null) {
+                    if ($vehicle === null) {
                         throw ValidationException::withMessages(['vehicle_type' => 'Pilih jenis kendaraan untuk paket ini.']);
                     }
                     $package = $tenant->packages()->where('is_active', true)->find($item['id']) ?? $this->unavailable();
-                    $lines[] = $this->line('package', $package->id, $package->name, $qty, (int) round($package->price * $multiplier));
+                    if (! $package->fits($vehicle)) {
+                        throw ValidationException::withMessages(['items' => "Paket {$package->name} tidak tersedia untuk {$vehicle->name}."]);
+                    }
+                    $lines[] = $this->line('package', $package->id, $package->name, $qty, $package->priceFor($vehicle));
                     break;
                 case 'addon':
                     $addon = $tenant->addons()->where('is_active', true)->find($item['id']) ?? $this->unavailable();

@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { api, errorMessage, fieldErrors, type FieldErrors } from '@/lib/api'
 import { VEHICLE_COLORS } from '@/lib/carSvg'
 import { rupiah } from '@/lib/format'
+import { fitsVehicle, scopedPrice } from '@/lib/vehicles'
 import type { QueueBoard, ServicePackage, VehicleType } from '@/types'
 
 const props = defineProps<{ packages: ServicePackage[]; vehicleTypes: VehicleType[] }>()
@@ -27,8 +28,14 @@ const form = reactive({
   package_id: null as number | null,
 })
 
-const activePackages = computed(() => props.packages.filter((p) => p.is_active))
+const vehiclePackages = computed(() => props.packages.filter((p) => p.is_active && fitsVehicle(p.vehicle_scope, form.vehicle_type)))
 const multiplier = computed(() => props.vehicleTypes.find((v) => v.code === form.vehicle_type)?.price_multiplier ?? 1)
+
+function keepValidPackage() {
+  if (!vehiclePackages.value.some((p) => p.id === form.package_id)) form.package_id = vehiclePackages.value[0]?.id ?? null
+}
+
+watch(() => form.vehicle_type, keepValidPackage)
 
 watch(open, (isOpen) => {
   if (!isOpen) return
@@ -39,8 +46,9 @@ watch(open, (isOpen) => {
     plate: '',
     vehicle_type: props.vehicleTypes[0]?.code ?? 'compact',
     vehicle_color: 'white',
-    package_id: activePackages.value[0]?.id ?? null,
+    package_id: null,
   })
+  keepValidPackage()
 })
 
 async function submit() {
@@ -125,7 +133,7 @@ async function submit() {
           <Label>Paket</Label>
           <div class="space-y-2">
             <label
-              v-for="pkg in activePackages"
+              v-for="pkg in vehiclePackages"
               :key="pkg.id"
               :class="[
                 'flex cursor-pointer items-center justify-between gap-3 rounded-xl border p-3 text-sm',
@@ -136,8 +144,9 @@ async function submit() {
                 <input v-model="form.package_id" type="radio" name="walkin-package" :value="pkg.id" class="accent-current" />
                 {{ pkg.name }}
               </span>
-              <span class="font-display font-semibold">{{ rupiah(Math.round(pkg.price * multiplier)) }}</span>
+              <span class="font-display font-semibold">{{ rupiah(scopedPrice(pkg.price, pkg.vehicle_scope, multiplier)) }}</span>
             </label>
+            <p v-if="!vehiclePackages.length" class="text-sm text-muted-foreground">Belum ada paket untuk kendaraan ini. Atur di Layanan &amp; Harga.</p>
           </div>
           <p v-if="errors.package_id" class="text-xs text-destructive">{{ errors.package_id[0] }}</p>
         </div>

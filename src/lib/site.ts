@@ -4,6 +4,7 @@ import interiorImage from '../assets/images/interior_spa_detail_1794059454770.jp
 
 export type Day = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 export type PackageCategory = 'wash' | 'salon' | 'coating';
+export type VehicleScope = 'car' | 'motor' | 'all';
 export type PromoTheme = 'blue' | 'cyan' | 'violet' | 'amber' | 'rose' | 'slate';
 
 export interface OpeningHour {
@@ -32,8 +33,9 @@ export interface Package {
   id: number;
   name: string;
   category: PackageCategory;
+  vehicleScope: VehicleScope;
   tagline: string | null;
-  price: number; // harga dasar (sedan/hatchback)
+  price: number; // harga dasar (sedan/hatchback); paket motor: harga jadi
   durationMinutes: number;
   description: string | null;
   features: string[];
@@ -93,6 +95,7 @@ interface ApiSite {
     id: number;
     name: string;
     category: PackageCategory;
+    vehicle_scope: VehicleScope;
     tagline: string | null;
     price: number;
     duration_minutes: number;
@@ -122,8 +125,8 @@ const CATEGORY_IMAGES: Record<PackageCategory, string> = {
 };
 
 export const CATEGORY_LABELS: Record<PackageCategory, string> = {
-  wash: 'Cuci Mobil',
-  salon: 'Salon Mobil',
+  wash: 'Cuci',
+  salon: 'Salon',
   coating: 'Coating',
 };
 
@@ -156,6 +159,7 @@ export async function fetchSite(): Promise<Site | null> {
       id: p.id,
       name: p.name,
       category: p.category,
+      vehicleScope: p.vehicle_scope,
       tagline: p.tagline,
       price: p.price,
       durationMinutes: p.duration_minutes,
@@ -182,7 +186,16 @@ export async function fetchSite(): Promise<Site | null> {
   };
 }
 
-export const priceFor = (pkg: Package, vehicle?: VehicleType) => Math.round(pkg.price * (vehicle?.multiplier ?? 1));
+const SCOPE_SUFFIX: Record<VehicleScope, string> = { car: ' Mobil', motor: ' Motor', all: '' };
+
+export const packageLabel = (pkg: Package) => `${CATEGORY_LABELS[pkg.category]}${SCOPE_SUFFIX[pkg.vehicleScope]}`;
+
+export const fitsVehicle = (pkg: Package, vehicle: VehicleType) =>
+  pkg.vehicleScope === 'all' || pkg.vehicleScope === (vehicle.code.startsWith('motor_') ? 'motor' : 'car');
+
+// Paket khusus motor memakai harganya sendiri; selain itu harga dasar × pengali jenis kendaraan.
+export const priceFor = (pkg: Package, vehicle?: VehicleType) =>
+  pkg.vehicleScope === 'motor' ? pkg.price : Math.round(pkg.price * (vehicle?.multiplier ?? 1));
 
 /** Link wa.me dari nomor lokal (08xx) atau internasional (62xx). */
 export function whatsappLink(number: string | null, text?: string): string | null {

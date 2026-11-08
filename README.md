@@ -132,7 +132,8 @@ Pertama kali:
 
 ## Catatan teknis
 
-- Ilustrasi mobil tampak atas: `src/lib/carSvg.ts` dan `dash-admin/src/lib/carSvg.ts` (isi identik — ubah keduanya).
+- Setiap paket punya `vehicle_scope`: `car`, `motor`, atau `all`. Paket `motor` memakai harganya sendiri; `car` dan `all` memakai harga dasar × pengali jenis kendaraan. Reservasi situs hanya menawarkan jenis kendaraan yang punya paket.
+- Ilustrasi kendaraan tampak atas: `src/lib/carSvg.ts` dan `dash-admin/src/lib/carSvg.ts` (isi identik — ubah keduanya).
 - Foto paket & promo disimpan di `backend/storage/app/public/tenants/{id}/` dan disajikan lewat `/api/media/...`, jadi tidak perlu `storage:link` atau aturan nginx tambahan.
 - Estimasi waktu tunggu dihitung dari jumlah bay (Profil Bisnis) dan durasi paket.
 - Nomor antrian reset tiap hari menurut `SAAS_TIMEZONE` (default `Asia/Jakarta`).

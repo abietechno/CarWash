@@ -126,6 +126,7 @@ export interface ServicePackage {
   id: number
   name: string
   category: PackageCategory
+  vehicle_scope: VehicleScope
   tagline: string | null
   price: number
   duration_minutes: number
@@ -257,7 +258,7 @@ export interface UnpaidBooking {
 }
 
 export interface PosCatalog {
-  packages: { id: number; name: string; category: PackageCategory; price: number }[]
+  packages: { id: number; name: string; category: PackageCategory; vehicle_scope: VehicleScope; price: number }[]
   addons: { id: number; name: string; category: AddonCategory; price: number }[]
   vehicle_types: { code: VehicleCode; name: string; price_multiplier: number }[]
   unpaid: UnpaidBooking[]
@@ -286,6 +287,8 @@ export interface ReportSummary {
   by_category: { key: string; total: number; count: number }[]
   top_items: { name: string; qty: number; total: number }[]
 }
+
+export type VehicleScope = 'car' | 'motor' | 'all'
 
 export type VehicleCode = 'compact' | 'medium' | 'large' | 'luxury' | 'motor_matic' | 'motor_listrik' | 'motor_manual'
 
