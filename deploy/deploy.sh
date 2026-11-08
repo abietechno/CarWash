@@ -25,8 +25,10 @@ build() {
     echo "== Build $1"
     cd "$1"
     npm ci --no-audit --no-fund
+    npm run type-check --if-present
     rm -rf dist-next
-    npm run build -- --outDir dist-next --emptyOutDir
+    # Vite dipanggil langsung: argumen lewat `npm run build -- ...` tidak sampai utuh ke vite (run-p di dash-admin).
+    npx vite build --outDir dist-next --emptyOutDir
     rm -rf dist-prev
     if [ -d dist ]; then mv dist dist-prev; fi
     mv dist-next dist
