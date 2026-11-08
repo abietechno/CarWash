@@ -70,6 +70,8 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'max_files' => env('LOG_DAILY_DAYS', 14),
+            // Bisa ditulis PHP-FPM (www) maupun user deploy yang menjalankan artisan (grup www).
+            'permission' => 0664,
             'replace_placeholders' => true,
         ],
 
