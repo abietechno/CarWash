@@ -178,7 +178,7 @@ function hourError(index: number) {
     <Card>
       <CardHeader>
         <CardTitle class="text-base">Tempat cuci (bay)</CardTitle>
-        <CardDescription>Berapa mobil yang bisa dikerjakan bersamaan. Dipakai untuk estimasi waktu tunggu di papan antrian.</CardDescription>
+        <CardDescription>Berapa kendaraan yang bisa dikerjakan bersamaan. Dipakai untuk estimasi waktu tunggu di papan antrian.</CardDescription>
       </CardHeader>
       <CardContent>
         <div class="flex items-center gap-3">

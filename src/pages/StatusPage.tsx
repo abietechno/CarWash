@@ -20,7 +20,7 @@ export function StatusPage({ onNavigate }: { onNavigate: (page: Page) => void })
       <header className="overflow-hidden rounded-3xl bg-gradient-to-br from-ink-900 to-brand-800 p-6 text-white sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold">Antrian Cuci Mobil</h1>
+            <h1 className="text-3xl font-extrabold">Antrian Cuci</h1>
             <p className="mt-1 text-white/70">{todayLabel()}</p>
           </div>
           <span className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs">
@@ -73,7 +73,7 @@ export function StatusPage({ onNavigate }: { onNavigate: (page: Page) => void })
       {board && board.waiting.length > 0 && (
         <section>
           <h2 className="mb-4 flex items-baseline gap-2 text-xl font-bold">
-            Antrian Berikutnya <span className="text-sm font-normal text-slate-500">{board.waiting.length} mobil</span>
+            Antrian Berikutnya <span className="text-sm font-normal text-slate-500">{board.waiting.length} kendaraan</span>
           </h2>
           <div className="space-y-3">
             {board.waiting.map((item, i) => (
@@ -133,7 +133,7 @@ function WaitingRow({ item, next, mine, vehicleName }: { item: QueueItem; next: 
       <div className="min-w-0 flex-1">
         <p className="truncate font-semibold">
           {item.name}
-          {mine && <span className="ml-2 rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-bold text-white">Mobil kamu</span>}
+          {mine && <span className="ml-2 rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-bold text-white">Kendaraan kamu</span>}
         </p>
         <p className="truncate text-sm text-slate-500">
           {vehicleName} · {item.package_name}
@@ -161,7 +161,7 @@ function MyCar({ board, ticket }: { board: QueueBoard; ticket: string }) {
   const ready = board.ready.find((i) => i.ticket === ticket);
 
   let text: string;
-  if (ready) text = 'Selesai! Mobil kamu siap diambil.';
+  if (ready) text = 'Selesai! Kendaraan kamu siap diambil.';
   else if (inProgress) text = `Sedang dicuci${inProgress.bay ? ` di Bay ${inProgress.bay}` : ''} · ${inProgress.progress}% · sisa ±${inProgress.remaining_minutes} menit`;
   else if (waitingIndex >= 0) {
     const item = board.waiting[waitingIndex];
@@ -172,7 +172,7 @@ function MyCar({ board, ticket }: { board: QueueBoard; ticket: string }) {
     <div className={`flex items-center gap-4 rounded-3xl p-5 text-white ${ready ? 'bg-emerald-500' : 'bg-brand-500'}`}>
       {ready ? <PartyPopper className="h-8 w-8 shrink-0" /> : null}
       <div className="min-w-0">
-        <p className="text-sm text-white/80">Mobil kamu · {ticket}</p>
+        <p className="text-sm text-white/80">Kendaraan kamu · {ticket}</p>
         <p className="font-semibold">{text}</p>
       </div>
     </div>

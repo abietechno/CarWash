@@ -69,6 +69,18 @@ class BookingFlowTest extends TestCase
         $this->assertSame(87750, $tenant->bookings()->first()->price);
     }
 
+    public function test_motorcycle_booking_uses_its_own_multiplier(): void
+    {
+        ['tenant' => $tenant] = $this->publishedTenant();
+        $package = $tenant->packages()->first(); // 65.000, motor matic = x0.3
+
+        $this->book($package->id, ['vehicle_type' => 'motor_matic'])->assertCreated();
+
+        $booking = $tenant->bookings()->first();
+        $this->assertSame('motor_matic', $booking->vehicle_type);
+        $this->assertSame(19500, $booking->price);
+    }
+
     public function test_booking_is_rejected_when_closed_or_phone_has_too_many_active(): void
     {
         ['tenant' => $tenant] = $this->publishedTenant();

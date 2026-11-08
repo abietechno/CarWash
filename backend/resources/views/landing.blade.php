@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="CarWash Cloud — website & katalog layanan online untuk bisnis cuci dan salon mobil. Daftar gratis, dapat subdomain sendiri, atur harga dari dashboard." />
-    <title>CarWash Cloud — Website Bisnis Cuci Mobil dalam 5 Menit</title>
+    <meta name="description" content="WashWuzz — website & katalog layanan online untuk bisnis cuci dan salon mobil. Daftar gratis, dapat subdomain sendiri, atur harga dari dashboard." />
+    <title>WashWuzz — Website Bisnis Cuci Mobil dalam 5 Menit</title>
     <link rel="icon" href="/favicon.ico">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
@@ -92,7 +92,7 @@
     <nav class="max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between">
         <a href="#" class="flex items-center gap-2.5">
             <img src="/logo.png" alt="" class="h-9 w-auto">
-            <span class="font-display font-bold text-lg">CarWash Cloud</span>
+            <span class="font-display font-bold text-lg">WashWuzz</span>
         </a>
         <div class="hidden md:flex items-center gap-8 text-sm text-ink-700">
             <a href="#fitur" class="hover:text-brand-600">Fitur</a>
@@ -211,10 +211,10 @@
 <!-- Stats -->
 <section class="border-y border-platinum-200 bg-platinum-50 bg-pattern-stripe">
     <div class="max-w-7xl mx-auto px-5 lg:px-8 py-10 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-        <div><p class="font-display text-3xl font-bold text-brand-600">5 Menit</p><p class="text-sm text-ink-500 mt-1">Dari daftar sampai online</p></div>
-        <div><p class="font-display text-3xl font-bold text-brand-600">1 Subdomain</p><p class="text-sm text-ink-500 mt-1">namabisnis.{{ $baseDomain }}</p></div>
-        <div><p class="font-display text-3xl font-bold text-brand-600">4 Kelas</p><p class="text-sm text-ink-500 mt-1">Harga per jenis kendaraan</p></div>
-        <div><p class="font-display text-3xl font-bold text-brand-600">Rp0</p><p class="text-sm text-ink-500 mt-1">Untuk mulai</p></div>
+        <div><p class="font-display text-2xl sm:text-3xl font-bold text-brand-600">5 Menit</p><p class="text-sm text-ink-500 mt-1">Dari daftar sampai online</p></div>
+        <div><p class="font-display text-2xl sm:text-3xl font-bold text-brand-600">1 Subdomain</p><p class="text-sm text-ink-500 mt-1">namabisnis.{{ $baseDomain }}</p></div>
+        <div><p class="font-display text-2xl sm:text-3xl font-bold text-brand-600">7 Kelas</p><p class="text-sm text-ink-500 mt-1">Harga per jenis kendaraan</p></div>
+        <div><p class="font-display text-2xl sm:text-3xl font-bold text-brand-600">Rp0</p><p class="text-sm text-ink-500 mt-1">Untuk mulai</p></div>
     </div>
 </section>
 
@@ -235,7 +235,7 @@
             @foreach ([
                 ['Subdomain Otomatis', 'Pilih nama saat daftar, situs langsung punya alamat sendiri seperti putrajayawash.'.$baseDomain.'.', ['Tanpa beli domain', 'SSL aktif'], '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>'],
                 ['Katalog Paket & Harga', 'Atur paket cuci, salon, dan coating lengkap dengan durasi, fitur, dan label terlaris.', ['Cuci', 'Salon', 'Coating'], '<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>'],
-                ['Harga per Jenis Kendaraan', 'Satu harga dasar, otomatis disesuaikan untuk sedan, SUV, MPV, sampai mobil mewah.', ['Pengali harga', 'Bisa diubah'], '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>'],
+                ['Harga per Jenis Kendaraan', 'Satu harga dasar, otomatis disesuaikan untuk sedan, SUV, MPV, mobil mewah, sampai motor.', ['Pengali harga', 'Bisa diubah'], '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>'],
                 ['Add-on Layanan', 'Tawarkan tambahan seperti detailing mesin, rain repellent, atau fogging di setiap paket.', ['Interior', 'Eksterior', 'Proteksi'], '<path d="M12 3v18"/><path d="M3 12h18"/>'],
                 ['Jam Buka & Lokasi', 'Jam operasional per hari, alamat, dan link Google Maps tampil jelas di situs.', ['Senin–Minggu', 'Google Maps'], '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'],
                 ['Chat WhatsApp', 'Tombol WhatsApp di situs, pelanggan langsung tanya atau pesan jadwal ke nomormu.', ['Satu klik', 'Tanpa aplikasi'], '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>'],
@@ -309,7 +309,7 @@
                 <p class="mt-3"><span class="font-display text-5xl font-extrabold">Rp{{ number_format($prices['monthly'] / 1000, 0, ',', '.') }}rb</span><span class="text-ink-500"> / bulan</span></p>
                 <p class="mt-1 text-sm text-ink-500">atau Rp{{ number_format($prices['yearly'], 0, ',', '.') }} / tahun</p>
                 <ul class="mt-6 space-y-3 text-sm text-ink-700">
-                    @foreach (['Semua fitur Gratis', 'Reservasi online dengan nomor antrian', 'Promo slider sampai 25 foto', 'Logo sendiri di header situs', 'Paket layanan tanpa batas', 'Tanpa label "Dibuat dengan CarWash Cloud"'] as $item)
+                    @foreach (['Semua fitur Gratis', 'Reservasi online dengan nomor antrian', 'Promo slider sampai 25 foto', 'Logo sendiri di header situs', 'Paket layanan tanpa batas', 'Tanpa label "Dibuat dengan WashWuzz"'] as $item)
                     <li class="flex gap-2"><svg class="w-5 h-5 shrink-0 text-accent-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{{ $item }}</li>
                     @endforeach
                 </ul>
@@ -321,7 +321,7 @@
 
 <!-- Daftar -->
 <section id="daftar" class="py-24 lg:py-32">
-    <div class="max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-5 gap-12 items-start">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8 grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
         <div class="lg:col-span-2 reveal">
             <span class="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-700">
                 <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span> Daftar
@@ -333,7 +333,7 @@
 
         <div class="lg:col-span-3 reveal">
             <form id="register-form" class="rounded-3xl border border-platinum-200 bg-white p-6 sm:p-8 shadow-xl shadow-brand-100/60 space-y-5" novalidate>
-                <div class="grid sm:grid-cols-2 gap-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <label class="block sm:col-span-2">
                         <span class="text-sm font-medium">Nama bisnis</span>
                         <input name="business_name" required maxlength="100" placeholder="Putra Jaya Wash" class="mt-1.5 w-full rounded-xl border border-platinum-300 px-4 py-3 outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100">
@@ -417,16 +417,32 @@
     </div>
 </section>
 
-<!-- Footer -->
+@php($whatsappUrl = 'https://wa.me/6281233741899?text='.rawurlencode('Halo ABIE TECHNOLOGY, saya mau tanya soal WashWuzz.'))
+
+<!-- Footer (padding bawah memberi ruang untuk tombol WhatsApp melayang) -->
 <footer class="bg-ink-950 text-white/70">
-    <div class="max-w-7xl mx-auto px-5 lg:px-8 py-12 flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8 pt-12 pb-24 flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
         <div class="flex items-center gap-2.5">
             <img src="/logo-white.png" alt="" class="h-9 w-auto">
-            <span class="font-display font-bold text-white">CarWash Cloud</span>
+            <span class="font-display font-bold text-white">WashWuzz</span>
         </div>
-        <p class="text-sm">© {{ date('Y') }} CarWash Cloud · cloudbizz.my.id</p>
+        <div class="text-sm sm:text-right">
+            <p>© {{ date('Y') }} WashWuzz · cloudbizz.my.id</p>
+            <a href="{{ $whatsappUrl }}" target="_blank" rel="noopener" class="mt-1 inline-block hover:text-white">WhatsApp 081233741899 · ABIE TECHNOLOGY</a>
+        </div>
     </div>
 </footer>
+
+<a
+    href="{{ $whatsappUrl }}"
+    target="_blank"
+    rel="noopener"
+    aria-label="Chat WhatsApp ABIE TECHNOLOGY"
+    class="fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-black/25 transition-colors hover:bg-[#1ebe5b] md:right-6 md:bottom-6"
+>
+    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+    ABIE TECHNOLOGY
+</a>
 
 <script>window.SAAS = @json(['adminUrl' => $adminUrl]);</script>
 @verbatim

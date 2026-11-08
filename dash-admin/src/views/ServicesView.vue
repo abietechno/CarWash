@@ -319,7 +319,7 @@ async function saveVehicles() {
                   <Input
                     :model-value="type.examples ?? ''"
                     :aria-label="`Contoh ${type.code}`"
-                    placeholder="Contoh mobil"
+                    placeholder="Contoh kendaraan"
                     maxlength="255"
                     class="text-muted-foreground"
                     @update:model-value="(v) => (type.examples = String(v))"
@@ -330,7 +330,7 @@ async function saveVehicles() {
                 </div>
                 <div class="flex items-center gap-1">
                   <span class="text-sm text-muted-foreground">×</span>
-                  <Input v-model="type.price_multiplier" type="number" min="0.5" max="5" step="0.05" :aria-label="`Pengali ${type.code}`" />
+                  <Input v-model="type.price_multiplier" type="number" min="0.1" max="5" step="0.05" :aria-label="`Pengali ${type.code}`" />
                 </div>
               </div>
             </CardContent>

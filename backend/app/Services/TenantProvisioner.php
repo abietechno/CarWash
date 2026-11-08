@@ -49,6 +49,9 @@ class TenantProvisioner
             ['code' => 'medium', 'name' => 'Medium SUV / Crossover', 'examples' => 'HR-V, CR-V, CX-5, Xforce', 'price_multiplier' => 1.2, 'sort_order' => 2],
             ['code' => 'large', 'name' => 'Large SUV / MPV / Van', 'examples' => 'Fortuner, Pajero, Innova, Alphard', 'price_multiplier' => 1.35, 'sort_order' => 3],
             ['code' => 'luxury', 'name' => 'Luxury / Sport', 'examples' => 'Porsche, G-Wagon, Defender, M4', 'price_multiplier' => 1.6, 'sort_order' => 4],
+            ['code' => 'motor_matic', 'name' => 'Motor Matic', 'examples' => 'Beat, Vario, Scoopy, NMAX', 'price_multiplier' => 0.3, 'sort_order' => 5],
+            ['code' => 'motor_listrik', 'name' => 'Electric Vehicle (Molis)', 'examples' => 'Gesits, Alva One, Polytron Fox', 'price_multiplier' => 0.3, 'sort_order' => 6],
+            ['code' => 'motor_manual', 'name' => 'Motor Manual', 'examples' => 'Supra, Vixion, CB150R, Ninja', 'price_multiplier' => 0.3, 'sort_order' => 7],
         ];
     }
 

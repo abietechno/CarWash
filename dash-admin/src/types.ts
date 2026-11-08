@@ -287,7 +287,7 @@ export interface ReportSummary {
   top_items: { name: string; qty: number; total: number }[]
 }
 
-export type VehicleCode = 'compact' | 'medium' | 'large' | 'luxury'
+export type VehicleCode = 'compact' | 'medium' | 'large' | 'luxury' | 'motor_matic' | 'motor_listrik' | 'motor_manual'
 
 export interface VehicleType {
   id: number

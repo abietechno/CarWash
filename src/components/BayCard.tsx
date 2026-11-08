@@ -20,7 +20,7 @@ export function BayCard({ item, vehicleName, mine }: { item: QueueItem; vehicleN
         {item.bay && (
           <span className="absolute top-4 left-4 z-30 rounded-full bg-brand-500 px-2.5 py-0.5 text-xs font-bold text-white">BAY {item.bay}</span>
         )}
-        {mine && <span className="absolute top-4 right-4 z-30 rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-brand-700">Mobil kamu</span>}
+        {mine && <span className="absolute top-4 right-4 z-30 rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-brand-700">Kendaraan kamu</span>}
       </div>
 
       <div className="p-5">

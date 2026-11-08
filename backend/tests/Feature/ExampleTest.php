@@ -20,4 +20,14 @@ class ExampleTest extends TestCase
             ->assertSee('Rp149rb')
             ->assertSee('Rp1.490.000');
     }
+
+    public function test_landing_page_uses_washwuzz_brand_and_whatsapp_button(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('<title>WashWuzz', false)
+            ->assertSee('https://wa.me/6281233741899', false)
+            ->assertSee('ABIE TECHNOLOGY')
+            ->assertDontSee('CarWash Cloud');
+    }
 }

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['code', 'name', 'examples', 'price_multiplier', 'sort_order'])]
 class VehicleType extends Model
 {
-    public const CODES = ['compact', 'medium', 'large', 'luxury'];
+    public const CODES = ['compact', 'medium', 'large', 'luxury', 'motor_matic', 'motor_listrik', 'motor_manual'];
 
     protected function casts(): array
     {

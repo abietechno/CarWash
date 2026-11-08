@@ -62,7 +62,7 @@ class SaasFlowTest extends TestCase
         $this->assertSame('owner@example.com', $tenant->users()->first()->email);
         $this->assertSame(3, $tenant->packages()->count());
         $this->assertSame(3, $tenant->addons()->count());
-        $this->assertSame(4, $tenant->vehicleTypes()->count());
+        $this->assertSame(7, $tenant->vehicleTypes()->count());
     }
 
     public function test_register_rejects_reserved_taken_and_invalid_input(): void
@@ -148,7 +148,7 @@ class SaasFlowTest extends TestCase
             ->assertOk()
             ->assertJsonPath('tenant.name', 'Putrajayawash')
             ->assertJsonCount(2, 'packages')
-            ->assertJsonCount(4, 'vehicle_types')
+            ->assertJsonCount(7, 'vehicle_types')
             ->assertJsonMissingPath('tenant.status');
 
         $this->getJson('http://unknown.localhost/api/public/site')->assertNotFound();
@@ -198,6 +198,35 @@ class SaasFlowTest extends TestCase
         $this->putJson('/api/vehicle-types', ['vehicle_types' => [
             ['code' => 'medium', 'name' => 'SUV Sedang', 'examples' => 'HR-V', 'price_multiplier' => 1.25],
         ]])->assertOk()->assertJsonFragment(['code' => 'medium', 'name' => 'SUV Sedang', 'price_multiplier' => 1.25]);
+    }
+
+    public function test_motorcycle_multiplier_can_go_below_half_but_not_below_the_minimum(): void
+    {
+        ['user' => $user] = $this->provision('putrajayawash', 'owner@example.com');
+        Sanctum::actingAs($user);
+
+        $this->putJson('/api/vehicle-types', ['vehicle_types' => [
+            ['code' => 'motor_listrik', 'name' => 'Molis', 'examples' => null, 'price_multiplier' => 0.25],
+        ]])->assertOk()->assertJsonFragment(['code' => 'motor_listrik', 'name' => 'Molis', 'price_multiplier' => 0.25]);
+
+        $this->putJson('/api/vehicle-types', ['vehicle_types' => [
+            ['code' => 'motor_listrik', 'name' => 'Molis', 'examples' => null, 'price_multiplier' => 0.05],
+        ]])->assertUnprocessable()->assertJsonValidationErrors('vehicle_types.0.price_multiplier');
+    }
+
+    public function test_motorcycle_migration_backfills_existing_tenants_without_touching_their_edits(): void
+    {
+        ['tenant' => $tenant] = $this->provision('putrajayawash', 'owner@example.com');
+        $tenant->vehicleTypes()->whereIn('code', ['motor_listrik', 'motor_manual'])->delete();
+        $tenant->vehicleTypes()->where('code', 'motor_matic')->update(['name' => 'Skutik', 'price_multiplier' => 0.4]);
+
+        $migration = require database_path('migrations/2026_11_10_000002_add_motorcycle_vehicle_types.php');
+        $migration->up();
+        $migration->up();
+
+        $this->assertSame(7, $tenant->vehicleTypes()->count());
+        $this->assertSame('Skutik', $tenant->vehicleTypes()->where('code', 'motor_matic')->value('name'));
+        $this->assertSame('Electric Vehicle (Molis)', $tenant->vehicleTypes()->where('code', 'motor_listrik')->value('name'));
     }
 
     public function test_subdomain_checks_do_not_use_up_the_registration_limit(): void

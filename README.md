@@ -14,13 +14,13 @@ Subdomain tenant tidak dibuat satu per satu di DNS: satu record wildcard `*.clou
 ## Alur
 
 1. Calon tenant membuka landing page, mengisi nama bisnis & memilih subdomain (dicek langsung), lalu daftar.
-   Akun owner, tenant berstatus **draft**, dan data awal (3 paket, 3 add-on, 4 jenis kendaraan) dibuat otomatis.
+   Akun owner, tenant berstatus **draft**, dan data awal (3 paket, 3 add-on, 7 jenis kendaraan: 4 mobil + 3 motor) dibuat otomatis.
 2. Owner login di dash-admin, melengkapi profil (WhatsApp, alamat, kota, jam buka) dan layanan & harga.
 3. Klik **Publikasikan** (ditolak kalau data wajib belum lengkap). Situs `{subdomain}` langsung bisa dibuka publik.
    Owner bisa menyembunyikannya lagi kapan saja.
 4. Pelanggan membuka situs tenant:
    - **Beranda:** slider promo, paket cuci/salon dengan foto & harga, ringkasan antrian live.
-   - **Reservasi:** nama, HP, jenis mobil (+ warna), paket → langsung dapat nomor antrian hari ini (A-001, …). Hanya saat jam buka.
+   - **Reservasi:** nama, HP, jenis kendaraan (+ warna), paket → langsung dapat nomor antrian hari ini (A-001, …). Hanya saat jam buka.
    - **Status:** papan antrian realtime (diperbarui tiap 10 detik) dengan ilustrasi mobil sesuai jenis & warna, progress, estimasi mulai. Mobil milik pengunjung disorot.
 5. Di dash-admin **Antrian**, owner menambah pelanggan yang datang langsung dan memindahkan status:
    menunggu → dikerjakan (bay otomatis) → selesai/siap diambil → sudah diambil. Papan publik ikut berubah.

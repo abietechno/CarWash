@@ -30,7 +30,7 @@ class VehicleTypeController extends Controller
             'vehicle_types.*.code' => ['required', 'distinct', Rule::in(VehicleType::CODES)],
             'vehicle_types.*.name' => ['required', 'string', 'max:100'],
             'vehicle_types.*.examples' => ['nullable', 'string', 'max:255'],
-            'vehicle_types.*.price_multiplier' => ['required', 'numeric', 'between:0.5,5'],
+            'vehicle_types.*.price_multiplier' => ['required', 'numeric', 'between:0.1,5'],
         ]);
 
         foreach ($data['vehicle_types'] as $type) {

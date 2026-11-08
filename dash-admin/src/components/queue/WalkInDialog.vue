@@ -87,7 +87,7 @@ async function submit() {
         </div>
 
         <div class="space-y-2">
-          <Label>Jenis mobil</Label>
+          <Label>Jenis kendaraan</Label>
           <div class="grid grid-cols-2 gap-2">
             <button
               v-for="type in vehicleTypes"
@@ -100,7 +100,7 @@ async function submit() {
               @click="form.vehicle_type = type.code"
             >
               <CarTop :type="type.code" :color="form.vehicle_color" class="h-8 w-14 shrink-0" />
-              <span class="line-clamp-2">{{ type.name }}</span>
+              <span class="line-clamp-3">{{ type.name }}</span>
             </button>
           </div>
         </div>

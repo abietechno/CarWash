@@ -61,7 +61,7 @@ onMounted(async () => {
         <p class="text-xs text-muted-foreground">dari tenant Pro aktif</p>
       </div>
       <div class="col-span-2 rounded-2xl border border-border/60 bg-card p-4">
-        <p class="text-xs text-muted-foreground">Mobil di antrian semua tenant hari ini</p>
+        <p class="text-xs text-muted-foreground">Kendaraan di antrian semua tenant hari ini</p>
         <p class="mt-1 font-display text-2xl font-bold">{{ data.bookings_today }}</p>
       </div>
     </div>

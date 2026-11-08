@@ -1,4 +1,4 @@
-// Ilustrasi mobil tampak atas (menghadap kanan) per jenis kendaraan & warna.
+// Ilustrasi mobil & motor tampak atas (menghadap kanan) per jenis kendaraan & warna.
 // Salinan yang sama ada di situs tenant (src/lib/carSvg.ts) dan dash-admin (dash-admin/src/lib/carSvg.ts) — ubah keduanya.
 
 export const VEHICLE_COLORS: Record<string, { label: string; body: string; edge: string }> = {
@@ -38,9 +38,73 @@ const SHAPES: Record<string, Shape> = {
 
 const GLASS = '#1E293B'
 
+// Matic & listrik berbentuk skuter (listrik tanpa knalpot, ada petir); manual bertangki dengan mesin terbuka.
+function motorSvg(type: string, c: { body: string; edge: string }): string {
+  const rect = (x: number, y: number, w: number, h: number, rx: number, style: string) =>
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" ${style}/>`
+  const paint = `fill="${c.body}" stroke="${c.edge}" stroke-width="2"`
+  const seat = `fill="${GLASS}" stroke="#475569" stroke-width="1.5"`
+  const tire = 'fill="#111827"'
+  const manual = type === 'motor_manual'
+  const electric = type === 'motor_listrik'
+  const bar = manual ? 142 : 135
+
+  const parts: string[] = [
+    rect(30, 40, 152, 30, 14, 'fill="#000" opacity=".2"'),
+    rect(24, 43, 46, 14, 6, tire),
+    rect(132, 43, 46, 14, 6, tire),
+  ]
+
+  // knalpot
+  if (!electric) parts.push(rect(32, 66, manual ? 64 : 52, 9, 4, 'fill="#9CA3AF" stroke="#6B7280"'))
+
+  if (manual) {
+    parts.push(
+      rect(38, 42, 34, 16, 8, paint),
+      // blok mesin
+      rect(92, 28, 30, 44, 6, 'fill="#6B7280" stroke="#374151"'),
+      rect(60, 37, 44, 26, 10, seat),
+      // tangki
+      rect(96, 32, 46, 36, 16, paint),
+      rect(106, 38, 26, 6, 3, 'fill="#fff" opacity=".35"'),
+    )
+  } else {
+    parts.push(
+      rect(38, 31, 72, 38, 17, paint),
+      // dek kaki
+      rect(100, 36, 34, 28, 4, paint),
+      rect(106, 41, 22, 18, 3, `fill="${c.edge}" opacity=".5"`),
+      rect(46, 37, 56, 26, 12, seat),
+      rect(52, 41, 40, 5, 2.5, 'fill="#fff" opacity=".14"'),
+      // tameng depan
+      rect(128, 30, 24, 40, 11, paint),
+    )
+  }
+
+  if (electric) parts.push('<polygon points="78,38 66,52 73,52 69,62 82,47 75,47" fill="#FACC15"/>')
+
+  parts.push(
+    // spakbor depan
+    rect(150, 45, 22, 10, 4, paint),
+    // setang, kedua grip, dan spion
+    rect(bar, 18, 7, 64, 3.5, 'fill="#374151"'),
+    rect(bar - 1, 14, 9, 18, 4, tire),
+    rect(bar - 1, 68, 9, 18, 4, tire),
+    `<circle cx="${bar + 13}" cy="25" r="5" ${paint}/>`,
+    `<circle cx="${bar + 13}" cy="75" r="5" ${paint}/>`,
+    // lampu depan & belakang
+    rect(152, 41, 6, 18, 3, 'fill="#FEF9C3" stroke="#CA8A04"'),
+    rect(36, 44, 5, 12, 2, 'fill="#EF4444"'),
+  )
+
+  return `<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${parts.join('')}</svg>`
+}
+
 export function carSvg(type: string, color: string): string {
-  const s = SHAPES[type] ?? SHAPES.compact!
   const c = VEHICLE_COLORS[color] ?? VEHICLE_COLORS.white!
+  if (type.startsWith('motor_')) return motorSvg(type, c)
+
+  const s = SHAPES[type] ?? SHAPES.compact!
   const x = (200 - s.len) / 2
   const y = (100 - s.wid) / 2
   const X = (f: number) => (x + s.len * f).toFixed(1)

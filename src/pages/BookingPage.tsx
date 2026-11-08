@@ -112,7 +112,7 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
           <p className="mt-3 text-xs text-slate-400">Di papan antrian publik hanya tampil nama depan & inisial, nomor HP tidak ditampilkan.</p>
         </Step>
 
-        <Step number={2} title="Jenis mobil">
+        <Step number={2} title="Jenis kendaraan">
           <div className="grid grid-cols-2 gap-3">
             {vehicleTypes.map((v) => {
               const active = v.code === vehicleCode;
@@ -133,7 +133,7 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
               );
             })}
           </div>
-          <p className="mt-5 mb-2 text-sm font-medium">Warna mobil</p>
+          <p className="mt-5 mb-2 text-sm font-medium">Warna kendaraan</p>
           <div className="flex flex-wrap gap-2.5">
             {Object.entries(VEHICLE_COLORS).map(([code, c]) => (
               <button
@@ -194,7 +194,7 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
           </div>
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between gap-3">
-              <dt className="text-slate-500">Mobil</dt>
+              <dt className="text-slate-500">Kendaraan</dt>
               <dd className="text-right font-medium">{vehicle?.name}</dd>
             </div>
             <div className="flex justify-between gap-3">

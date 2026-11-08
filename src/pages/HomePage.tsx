@@ -66,7 +66,7 @@ export function HomePage({ onBook, onNavigate }: Props) {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-2xl font-extrabold">Paket Layanan</h2>
-            <p className="mt-1 text-sm text-slate-500">Harga mulai untuk sedan/hatchback. SUV, MPV & mobil mewah menyesuaikan.</p>
+            <p className="mt-1 text-sm text-slate-500">Harga untuk sedan/hatchback. Jenis kendaraan lain, termasuk motor, menyesuaikan.</p>
           </div>
           {categories.length > 1 && (
             <div className="flex gap-2 overflow-x-auto" role="tablist" aria-label="Kategori layanan">
