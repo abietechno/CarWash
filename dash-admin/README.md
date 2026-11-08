@@ -1,4 +1,4 @@
-# CarWash Cloud Admin — Frontend
+# WashWuzz Admin — Frontend
 
 Vue 3 + TypeScript + Vite + Tailwind CSS 4 + shadcn-vue + Pinia + Vue Router + axios.
 

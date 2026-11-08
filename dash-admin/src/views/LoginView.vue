@@ -38,7 +38,8 @@ async function submit() {
   <main class="flex min-h-svh items-center justify-center bg-background p-4">
     <div class="w-full max-w-sm">
       <div class="mb-8 flex flex-col items-center text-center">
-        <img src="/logo.png" alt="CarWash Cloud" class="h-14 w-auto" />
+        <img src="/logo.png" alt="" class="h-14 w-auto" />
+        <p class="mt-2 font-display text-xl font-bold">WashWuzz</p>
         <h1 class="mt-5 text-2xl font-bold">Masuk Dashboard</h1>
         <p class="mt-1 text-sm text-muted-foreground">Kelola situs bisnis cuci mobilmu</p>
       </div>

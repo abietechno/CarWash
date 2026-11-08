@@ -84,7 +84,7 @@ async function backToSuper() {
       <aside class="fixed inset-y-0 left-0 z-40 hidden w-[76px] flex-col items-center bg-background py-5 md:flex">
         <RouterLink
           to="/"
-          aria-label="CarWash Cloud"
+          aria-label="WashWuzz"
           class="mb-6 flex h-12 w-16 items-center justify-center transition-all hover:scale-110"
         >
           <img src="/logo.png" alt="" class="w-full" />

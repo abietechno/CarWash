@@ -60,7 +60,7 @@ export interface Promo {
 
 export interface Features {
   onlineBooking: boolean; // reservasi online (paket Pro)
-  branding: boolean; // label "Dibuat dengan CarWash Cloud" (paket Gratis)
+  branding: boolean; // label "Dibuat dengan WashWuzz" (paket Gratis)
 }
 
 export interface Site {

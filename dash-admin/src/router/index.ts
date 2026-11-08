@@ -72,7 +72,7 @@ router.beforeEach(async (to) => {
 })
 
 router.afterEach((to) => {
-  document.title = `${to.meta.title ?? 'Dashboard'} · CarWash Cloud`
+  document.title = `${to.meta.title ?? 'Dashboard'} · WashWuzz`
 })
 
 export default router

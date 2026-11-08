@@ -70,7 +70,7 @@ class Tenant extends Model
             'max_promos' => $pro ? self::PRO_MAX_PROMOS : self::FREE_MAX_PROMOS,
             'online_booking' => $pro,
             'custom_logo' => $pro, // logo sendiri di header situs
-            'branding' => ! $pro, // label "Dibuat dengan CarWash Cloud"
+            'branding' => ! $pro, // label "Dibuat dengan WashWuzz"
         ];
     }
 

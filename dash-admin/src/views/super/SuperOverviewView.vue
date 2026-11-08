@@ -23,7 +23,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <PageHeader title="Ringkasan Platform" description="CarWash Cloud · semua tenant" />
+  <PageHeader title="Ringkasan Platform" description="WashWuzz · semua tenant" />
 
   <div v-if="!data" class="grid gap-4 p-4 sm:grid-cols-2 sm:p-6 lg:grid-cols-4">
     <Skeleton v-for="i in 8" :key="i" class="h-24 rounded-2xl" />

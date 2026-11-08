@@ -1,4 +1,4 @@
-# CarWash Cloud — SaaS website bisnis cuci mobil
+# WashWuzz — SaaS website bisnis cuci mobil
 
 Multi-tenant: setiap bisnis cuci mobil mendaftar, mendapat subdomain sendiri, mengatur profil & harga dari dashboard, lalu mempublikasikan situsnya.
 
@@ -35,7 +35,7 @@ Subdomain tenant tidak dibuat satu per satu di DNS: satu record wildcard `*.clou
 | Foto promo slider | 1 | 25 |
 | Logo sendiri di header situs | — | ✓ |
 | Kasir & laporan uang masuk/keluar | ✓ | ✓ |
-| Label "Dibuat dengan CarWash Cloud" | tampil | tidak |
+| Label "Dibuat dengan WashWuzz" | tampil | tidak |
 
 Pembayaran **manual**: menu **Langganan** berisi tata cara (pilih periode → transfer → kirim bukti via WhatsApp → admin mengaktifkan)
 dan tombol WhatsApp melayang ke admin (nomor dari Pengaturan super-admin, bawaan 081233741899). Super-admin lalu mencatat pembayarannya.

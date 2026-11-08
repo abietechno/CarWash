@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CarWash Cloud — deploy / update di server, sebagai user deploy (tanpa sudo):
+# WashWuzz — deploy / update di server, sebagai user deploy (tanpa sudo):
 #   bash /www/wwwroot/carwash/CarWash/deploy/deploy.sh
 #
 # Tarik kode terbaru dari main, update backend (composer, migrasi, cache config/route),

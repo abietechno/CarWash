@@ -131,7 +131,7 @@ async function copyUrl() {
           </AlertDialogContent>
         </AlertDialog>
 
-        <p v-else class="text-sm text-destructive">Bisnis ini sedang dinonaktifkan. Hubungi admin CarWash Cloud.</p>
+        <p v-else class="text-sm text-destructive">Bisnis ini sedang dinonaktifkan. Hubungi admin WashWuzz.</p>
       </CardContent>
     </Card>
 

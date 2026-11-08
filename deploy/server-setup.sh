@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CarWash Cloud — setup server, SEKALI saja (butuh root):
+# WashWuzz — setup server, SEKALI saja (butuh root):
 #   sudo bash /www/wwwroot/carwash/CarWash/deploy/server-setup.sh
 #
 # - user deploy (abie) masuk grup www, supaya deploy berikutnya tidak perlu sudo;

@@ -49,7 +49,7 @@ const FEATURES = [
   { label: 'Foto promo slider di beranda', free: '1 foto', pro: '25 foto' },
   { label: 'Reservasi online dari situs', free: false },
   { label: 'Logo sendiri di header situs', free: false },
-  { label: 'Tanpa label "Dibuat dengan CarWash Cloud"', free: false },
+  { label: 'Tanpa label "Dibuat dengan WashWuzz"', free: false },
 ]
 
 const left = computed(() => daysUntil(sub.value?.pro_until ?? null))
@@ -69,7 +69,7 @@ const selected = computed(() => periods.value.find((p) => p.value === period.val
 const waConfirm = computed(() => {
   if (!sub.value || !selected.value) return null
   const text = [
-    `Halo admin CarWash Cloud, saya sudah transfer ${rupiah(selected.value.price)} untuk ${sub.value.plan === 'pro' ? 'perpanjang' : 'berlangganan'} Pro ${selected.value.label}.`,
+    `Halo admin WashWuzz, saya sudah transfer ${rupiah(selected.value.price)} untuk ${sub.value.plan === 'pro' ? 'perpanjang' : 'berlangganan'} Pro ${selected.value.label}.`,
     `Bisnis: ${auth.tenant?.name}`,
     `Situs: ${auth.tenant?.url}`,
     `Email akun: ${auth.user?.email}`,
@@ -81,7 +81,7 @@ const waConfirm = computed(() => {
 const waAsk = computed(() =>
   whatsappUrl(
     sub.value?.contact_whatsapp,
-    `Halo admin CarWash Cloud, saya dari ${auth.tenant?.name} (${auth.tenant?.url}). Saya mau tanya soal langganan Pro.`,
+    `Halo admin WashWuzz, saya dari ${auth.tenant?.name} (${auth.tenant?.url}). Saya mau tanya soal langganan Pro.`,
   ),
 )
 </script>
@@ -187,7 +187,7 @@ const waAsk = computed(() =>
               <Button v-if="waConfirm" as="a" :href="waConfirm" target="_blank" rel="noopener" class="bg-emerald-500 text-white hover:bg-emerald-600">
                 <MessageCircle /> Kirim bukti via WhatsApp
               </Button>
-              <p v-else class="text-sm text-muted-foreground">Hubungi admin CarWash Cloud untuk konfirmasi.</p>
+              <p v-else class="text-sm text-muted-foreground">Hubungi admin WashWuzz untuk konfirmasi.</p>
             </div>
           </li>
 

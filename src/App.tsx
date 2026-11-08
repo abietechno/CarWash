@@ -71,7 +71,7 @@ export default function App() {
           <>
             {' · '}Dibuat dengan{' '}
             <a href={LANDING_URL} className="font-semibold text-slate-500 hover:text-brand-600">
-              CarWash Cloud
+              WashWuzz
             </a>
           </>
         )}

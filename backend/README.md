@@ -1,4 +1,4 @@
-# CarWash Cloud — Backend (Laravel)
+# WashWuzz — Backend (Laravel)
 
 Laravel 13 API + Sanctum. Database default SQLite (`database/database.sqlite`).
 
