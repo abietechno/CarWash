@@ -23,6 +23,7 @@ class BookingService
             'phone' => [$phoneRequired ? 'required' : 'nullable', 'string', 'regex:/^[0-9+\-\s]{8,20}$/'],
             'vehicle_type' => ['required', Rule::in($tenant->vehicleTypes()->pluck('code')->all())],
             'vehicle_color' => ['nullable', Rule::in(Booking::COLORS)],
+            'vehicle_brand' => ['nullable', 'string', 'max:60'],
             'plate' => ['nullable', 'string', 'max:20'],
             'package_id' => [
                 'required', 'integer',
@@ -32,7 +33,7 @@ class BookingService
     }
 
     /**
-     * @param  array{customer_name: string, phone?: ?string, vehicle_type: string, vehicle_color?: ?string, plate?: ?string, package_id: int}  $data
+     * @param  array{customer_name: string, phone?: ?string, vehicle_type: string, vehicle_color?: ?string, vehicle_brand?: ?string, plate?: ?string, package_id: int}  $data
      */
     public function create(Tenant $tenant, array $data, string $source): Booking
     {
@@ -58,6 +59,7 @@ class BookingService
                 'phone' => isset($data['phone']) ? trim($data['phone']) : null,
                 'vehicle_type' => $vehicle->code,
                 'vehicle_color' => $data['vehicle_color'] ?? 'white',
+                'vehicle_brand' => isset($data['vehicle_brand']) ? trim($data['vehicle_brand']) : null,
                 'plate' => isset($data['plate']) ? strtoupper(trim($data['plate'])) : null,
                 'service_package_id' => $package->id,
                 'package_name' => $package->name,

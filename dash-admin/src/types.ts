@@ -160,6 +160,7 @@ export interface BoardBooking {
   name: string
   customer_name: string
   phone: string | null
+  vehicle_brand: string | null
   plate: string | null
   source: 'online' | 'walk_in'
   vehicle_type: VehicleCode

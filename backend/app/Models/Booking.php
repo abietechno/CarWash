@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'queue_date', 'queue_number', 'source', 'customer_name', 'phone', 'vehicle_type', 'vehicle_color', 'plate',
+    'queue_date', 'queue_number', 'source', 'customer_name', 'phone', 'vehicle_type', 'vehicle_color', 'vehicle_brand', 'plate',
     'service_package_id', 'package_name', 'price', 'duration_minutes', 'status', 'bay',
     'started_at', 'finished_at', 'picked_up_at',
 ])]

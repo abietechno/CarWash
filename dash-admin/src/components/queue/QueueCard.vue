@@ -33,6 +33,7 @@ const b = computed(() => props.booking)
           <Phone class="h-3 w-3" /> {{ b.phone }}
         </a>
         <p class="truncate text-muted-foreground">{{ vehicleName }}<template v-if="b.plate"> · {{ b.plate }}</template></p>
+        <p v-if="b.vehicle_brand" class="truncate text-muted-foreground">{{ b.vehicle_brand }}</p>
       </div>
     </div>
 

@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { api, errorMessage, fieldErrors, type FieldErrors } from '@/lib/api'
 import { VEHICLE_COLORS } from '@/lib/carSvg'
 import { rupiah } from '@/lib/format'
-import { fitsVehicle, scopedPrice } from '@/lib/vehicles'
+import { fitsVehicle, isMotor, scopedPrice } from '@/lib/vehicles'
 import type { QueueBoard, ServicePackage, VehicleType } from '@/types'
 
 const props = defineProps<{ packages: ServicePackage[]; vehicleTypes: VehicleType[] }>()
@@ -24,6 +24,7 @@ const form = reactive({
   phone: '',
   plate: '',
   vehicle_type: 'compact',
+  vehicle_brand: '',
   vehicle_color: 'white',
   package_id: null as number | null,
 })
@@ -45,6 +46,7 @@ watch(open, (isOpen) => {
     phone: '',
     plate: '',
     vehicle_type: props.vehicleTypes[0]?.code ?? 'compact',
+    vehicle_brand: '',
     vehicle_color: 'white',
     package_id: null,
   })
@@ -58,6 +60,7 @@ async function submit() {
     const { data } = await api.post<QueueBoard>('/bookings', {
       ...form,
       phone: form.phone || null,
+      vehicle_brand: form.vehicle_brand || null,
       plate: form.plate || null,
     })
     emit('saved', data)
@@ -111,6 +114,12 @@ async function submit() {
               <span class="line-clamp-3">{{ type.name }}</span>
             </button>
           </div>
+        </div>
+
+        <div class="space-y-2">
+          <Label for="walkin-brand">Merk kendaraan (opsional)</Label>
+          <Input id="walkin-brand" v-model="form.vehicle_brand" maxlength="60" :placeholder="isMotor(form.vehicle_type) ? 'Honda Beat' : 'Honda Accord'" />
+          <p v-if="errors.vehicle_brand" class="text-xs text-destructive">{{ errors.vehicle_brand[0] }}</p>
         </div>
 
         <div class="space-y-2">

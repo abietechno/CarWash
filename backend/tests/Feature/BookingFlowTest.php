@@ -146,6 +146,20 @@ class BookingFlowTest extends TestCase
         $this->getJson(self::SITE.'/api/public/queue')->assertJsonCount(0, 'ready');
     }
 
+    public function test_walk_in_vehicle_brand_is_saved_and_only_shown_to_admins(): void
+    {
+        ['tenant' => $tenant, 'user' => $user] = $this->publishedTenant();
+        Sanctum::actingAs($user);
+        $walkIn = fn (string $brand) => $this->postJson('/api/bookings', [
+            'customer_name' => 'Pak Joko', 'vehicle_type' => 'compact', 'vehicle_brand' => $brand, 'package_id' => $tenant->packages()->first()->id,
+        ]);
+
+        $walkIn(str_repeat('a', 61))->assertUnprocessable()->assertJsonValidationErrors('vehicle_brand');
+        $walkIn('Honda Accord')->assertCreated()->assertJsonPath('waiting.0.vehicle_brand', 'Honda Accord');
+
+        $this->getJson(self::SITE.'/api/public/queue')->assertJsonMissingPath('waiting.0.vehicle_brand');
+    }
+
     public function test_walk_in_without_phone_and_isolation_between_tenants(): void
     {
         ['tenant' => $tenant, 'user' => $user] = $this->publishedTenant();

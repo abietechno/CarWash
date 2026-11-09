@@ -128,6 +128,7 @@ class QueueBoard
                 'id' => $b->id,
                 'customer_name' => $b->customer_name,
                 'phone' => $b->phone,
+                'vehicle_brand' => $b->vehicle_brand,
                 'plate' => $b->plate,
                 'source' => $b->source,
                 'price' => $b->price,
