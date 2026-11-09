@@ -7,11 +7,16 @@ export const VEHICLE_COLORS: Record<string, { label: string; body: string; edge:
   silver: { label: 'Silver', body: '#D1D5DB', edge: '#9CA3AF' },
   gray: { label: 'Abu-abu', body: '#6B7280', edge: '#4B5563' },
   red: { label: 'Merah', body: '#DC2626', edge: '#991B1B' },
+  maroon: { label: 'Maroon', body: '#7A1F2B', edge: '#4C1118' },
   blue: { label: 'Biru', body: '#2563EB', edge: '#1E40AF' },
+  navy: { label: 'Biru Dongker', body: '#172B5E', edge: '#475A8F' },
   green: { label: 'Hijau', body: '#16A34A', edge: '#166534' },
+  tosca: { label: 'Tosca', body: '#14B8A6', edge: '#0F766E' },
   yellow: { label: 'Kuning', body: '#FACC15', edge: '#CA8A04' },
   orange: { label: 'Oranye', body: '#F97316', edge: '#C2410C' },
   brown: { label: 'Cokelat', body: '#92400E', edge: '#78350F' },
+  beige: { label: 'Krem', body: '#E7D9B8', edge: '#B8A77F' },
+  pink: { label: 'Pink', body: '#F472B6', edge: '#BE185D' },
 }
 
 interface Shape {

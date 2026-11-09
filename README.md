@@ -46,6 +46,7 @@ Dashboard tenant menampilkan peringatan 7 hari sebelum Pro habis, dan masih 30 h
 
 - **Kasir** (`/kasir`): tagih antrian yang belum bayar (tombol **Bayar** di Antrian) atau jual langsung (paket sesuai jenis kendaraan, add-on, item bebas). Ada diskon, metode bayar, uang diterima & kembalian, lalu struk (cetak thermal / kirim WhatsApp). Harga paket & add-on selalu dihitung server.
 - **Laporan** (`/laporan`): uang masuk, keluar, bersih per periode; grafik arus kas; metode bayar, kategori pengeluaran, layanan terlaris; daftar transaksi; unduh CSV. Pengeluaran dicatat dari halaman ini.
+- **Pembayaran** (`/pembayaran`): tenant memilih metode bayar yang diterima di Kasir (`tenants.payment_settings`). Pembayaran online saat reservasi masih dalam pengembangan.
 - Transaksi tidak pernah dihapus: **dibatalkan dengan alasan**, tetap terlihat, tidak dihitung di laporan, dan antriannya kembali "belum bayar". Antrian yang sudah dibayar tidak bisa dibatalkan sebelum transaksinya dibatalkan.
 - Tanggal laporan = `transactions.business_date` menurut `SAAS_TIMEZONE`.
 

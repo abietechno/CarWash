@@ -145,7 +145,7 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
               );
             })}
           </div>
-          <p className="mt-5 mb-2 text-sm font-medium">Warna kendaraan</p>
+          <p className="mt-5 mb-2 text-sm font-medium">Warna kendaraan <span className="font-normal text-slate-500">· {VEHICLE_COLORS[color]?.label}</span></p>
           <div className="flex flex-wrap gap-2.5">
             {Object.entries(VEHICLE_COLORS).map(([code, c]) => (
               <button

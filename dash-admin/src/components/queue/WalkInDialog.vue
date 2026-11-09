@@ -123,7 +123,7 @@ async function submit() {
         </div>
 
         <div class="space-y-2">
-          <Label>Warna</Label>
+          <Label>Warna <span class="font-normal text-muted-foreground">{{ VEHICLE_COLORS[form.vehicle_color]?.label }}</span></Label>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="(color, code) in VEHICLE_COLORS"

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Tenant;
+use App\Models\Transaction;
 use App\Services\BookingService;
 use App\Services\TenantProvisioner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -125,6 +126,34 @@ class PosAndReportTest extends TestCase
         $sell($car, 'motor_matic')->assertUnprocessable()->assertJsonValidationErrors('items');
         $sell($motor, 'compact')->assertUnprocessable()->assertJsonValidationErrors('items');
         $sell($motor, 'motor_matic')->assertCreated()->assertJsonPath('amount', 25000);
+    }
+
+    public function test_payment_settings_default_to_all_methods_and_limit_the_cashier(): void
+    {
+        ['user' => $user] = $this->tenant();
+        Sanctum::actingAs($user);
+        $sell = fn (string $method) => $this->postJson('/api/pos/sales', [
+            'items' => [['type' => 'custom', 'name' => 'Parfum', 'price' => 10000, 'qty' => 1]],
+            'payment_method' => $method,
+        ]);
+
+        $this->getJson('/api/payment-settings')->assertOk()->assertJsonPath('methods', Transaction::PAYMENT_METHODS);
+        $this->getJson('/api/pos/catalog')->assertJsonPath('payment_methods', Transaction::PAYMENT_METHODS);
+
+        $this->putJson('/api/payment-settings', ['methods' => ['qris', 'cash']])->assertOk()->assertJsonPath('methods', ['cash', 'qris']);
+
+        $this->getJson('/api/pos/catalog')->assertJsonPath('payment_methods', ['cash', 'qris']);
+        $sell('transfer')->assertUnprocessable()->assertJsonValidationErrors('payment_method');
+        $sell('qris')->assertCreated();
+    }
+
+    public function test_payment_settings_need_at_least_one_valid_method(): void
+    {
+        ['user' => $user] = $this->tenant();
+        Sanctum::actingAs($user);
+
+        $this->putJson('/api/payment-settings', ['methods' => []])->assertUnprocessable()->assertJsonValidationErrors('methods');
+        $this->putJson('/api/payment-settings', ['methods' => ['bitcoin']])->assertUnprocessable()->assertJsonValidationErrors('methods.0');
     }
 
     public function test_invalid_sales_are_rejected(): void

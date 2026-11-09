@@ -146,6 +146,17 @@ class BookingFlowTest extends TestCase
         $this->getJson(self::SITE.'/api/public/queue')->assertJsonCount(0, 'ready');
     }
 
+    public function test_booking_accepts_the_listed_vehicle_colors_only(): void
+    {
+        ['tenant' => $tenant] = $this->publishedTenant();
+        $package = $tenant->packages()->first();
+
+        $this->book($package->id, ['vehicle_color' => 'ungu'])->assertUnprocessable()->assertJsonValidationErrors('vehicle_color');
+        $this->book($package->id, ['vehicle_color' => 'navy'])->assertCreated();
+
+        $this->assertSame('navy', $tenant->bookings()->first()->vehicle_color);
+    }
+
     public function test_walk_in_vehicle_brand_is_saved_and_only_shown_to_admins(): void
     {
         ['tenant' => $tenant, 'user' => $user] = $this->publishedTenant();

@@ -8,7 +8,6 @@ use App\Http\Resources\TransactionResource;
 use App\Models\Booking;
 use App\Models\ServiceAddon;
 use App\Models\ServicePackage;
-use App\Models\Transaction;
 use App\Services\BookingService;
 use App\Services\Cashier;
 use Carbon\CarbonImmutable;
@@ -41,6 +40,7 @@ class PosController extends Controller
             'addons' => $tenant->addons()->where('is_active', true)->get()
                 ->map(fn (ServiceAddon $a) => $a->only(['id', 'name', 'category', 'price'])),
             'vehicle_types' => $tenant->vehicleTypes()->get(['code', 'name', 'price_multiplier']),
+            'payment_methods' => $tenant->paymentMethods(),
             'unpaid' => $unpaid->map(fn (Booking $b) => [
                 'id' => $b->id,
                 'ticket' => $b->ticket(),
@@ -73,11 +73,12 @@ class PosController extends Controller
             'items.*.price' => ['required_if:items.*.type,custom', 'nullable', 'integer', 'min:0', 'max:50000000'],
             'items.*.qty' => ['required', 'integer', 'between:1,99'],
             'discount' => ['nullable', 'integer', 'min:0'],
-            'payment_method' => ['required', Rule::in(Transaction::PAYMENT_METHODS)],
+            'payment_method' => ['required', Rule::in($tenant->paymentMethods())],
             'paid_amount' => ['nullable', 'integer', 'min:0', 'max:2000000000'],
         ], [
             'customer_phone.regex' => 'Nomor HP tidak valid.',
             'booking_id.exists' => 'Antrian tidak ditemukan.',
+            'payment_method.in' => 'Metode bayar ini tidak aktif. Atur di menu Pembayaran.',
         ]);
 
         $transaction = $cashier->recordSale($tenant, $request->user(), $data);

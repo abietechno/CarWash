@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'name', 'subdomain', 'status', 'tagline', 'description', 'phone', 'whatsapp', 'email',
-    'address', 'city', 'maps_url', 'opening_hours', 'bay_count', 'published_at', 'pro_until', 'suspended_at',
+    'address', 'city', 'maps_url', 'opening_hours', 'bay_count', 'payment_settings', 'published_at', 'pro_until', 'suspended_at',
 ])]
 class Tenant extends Model
 {
@@ -34,6 +34,7 @@ class Tenant extends Model
         return [
             'opening_hours' => 'array',
             'bay_count' => 'integer',
+            'payment_settings' => 'array',
             'published_at' => 'datetime',
             'pro_until' => 'datetime',
             'suspended_at' => 'datetime',
@@ -72,6 +73,18 @@ class Tenant extends Model
             'custom_logo' => $pro, // logo sendiri di header situs
             'branding' => ! $pro, // label "Dibuat dengan WashWuzz"
         ];
+    }
+
+    /**
+     * Metode bayar yang diterima di kasir; tenant yang belum mengatur menerima semua.
+     *
+     * @return list<string>
+     */
+    public function paymentMethods(): array
+    {
+        $enabled = $this->payment_settings['methods'] ?? Transaction::PAYMENT_METHODS;
+
+        return array_values(array_intersect(Transaction::PAYMENT_METHODS, $enabled));
     }
 
     /** @return HasMany<User, $this> */

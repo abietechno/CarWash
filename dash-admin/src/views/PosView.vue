@@ -56,6 +56,7 @@ async function load() {
     const { data } = await api.get<PosCatalog>('/pos/catalog')
     catalog.value = data
     vehicle.value ??= data.vehicle_types[0]?.code ?? null
+    if (!data.payment_methods.includes(method.value)) method.value = data.payment_methods[0] ?? 'cash'
 
     // Datang dari tombol "Bayar" di halaman Antrian.
     const fromQueue = Number(route.query.booking)
@@ -326,7 +327,7 @@ async function pay() {
         </div>
 
         <div class="flex flex-wrap gap-2">
-          <ChipButton v-for="(label, key) in TRANSACTION_METHODS" :key="key" :active="method === key" @click="method = key">{{ label }}</ChipButton>
+          <ChipButton v-for="key in catalog.payment_methods" :key="key" :active="method === key" @click="method = key">{{ TRANSACTION_METHODS[key] }}</ChipButton>
         </div>
 
         <div v-if="method === 'cash'" class="space-y-2">

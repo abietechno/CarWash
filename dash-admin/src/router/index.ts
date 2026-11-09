@@ -24,6 +24,7 @@ const router = createRouter({
     { path: '/antrian', name: 'queue', component: () => import('@/views/QueueView.vue'), meta: { ...tenant, title: 'Antrian' } },
     { path: '/kasir', name: 'pos', component: () => import('@/views/PosView.vue'), meta: { ...tenant, title: 'Kasir' } },
     { path: '/laporan', name: 'reports', component: () => import('@/views/ReportsView.vue'), meta: { ...tenant, title: 'Laporan' } },
+    { path: '/pembayaran', name: 'payments', component: () => import('@/views/PaymentView.vue'), meta: { ...tenant, title: 'Pembayaran' } },
     { path: '/profil', name: 'profile', component: () => import('@/views/ProfileView.vue'), meta: { ...tenant, title: 'Profil Bisnis' } },
     { path: '/layanan', name: 'services', component: () => import('@/views/ServicesView.vue'), meta: { ...tenant, title: 'Layanan & Harga' } },
     { path: '/langganan', name: 'subscription', component: () => import('@/views/SubscriptionView.vue'), meta: { ...tenant, title: 'Langganan' } },

@@ -35,7 +35,7 @@ class Booking extends Model
         self::CANCELLED => [self::WAITING],
     ];
 
-    public const COLORS = ['white', 'black', 'silver', 'gray', 'red', 'blue', 'green', 'yellow', 'orange', 'brown'];
+    public const COLORS = ['white', 'black', 'silver', 'gray', 'red', 'maroon', 'blue', 'navy', 'green', 'tosca', 'yellow', 'orange', 'brown', 'beige', 'pink'];
 
     protected function casts(): array
     {

@@ -262,7 +262,12 @@ export interface PosCatalog {
   packages: { id: number; name: string; category: PackageCategory; vehicle_scope: VehicleScope; price: number }[]
   addons: { id: number; name: string; category: AddonCategory; price: number }[]
   vehicle_types: { code: VehicleCode; name: string; price_multiplier: number }[]
+  payment_methods: TransactionMethod[]
   unpaid: UnpaidBooking[]
+}
+
+export interface PaymentSettings {
+  methods: TransactionMethod[]
 }
 
 export interface ReportPoint {

@@ -265,5 +265,6 @@ class SaasFlowTest extends TestCase
     {
         $this->getJson('/api/tenant')->assertUnauthorized();
         $this->getJson('/api/packages')->assertUnauthorized();
+        $this->getJson('/api/payment-settings')->assertUnauthorized();
     }
 }

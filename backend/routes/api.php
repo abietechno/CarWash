@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\MediaController;
+use App\Http\Controllers\Api\PaymentSettingController;
 use App\Http\Controllers\Api\PosController;
 use App\Http\Controllers\Api\PromoController;
 use App\Http\Controllers\Api\PublicBookingController;
@@ -65,6 +66,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/pos/catalog', [PosController::class, 'catalog']);
     Route::post('/pos/sales', [PosController::class, 'sale']);
+
+    Route::get('/payment-settings', [PaymentSettingController::class, 'show']);
+    Route::put('/payment-settings', [PaymentSettingController::class, 'update']);
 
     Route::get('/transactions', [TransactionController::class, 'index']);
     Route::post('/transactions/expenses', [TransactionController::class, 'storeExpense']);
