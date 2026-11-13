@@ -3,8 +3,10 @@
 // Teks landing page (resources/views/landing.blade.php). :domain = domain induk tenant, :publish = kata "Terbitkan" yang ditebalkan.
 return [
     'meta' => [
-        'title' => 'WashWuzz — Laman Web Perniagaan Cuci Kereta dalam 5 Minit',
-        'description' => 'WashWuzz — laman web & katalog perkhidmatan dalam talian untuk perniagaan cuci dan salun kereta. Daftar percuma, dapatkan subdomain sendiri, urus harga dari papan pemuka.',
+        'title' => 'WashWuzz: Laman Web Perniagaan Cuci Kereta & Motosikal dalam 5 Minit',
+        'description' => 'WashWuzz: laman web & katalog perkhidmatan dalam talian untuk perniagaan cuci kereta dan motosikal. Daftar percuma, dapatkan subdomain sendiri, urus harga dari papan pemuka.',
+        // Teks gambar pratinjau link (public/og/washwuzz-ms.png); ubah gambarnya juga kalau teks ini berubah.
+        'image_alt' => 'WashWuzz: perniagaan cuci kereta & motosikal, dalam talian dalam 5 minit. Daftar percuma di washwuzz.cloudbizz.my.id',
     ],
 
     'language' => 'Bahasa',

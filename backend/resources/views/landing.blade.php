@@ -2,6 +2,7 @@
     $locale = app()->getLocale();
     $localeUrl = fn (string $code) => url($code === 'id' ? '/' : '/'.$code);
     $languages = ['id' => ['ID', 'Bahasa Indonesia'], 'ms' => ['MY', 'Bahasa Melayu'], 'en' => ['EN', 'English']];
+    $ogLocales = ['id' => 'id_ID', 'ms' => 'ms_MY', 'en' => 'en_US'];
     // Angka ribuan: titik di Indonesia, koma di Malaysia & Inggris.
     $money = fn (int $value) => $locale === 'id' ? number_format($value, 0, ',', '.') : number_format($value);
     // Kalimat dengan kata :publish yang ditebalkan; teksnya di-escape dulu, baru tag <strong> disisipkan.
@@ -25,6 +26,22 @@
     <link rel="alternate" hreflang="{{ $code }}" href="{{ $localeUrl($code) }}">
     @endforeach
     <link rel="alternate" hreflang="x-default" href="{{ $localeUrl('id') }}">
+    {{-- Pratinjau link saat dibagikan (Threads, WhatsApp, Facebook, X); gambarnya per bahasa di public/og. --}}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="WashWuzz">
+    <meta property="og:title" content="{{ __('landing.meta.title') }}">
+    <meta property="og:description" content="{{ __('landing.meta.description') }}">
+    <meta property="og:url" content="{{ $localeUrl($locale) }}">
+    <meta property="og:image" content="{{ url('og/washwuzz-'.$locale.'.png') }}">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ __('landing.meta.image_alt') }}">
+    <meta property="og:locale" content="{{ $ogLocales[$locale] }}">
+    @foreach (array_diff_key($ogLocales, [$locale => true]) as $ogLocale)
+    <meta property="og:locale:alternate" content="{{ $ogLocale }}">
+    @endforeach
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" href="/favicon.ico">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 

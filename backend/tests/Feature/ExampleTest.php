@@ -32,6 +32,19 @@ class ExampleTest extends TestCase
         $this->assertFileExists(public_path('video/washwuzz-promo-poster.jpg'));
     }
 
+    public function test_each_landing_language_has_its_own_link_preview_image(): void
+    {
+        foreach (['/' => 'id', '/ms' => 'ms', '/en' => 'en'] as $path => $locale) {
+            $this->get($path)
+                ->assertOk()
+                ->assertSee('<meta property="og:image" content="'.url("og/washwuzz-$locale.png").'">', false)
+                ->assertSee('<meta name="twitter:card" content="summary_large_image">', false)
+                ->assertSee('<title>WashWuzz: ', false);
+
+            $this->assertFileExists(public_path("og/washwuzz-$locale.png"));
+        }
+    }
+
     public function test_landing_page_uses_washwuzz_brand_and_whatsapp_button(): void
     {
         $this->get('/')

@@ -3,8 +3,10 @@
 // Teks landing page (resources/views/landing.blade.php). :domain = domain induk tenant, :publish = kata "Publish" yang ditebalkan.
 return [
     'meta' => [
-        'title' => 'WashWuzz — A Car Wash Website in 5 Minutes',
-        'description' => 'WashWuzz — website & online service catalogue for car wash and detailing businesses. Sign up free, get your own subdomain, manage prices from the dashboard.',
+        'title' => 'WashWuzz: A Car & Motorbike Wash Website in 5 Minutes',
+        'description' => 'WashWuzz: website & online service catalogue for car and motorbike wash businesses. Sign up free, get your own subdomain, manage prices from the dashboard.',
+        // Teks gambar pratinjau link (public/og/washwuzz-en.png); ubah gambarnya juga kalau teks ini berubah.
+        'image_alt' => 'WashWuzz: your car & motorbike wash, online in 5 minutes. Sign up free at washwuzz.cloudbizz.my.id',
     ],
 
     'language' => 'Language',
