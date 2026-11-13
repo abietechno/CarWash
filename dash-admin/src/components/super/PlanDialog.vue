@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { t } from '@/i18n'
 import { api, errorMessage } from '@/lib/api'
 import { dateInputValue } from '@/lib/format'
 import type { SuperTenantDetail } from '@/types'
@@ -31,7 +32,7 @@ async function save(proUntil: string | null) {
     const { data } = await api.put<SuperTenantDetail>(`/super/tenants/${props.tenant.id}/plan`, { pro_until: proUntil, note: note.value || null })
     emit('saved', data)
     open.value = false
-    toast.success(proUntil ? 'Masa aktif Pro diubah.' : 'Tenant dijadikan Gratis.')
+    toast.success(proUntil ? t('planDialog.changed') : t('planDialog.madeFree'))
   } catch (e) {
     toast.error(errorMessage(e))
   } finally {
@@ -44,26 +45,26 @@ async function save(proUntil: string | null) {
   <Dialog v-model:open="open">
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Ubah masa aktif Pro</DialogTitle>
-        <DialogDescription>Untuk koreksi. Pembayaran normal cukup lewat "Catat pembayaran".</DialogDescription>
+        <DialogTitle>{{ t('planDialog.title') }}</DialogTitle>
+        <DialogDescription>{{ t('planDialog.description') }}</DialogDescription>
       </DialogHeader>
       <form id="plan-form" class="space-y-4" @submit.prevent="save(until)">
         <div class="space-y-2">
-          <Label for="plan-until">Pro aktif sampai</Label>
+          <Label for="plan-until">{{ t('planDialog.until') }}</Label>
           <Input id="plan-until" v-model="until" type="date" required />
         </div>
         <div class="space-y-2">
-          <Label for="plan-note">Alasan</Label>
-          <Input id="plan-note" v-model="note" maxlength="255" placeholder="mis. kompensasi gangguan" />
+          <Label for="plan-note">{{ t('planDialog.reason') }}</Label>
+          <Input id="plan-note" v-model="note" maxlength="255" :placeholder="t('planDialog.reasonPlaceholder')" />
         </div>
       </form>
       <DialogFooter class="sm:justify-between">
-        <Button variant="ghost" class="text-destructive" :disabled="saving" @click="save(null)">Jadikan Gratis</Button>
+        <Button variant="ghost" class="text-destructive" :disabled="saving" @click="save(null)">{{ t('planDialog.makeFree') }}</Button>
         <div class="flex gap-2">
-          <Button variant="outline" @click="open = false">Batal</Button>
+          <Button variant="outline" @click="open = false">{{ t('common.cancel') }}</Button>
           <Button type="submit" form="plan-form" :disabled="saving || !until">
             <LoaderCircle v-if="saving" class="animate-spin" />
-            Simpan
+            {{ t('common.save') }}
           </Button>
         </div>
       </DialogFooter>

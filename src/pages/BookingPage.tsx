@@ -4,6 +4,7 @@ import { CarFront, Check, Clock, Loader2, MessageCircle, Moon } from 'lucide-rea
 import { CarTop } from '../components/CarTop';
 import { Page } from '../components/SiteNav';
 import { VEHICLE_COLORS } from '../lib/carSvg';
+import { useI18n } from '../i18n';
 import { clock, duration, rupiah } from '../lib/format';
 import { BookingError, createBooking, QueueItem, saveMyTicket } from '../lib/queue';
 import { fitsVehicle, formatHours, priceFor, todayHours, VehicleType, whatsappLink } from '../lib/site';
@@ -16,6 +17,7 @@ interface Props {
 
 export function BookingPage({ initialPackageId, onNavigate }: Props) {
   const { business, features, packages, vehicleTypes } = useSite();
+  const { locale, t, label } = useI18n();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   // Jenis kendaraan hanya ditawarkan kalau ada paket untuknya.
@@ -58,7 +60,7 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
         vehicle_type: vehicleCode,
         vehicle_color: color,
         package_id: pkg.id,
-      });
+      }, locale);
       if (booking.date) saveMyTicket(business.subdomain, booking.ticket, booking.date);
       setResult(booking);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -67,7 +69,7 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
         setError(e.message);
         setFieldErrors(e.fields);
       } else {
-        setError('Tidak bisa terhubung ke server. Periksa koneksi lalu coba lagi.');
+        setError(t('booking.offline'));
       }
     } finally {
       setSubmitting(false);
@@ -82,34 +84,31 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
     <form onSubmit={submit} className="grid gap-6 lg:grid-cols-[1fr_340px] lg:items-start">
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-extrabold">Reservasi Online</h1>
-          <p className="mt-1 text-slate-500">Isi data singkat, langsung dapat nomor antrian.</p>
+          <h1 className="text-3xl font-extrabold">{t('booking.title')}</h1>
+          <p className="mt-1 text-slate-500">{t('booking.subtitle')}</p>
         </div>
 
         {!business.openNow && (
           <div className="flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
             <Moon className="h-5 w-5 shrink-0" />
-            <p>
-              Kami sedang tutup. Reservasi online bisa dilakukan saat jam buka
-              {today && !today.closed ? ` (hari ini ${formatHours(today)})` : ''}.
-            </p>
+            <p>{today && !today.closed ? t('booking.closedToday', { hours: formatHours(today, locale) }) : t('booking.closed')}</p>
           </div>
         )}
 
-        <Step number={1} title="Data kamu">
+        <Step number={1} title={t('booking.step1')}>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Nama" error={fieldErrors.customer_name?.[0]}>
+            <Field label={t('booking.name')} error={fieldErrors.customer_name?.[0]}>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
                 maxLength={100}
                 autoComplete="name"
-                placeholder="Nama kamu"
+                placeholder={t('booking.namePlaceholder')}
                 className="input"
               />
             </Field>
-            <Field label="No. HP / WhatsApp" error={fieldErrors.phone?.[0]}>
+            <Field label={t('booking.phone')} error={fieldErrors.phone?.[0]}>
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -121,10 +120,10 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
               />
             </Field>
           </div>
-          <p className="mt-3 text-xs text-slate-400">Di papan antrian publik hanya tampil nama depan & inisial, nomor HP tidak ditampilkan.</p>
+          <p className="mt-3 text-xs text-slate-400">{t('booking.privacy')}</p>
         </Step>
 
-        <Step number={2} title="Jenis kendaraan">
+        <Step number={2} title={t('booking.step2')}>
           <div className="grid grid-cols-2 gap-3">
             {vehicleChoices.map((v) => {
               const active = v.code === vehicleCode;
@@ -145,14 +144,14 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
               );
             })}
           </div>
-          <p className="mt-5 mb-2 text-sm font-medium">Warna kendaraan <span className="font-normal text-slate-500">· {VEHICLE_COLORS[color]?.label}</span></p>
+          <p className="mt-5 mb-2 text-sm font-medium">{t('booking.color')} <span className="font-normal text-slate-500">· {label('colors', color)}</span></p>
           <div className="flex flex-wrap gap-2.5">
             {Object.entries(VEHICLE_COLORS).map(([code, c]) => (
               <button
                 key={code}
                 type="button"
-                title={c.label}
-                aria-label={c.label}
+                title={label('colors', code)}
+                aria-label={label('colors', code)}
                 aria-pressed={code === color}
                 onClick={() => setColor(code)}
                 className={`h-9 w-9 rounded-full border-2 transition-transform ${code === color ? 'scale-110 border-brand-500 ring-2 ring-brand-200' : 'border-slate-200'}`}
@@ -163,7 +162,7 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
           {fieldErrors.vehicle_type && <p className="mt-2 text-xs text-red-600">{fieldErrors.vehicle_type[0]}</p>}
         </Step>
 
-        <Step number={3} title="Pilih paket">
+        <Step number={3} title={t('booking.step3')}>
           <div className="space-y-3">
             {vehiclePackages.map((p) => {
               const active = p.id === packageId;
@@ -180,7 +179,7 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
                     <span className="block leading-snug font-semibold">{p.name}</span>
                     <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
                       <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" /> {duration(p.durationMinutes)}
+                        <Clock className="h-3 w-3" /> {duration(p.durationMinutes, locale)}
                       </span>
                       <span className="font-display text-sm font-extrabold whitespace-nowrap text-brand-600">{rupiah(priceFor(p, vehicle))}</span>
                     </span>
@@ -206,19 +205,19 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
           </div>
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between gap-3">
-              <dt className="text-slate-500">Kendaraan</dt>
+              <dt className="text-slate-500">{t('booking.vehicle')}</dt>
               <dd className="text-right font-medium">{vehicle?.name}</dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-slate-500">Paket</dt>
+              <dt className="text-slate-500">{t('booking.package')}</dt>
               <dd className="text-right font-medium">{pkg?.name ?? '-'}</dd>
             </div>
             <div className="flex justify-between gap-3 border-t border-slate-100 pt-3">
-              <dt className="font-semibold">Total</dt>
+              <dt className="font-semibold">{t('booking.total')}</dt>
               <dd className="font-display text-xl font-extrabold text-brand-600">{rupiah(total)}</dd>
             </div>
           </dl>
-          <p className="mt-1 text-xs text-slate-400">Bayar di tempat setelah selesai.</p>
+          <p className="mt-1 text-xs text-slate-400">{t('booking.payOnSite')}</p>
           {error && <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
           <button
             type="submit"
@@ -226,7 +225,7 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-brand-500 py-3.5 font-bold text-white shadow-lg shadow-brand-500/30 transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
           >
             {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <CarFront className="h-5 w-5" />}
-            Ambil Nomor Antrian
+            {t('booking.submit')}
           </button>
         </div>
       </aside>
@@ -237,14 +236,15 @@ export function BookingPage({ initialPackageId, onNavigate }: Props) {
 // Bisnis tanpa reservasi online: arahkan ke WhatsApp atau datang langsung.
 function BookingUnavailable({ onNavigate }: { onNavigate: (page: Page) => void }) {
   const { business } = useSite();
-  const wa = whatsappLink(business.whatsapp, `Halo ${business.name}, saya mau pesan cuci mobil.`);
+  const { t } = useI18n();
+  const wa = whatsappLink(business.whatsapp, t('wa.order', { name: business.name }));
 
   return (
     <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center">
       <CarTop type="medium" color="blue" className="mx-auto h-16 w-32" />
-      <h1 className="mt-5 text-2xl font-extrabold">Pesan via WhatsApp</h1>
+      <h1 className="mt-5 text-2xl font-extrabold">{t('unavailable.title')}</h1>
       <p className="mt-2 text-slate-500">
-        {business.name} menerima pesanan lewat WhatsApp atau datang langsung. Pantau antrian dari halaman status.
+        {t('unavailable.text', { name: business.name })}
       </p>
       <div className="mt-6 flex flex-col gap-3">
         {wa && (
@@ -254,7 +254,7 @@ function BookingUnavailable({ onNavigate }: { onNavigate: (page: Page) => void }
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 rounded-full bg-emerald-500 py-3.5 font-bold text-white hover:bg-emerald-600"
           >
-            <MessageCircle className="h-5 w-5" /> Chat WhatsApp
+            <MessageCircle className="h-5 w-5" /> {t('home.chat')}
           </a>
         )}
         <button
@@ -262,7 +262,7 @@ function BookingUnavailable({ onNavigate }: { onNavigate: (page: Page) => void }
           onClick={() => onNavigate('status')}
           className="rounded-full bg-white py-3.5 font-semibold ring-1 ring-slate-200 hover:bg-slate-50"
         >
-          Lihat antrian sekarang
+          {t('unavailable.viewQueue')}
         </button>
       </div>
     </div>
@@ -303,7 +303,8 @@ function BookingSuccess({
   onNavigate: (page: Page) => void;
 }) {
   const { business } = useSite();
-  const wa = whatsappLink(business.whatsapp, `Halo ${business.name}, saya sudah reservasi online dengan nomor antrian ${booking.ticket}.`);
+  const { locale, t } = useI18n();
+  const wa = whatsappLink(business.whatsapp, t('wa.booked', { name: business.name, ticket: booking.ticket }));
 
   useEffect(() => {
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -316,27 +317,27 @@ function BookingSuccess({
       <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-100 text-emerald-600">
         <Check className="h-7 w-7" strokeWidth={3} />
       </span>
-      <h1 className="mt-4 text-2xl font-extrabold">Reservasi berhasil!</h1>
-      <p className="mt-1 text-slate-500">Simpan nomor antrianmu.</p>
+      <h1 className="mt-4 text-2xl font-extrabold">{t('success.title')}</h1>
+      <p className="mt-1 text-slate-500">{t('success.save')}</p>
 
       <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-brand-900/5">
         <div className="bay-lane h-32 px-8">
           <CarTop type={booking.vehicle_type} color={booking.vehicle_color} className="mx-auto h-full max-w-[240px] py-3" />
         </div>
         <div className="p-6">
-          <p className="text-sm text-slate-500">Nomor antrian</p>
+          <p className="text-sm text-slate-500">{t('success.ticket')}</p>
           <p className="font-display text-6xl font-extrabold tracking-tight text-brand-600">{booking.ticket}</p>
           <div className="mt-5 grid grid-cols-2 gap-3 text-left text-sm">
             <div className="rounded-2xl bg-slate-50 p-3">
-              <p className="text-xs text-slate-500">Posisi antrian</p>
-              <p className="font-display text-lg font-bold">ke-{booking.position ?? 1}</p>
+              <p className="text-xs text-slate-500">{t('success.position')}</p>
+              <p className="font-display text-lg font-bold">{t('success.positionValue', { n: booking.position ?? 1 })}</p>
             </div>
             <div className="rounded-2xl bg-slate-50 p-3">
-              <p className="text-xs text-slate-500">Estimasi mulai</p>
+              <p className="text-xs text-slate-500">{t('success.estimate')}</p>
               <p className="font-display text-lg font-bold">
-                {booking.est_wait_minutes ? `±${booking.est_wait_minutes} mnt` : 'Sekarang'}
+                {booking.est_wait_minutes ? t('success.minutes', { count: booking.est_wait_minutes }) : t('success.now')}
               </p>
-              {booking.est_wait_minutes ? <p className="text-xs text-slate-500">sekitar {clock(booking.est_start_at)}</p> : null}
+              {booking.est_wait_minutes ? <p className="text-xs text-slate-500">{t('success.around', { time: clock(booking.est_start_at, locale) })}</p> : null}
             </div>
           </div>
           <p className="mt-4 text-sm text-slate-600">
@@ -351,7 +352,7 @@ function BookingSuccess({
           onClick={() => onNavigate('status')}
           className="rounded-full bg-brand-500 py-3.5 font-bold text-white hover:bg-brand-600"
         >
-          Pantau status antrian
+          {t('success.track')}
         </button>
         {wa && (
           <a
@@ -360,7 +361,7 @@ function BookingSuccess({
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 rounded-full bg-white py-3.5 font-semibold ring-1 ring-slate-200 hover:bg-slate-50"
           >
-            <MessageCircle className="h-5 w-5 text-emerald-500" /> Konfirmasi via WhatsApp
+            <MessageCircle className="h-5 w-5 text-emerald-500" /> {t('success.confirm')}
           </a>
         )}
       </div>

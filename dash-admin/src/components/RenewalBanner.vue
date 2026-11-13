@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { CircleAlert } from '@lucide/vue'
+import { t } from '@/i18n'
 import { shortDate } from '@/lib/format'
 import { renewalState } from '@/lib/plans'
 import { useAuthStore } from '@/stores/auth'
@@ -30,12 +31,13 @@ const state = computed(() =>
     <CircleAlert class="h-4 w-4 shrink-0" />
     <span class="flex-1">
       <template v-if="state.kind === 'expiring'">
-        <strong>Pro berakhir {{ shortDate(tenant.pro_until) }}</strong> ({{ state.daysLeft }} hari lagi).
-        Perpanjang supaya reservasi online, promo, dan logo tetap aktif.
+        <strong>{{ t('renewal.expiringTitle', { date: shortDate(tenant.pro_until) }) }}</strong>
+        {{ t('renewal.expiringDays', { count: state.daysLeft }) }}
+        {{ t('renewal.expiringText') }}
       </template>
       <template v-else>
-        <strong>Pro sudah berakhir {{ shortDate(tenant.pro_until) }}.</strong>
-        Situsmu kembali ke paket Gratis: reservasi online mati, promo tinggal 1 foto, logo disembunyikan.
+        <strong>{{ t('renewal.expiredTitle', { date: shortDate(tenant.pro_until) }) }}</strong>
+        {{ t('renewal.expiredText') }}
       </template>
     </span>
     <span
@@ -44,7 +46,7 @@ const state = computed(() =>
         state.kind === 'expiring' ? 'bg-amber-500 text-amber-950' : 'bg-red-500 text-white',
       ]"
     >
-      Perpanjang
+      {{ t('renewal.renew') }}
     </span>
   </RouterLink>
 </template>

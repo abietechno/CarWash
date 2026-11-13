@@ -9,9 +9,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { t } from '@/i18n'
 import { api, errorMessage, fieldErrors, type FieldErrors } from '@/lib/api'
 import { syncImage } from '@/lib/images'
-import { PROMO_THEMES } from '@/lib/format'
+import { PROMO_THEME_LABELS, PROMO_THEMES } from '@/lib/format'
 import type { Promo, PromoTheme, ServicePackage } from '@/types'
 
 const props = defineProps<{ item: Promo | null; packages: ServicePackage[] }>()
@@ -67,10 +68,10 @@ async function submit() {
     const withImage = await syncImage<Promo>(`/promos/${data.id}`, imageFile.value, imageRemoved.value, !!props.item?.image_url)
     emit('saved', withImage ?? data)
     open.value = false
-    toast.success(props.item ? 'Promo diperbarui.' : 'Promo ditambahkan.')
+    toast.success(props.item ? t('promoDialog.updated') : t('promoDialog.added'))
   } catch (e) {
     errors.value = fieldErrors(e)
-    toast.error(errorMessage(e, 'Gagal menyimpan promo.'))
+    toast.error(errorMessage(e, t('promoDialog.failed')))
   } finally {
     saving.value = false
   }
@@ -81,59 +82,59 @@ async function submit() {
   <Dialog v-model:open="open">
     <DialogContent class="max-h-[90svh] overflow-y-auto sm:max-w-lg">
       <DialogHeader>
-        <DialogTitle>{{ item ? 'Edit promo' : 'Tambah promo' }}</DialogTitle>
-        <DialogDescription>Tampil sebagai slide di halaman depan situs.</DialogDescription>
+        <DialogTitle>{{ item ? t('promoDialog.edit') : t('promoDialog.add') }}</DialogTitle>
+        <DialogDescription>{{ t('promoDialog.description') }}</DialogDescription>
       </DialogHeader>
 
       <form id="promo-form" class="space-y-4" @submit.prevent="submit">
         <div class="space-y-2">
-          <Label>Foto latar (opsional)</Label>
+          <Label>{{ t('promoDialog.photo') }}</Label>
           <ImageField v-model:file="imageFile" v-model:removed="imageRemoved" :current-url="item?.image_url ?? null" />
         </div>
         <div class="space-y-2">
-          <Label for="promo-title">Judul</Label>
-          <Input id="promo-title" v-model="form.title" maxlength="100" required placeholder="Cuci + Wax cuma 150rb" />
+          <Label for="promo-title">{{ t('promoDialog.title') }}</Label>
+          <Input id="promo-title" v-model="form.title" maxlength="100" required :placeholder="t('promoDialog.titlePlaceholder')" />
           <p v-if="errors.title" class="text-xs text-destructive">{{ errors.title[0] }}</p>
         </div>
         <div class="space-y-2">
-          <Label for="promo-subtitle">Keterangan</Label>
+          <Label for="promo-subtitle">{{ t('promoDialog.subtitle') }}</Label>
           <Input id="promo-subtitle" v-model="form.subtitle" maxlength="200" />
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-2">
-            <Label for="promo-badge">Label kecil</Label>
-            <Input id="promo-badge" v-model="form.badge" maxlength="40" placeholder="Diskon 20%" />
+            <Label for="promo-badge">{{ t('promoDialog.badge') }}</Label>
+            <Input id="promo-badge" v-model="form.badge" maxlength="40" :placeholder="t('promoDialog.badgePlaceholder')" />
           </div>
           <div class="space-y-2">
-            <Label>Warna</Label>
+            <Label>{{ t('promoDialog.color') }}</Label>
             <Select v-model="form.theme">
               <SelectTrigger class="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem v-for="(theme, value) in PROMO_THEMES" :key="value" :value="value">
-                  <span class="h-3 w-3 rounded-full" :style="{ background: theme.swatch }" /> {{ theme.label }}
+                  <span class="h-3 w-3 rounded-full" :style="{ background: theme.swatch }" /> {{ PROMO_THEME_LABELS[value] }}
                 </SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
         <div class="space-y-2">
-          <Label>Tombol "Pesan" mengarah ke paket</Label>
+          <Label>{{ t('promoDialog.target') }}</Label>
           <Select v-model="form.package">
             <SelectTrigger class="w-full"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem :value="NO_PACKAGE">Tanpa paket (ke halaman reservasi)</SelectItem>
+              <SelectItem :value="NO_PACKAGE">{{ t('promoDialog.noPackage') }}</SelectItem>
               <SelectItem v-for="pkg in packages" :key="pkg.id" :value="String(pkg.id)">{{ pkg.name }}</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        <label class="flex items-center gap-2 text-sm"><Switch v-model="form.is_active" /> Tampilkan di situs</label>
+        <label class="flex items-center gap-2 text-sm"><Switch v-model="form.is_active" /> {{ t('promoDialog.show') }}</label>
       </form>
 
       <DialogFooter>
-        <Button variant="outline" @click="open = false">Batal</Button>
+        <Button variant="outline" @click="open = false">{{ t('common.cancel') }}</Button>
         <Button type="submit" form="promo-form" :disabled="saving">
           <LoaderCircle v-if="saving" class="animate-spin" />
-          Simpan
+          {{ t('common.save') }}
         </Button>
       </DialogFooter>
     </DialogContent>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { ChevronRight, Search } from '@lucide/vue'
@@ -9,25 +9,26 @@ import StatusBadge from '@/components/super/StatusBadge.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { t } from '@/i18n'
 import { api, errorMessage } from '@/lib/api'
-import { shortDate } from '@/lib/format'
+import { shortDate, TENANT_STATUS } from '@/lib/format'
 import type { SuperTenant } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
 
-const STATUS_FILTERS = [
-  { value: '', label: 'Semua status' },
-  { value: 'published', label: 'Online' },
-  { value: 'draft', label: 'Draft' },
-  { value: 'suspended', label: 'Nonaktif' },
-]
-const PLAN_FILTERS = [
-  { value: '', label: 'Semua paket' },
+const STATUS_FILTERS = computed(() => [
+  { value: '', label: t('superTenants.allStatus') },
+  { value: 'published', label: TENANT_STATUS.published },
+  { value: 'draft', label: TENANT_STATUS.draft },
+  { value: 'suspended', label: t('superTenants.inactive') },
+])
+const PLAN_FILTERS = computed(() => [
+  { value: '', label: t('superTenants.allPlans') },
   { value: 'pro', label: 'Pro' },
-  { value: 'free', label: 'Gratis' },
-  { value: 'expiring', label: 'Habis ≤ 7 hari' },
-]
+  { value: 'free', label: t('common.free') },
+  { value: 'expiring', label: t('superOverview.expiringSoon') },
+])
 
 const q = (key: string) => (typeof route.query[key] === 'string' ? (route.query[key] as string) : '')
 const search = ref(q('search'))
@@ -73,12 +74,12 @@ function goPage(next: number) {
 </script>
 
 <template>
-  <PageHeader title="Tenant" :description="`${meta.total} bisnis terdaftar`" />
+  <PageHeader :title="t('nav.tenants')" :description="t('superTenants.registered', { count: meta.total })" />
 
   <div class="space-y-4 p-4 sm:p-6">
     <div class="relative">
       <Search class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-      <Input v-model="search" placeholder="Cari nama bisnis, subdomain, atau email pemilik" class="pl-9" />
+      <Input v-model="search" :placeholder="t('superTenants.search')" class="pl-9" />
     </div>
 
     <div class="flex flex-wrap gap-2">
@@ -107,41 +108,41 @@ function goPage(next: number) {
       <Skeleton v-for="i in 5" :key="i" class="h-20 rounded-2xl" />
     </div>
     <p v-else-if="!tenants.length" class="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-      Tidak ada tenant yang cocok.
+      {{ t('superTenants.none') }}
     </p>
 
     <div v-else class="divide-y divide-border/50 overflow-hidden rounded-2xl border border-border/60 bg-card">
       <RouterLink
-        v-for="t in tenants"
-        :key="t.id"
-        :to="{ name: 'super-tenant', params: { id: t.id } }"
+        v-for="row in tenants"
+        :key="row.id"
+        :to="{ name: 'super-tenant', params: { id: row.id } }"
         class="flex items-center gap-4 p-4 transition-colors hover:bg-accent"
       >
         <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted font-display font-bold">
-          {{ t.name.charAt(0).toUpperCase() }}
+          {{ row.name.charAt(0).toUpperCase() }}
         </span>
         <div class="min-w-0 flex-1">
           <div class="flex flex-wrap items-center gap-2">
-            <p class="truncate font-medium">{{ t.name }}</p>
-            <StatusBadge :status="t.status" />
-            <PlanBadge :plan="t.plan" :pro-until="t.pro_until" />
+            <p class="truncate font-medium">{{ row.name }}</p>
+            <StatusBadge :status="row.status" />
+            <PlanBadge :plan="row.plan" :pro-until="row.pro_until" />
           </div>
           <p class="truncate text-sm text-muted-foreground">
-            {{ t.subdomain }}<template v-if="t.owner"> · {{ t.owner.name }} ({{ t.owner.email }})</template>
+            {{ row.subdomain }}<template v-if="row.owner"> · {{ row.owner.name }} ({{ row.owner.email }})</template>
           </p>
         </div>
         <div class="hidden shrink-0 text-right text-xs text-muted-foreground sm:block">
-          <p>{{ t.bookings_this_month }} antrian bulan ini</p>
-          <p>Daftar {{ shortDate(t.created_at) }}</p>
+          <p>{{ t('superTenants.bookingsMonth', { count: row.bookings_this_month }) }}</p>
+          <p>{{ t('superOverview.signedUp', { date: shortDate(row.created_at) }) }}</p>
         </div>
         <ChevronRight class="h-4 w-4 shrink-0 text-muted-foreground" />
       </RouterLink>
     </div>
 
     <div v-if="meta.last_page > 1" class="flex items-center justify-center gap-3">
-      <Button variant="outline" size="sm" :disabled="meta.current_page <= 1" @click="goPage(meta.current_page - 1)">Sebelumnya</Button>
+      <Button variant="outline" size="sm" :disabled="meta.current_page <= 1" @click="goPage(meta.current_page - 1)">{{ t('common.previous') }}</Button>
       <span class="text-sm text-muted-foreground">{{ meta.current_page }} / {{ meta.last_page }}</span>
-      <Button variant="outline" size="sm" :disabled="meta.current_page >= meta.last_page" @click="goPage(meta.current_page + 1)">Berikutnya</Button>
+      <Button variant="outline" size="sm" :disabled="meta.current_page >= meta.last_page" @click="goPage(meta.current_page + 1)">{{ t('common.next') }}</Button>
     </div>
   </div>
 </template>

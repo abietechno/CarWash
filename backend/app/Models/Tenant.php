@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'name', 'subdomain', 'status', 'tagline', 'description', 'phone', 'whatsapp', 'email',
-    'address', 'city', 'maps_url', 'opening_hours', 'bay_count', 'payment_settings', 'published_at', 'pro_until', 'suspended_at',
+    'address', 'city', 'locale', 'maps_url', 'opening_hours', 'bay_count', 'payment_settings', 'published_at', 'pro_until', 'suspended_at',
 ])]
 class Tenant extends Model
 {
@@ -170,19 +170,25 @@ class Tenant extends Model
     {
         $issues = [];
 
-        foreach (['name' => 'Nama bisnis', 'whatsapp' => 'Nomor WhatsApp', 'address' => 'Alamat', 'city' => 'Kota'] as $field => $label) {
+        $required = [
+            'name' => 'Nama bisnis belum diisi',
+            'whatsapp' => 'Nomor WhatsApp belum diisi',
+            'address' => 'Alamat belum diisi',
+            'city' => 'Kota belum diisi',
+        ];
+        foreach ($required as $field => $issue) {
             if (blank($this->{$field})) {
-                $issues[] = "$label belum diisi";
+                $issues[] = __($issue);
             }
         }
 
         $hours = collect($this->opening_hours ?? []);
         if ($hours->isEmpty() || $hours->every(fn ($day) => $day['closed'] ?? true)) {
-            $issues[] = 'Jam buka belum diatur';
+            $issues[] = __('Jam buka belum diatur');
         }
 
         if (! $this->packages()->where('is_active', true)->exists()) {
-            $issues[] = 'Belum ada paket layanan aktif';
+            $issues[] = __('Belum ada paket layanan aktif');
         }
 
         return $issues;

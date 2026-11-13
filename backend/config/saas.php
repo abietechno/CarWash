@@ -18,6 +18,9 @@ return [
     // Zona waktu jam buka & tanggal antrian harian.
     'timezone' => env('SAAS_TIMEZONE', 'Asia/Jakarta'),
 
+    // Bahasa yang didukung; yang pertama = bawaan (sama dengan APP_LOCALE). Frontend mengirim pilihannya lewat header X-Locale.
+    'locales' => ['id', 'ms', 'en'],
+
     // Tenant contoh untuk tombol "Lihat Contoh Situs" di landing page. Kosongkan untuk menyembunyikan.
     'demo_subdomain' => env('SAAS_DEMO_SUBDOMAIN', 'putrajayawash'),
 

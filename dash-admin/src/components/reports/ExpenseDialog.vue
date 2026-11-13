@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { t } from '@/i18n'
 import { api, errorMessage, fieldErrors, type FieldErrors } from '@/lib/api'
 import { dateInputValue, EXPENSE_CATEGORIES, TRANSACTION_METHODS } from '@/lib/format'
 import type { Transaction, TransactionMethod } from '@/types'
@@ -41,10 +42,10 @@ async function submit() {
     })
     emit('saved', data)
     open.value = false
-    toast.success('Pengeluaran dicatat.')
+    toast.success(t('expense.saved'))
   } catch (e) {
     errors.value = fieldErrors(e)
-    toast.error(errorMessage(e, 'Gagal mencatat pengeluaran.'))
+    toast.error(errorMessage(e, t('expense.failed')))
   } finally {
     saving.value = false
   }
@@ -55,13 +56,13 @@ async function submit() {
   <Dialog v-model:open="open">
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Catat pengeluaran</DialogTitle>
-        <DialogDescription>Uang keluar untuk operasional usaha.</DialogDescription>
+        <DialogTitle>{{ t('expense.title') }}</DialogTitle>
+        <DialogDescription>{{ t('expense.description') }}</DialogDescription>
       </DialogHeader>
 
       <form id="expense-form" class="space-y-4" @submit.prevent="submit">
         <div class="space-y-2">
-          <p class="text-sm font-medium">Kategori</p>
+          <p class="text-sm font-medium">{{ t('common.category') }}</p>
           <div class="flex flex-wrap gap-2">
             <ChipButton v-for="(label, key) in EXPENSE_CATEGORIES" :key="key" :active="form.category === key" @click="form.category = String(key)">{{ label }}</ChipButton>
           </div>
@@ -69,36 +70,36 @@ async function submit() {
 
         <div class="grid grid-cols-2 gap-3">
           <div class="space-y-2">
-            <Label for="expense-amount">Jumlah (Rp)</Label>
+            <Label for="expense-amount">{{ t('expense.amount') }}</Label>
             <Input id="expense-amount" v-model="form.amount" type="number" inputmode="numeric" min="1" required placeholder="150000" />
             <p v-if="errors.amount" class="text-xs text-destructive">{{ errors.amount[0] }}</p>
           </div>
           <div class="space-y-2">
-            <Label for="expense-date">Tanggal</Label>
+            <Label for="expense-date">{{ t('expense.date') }}</Label>
             <Input id="expense-date" v-model="form.business_date" type="date" :max="dateInputValue()" required />
             <p v-if="errors.business_date" class="text-xs text-destructive">{{ errors.business_date[0] }}</p>
           </div>
         </div>
 
         <div class="space-y-2">
-          <p class="text-sm font-medium">Dibayar dengan</p>
+          <p class="text-sm font-medium">{{ t('expense.paidWith') }}</p>
           <div class="flex flex-wrap gap-2">
-            <ChipButton v-for="(label, key) in TRANSACTION_METHODS" :key="key" :active="form.payment_method === key" @click="form.payment_method = key">{{ label }}</ChipButton>
+            <ChipButton v-for="(label, key) in TRANSACTION_METHODS" :key="key" :active="form.payment_method === key" @click="form.payment_method = key as TransactionMethod">{{ label }}</ChipButton>
           </div>
         </div>
 
         <div class="space-y-2">
-          <Label for="expense-description">Keterangan</Label>
-          <Input id="expense-description" v-model="form.description" maxlength="255" placeholder="Beli sabun 5 liter" />
+          <Label for="expense-description">{{ t('expense.note') }}</Label>
+          <Input id="expense-description" v-model="form.description" maxlength="255" :placeholder="t('expense.notePlaceholder')" />
           <p v-if="errors.description" class="text-xs text-destructive">{{ errors.description[0] }}</p>
         </div>
       </form>
 
       <DialogFooter>
-        <Button variant="outline" @click="open = false">Batal</Button>
+        <Button variant="outline" @click="open = false">{{ t('common.cancel') }}</Button>
         <Button type="submit" form="expense-form" :disabled="saving">
           <LoaderCircle v-if="saving" class="animate-spin" />
-          Simpan
+          {{ t('common.save') }}
         </Button>
       </DialogFooter>
     </DialogContent>

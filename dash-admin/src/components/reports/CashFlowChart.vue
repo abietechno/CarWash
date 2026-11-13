@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { intlLocale, t } from '@/i18n'
 import { compactRupiah, rupiah } from '@/lib/format'
 import type { ReportPoint } from '@/types'
 
@@ -33,15 +34,15 @@ function parseDate(key: string) {
 function axisLabel(key: string) {
   const date = parseDate(key)
   return props.granularity === 'month'
-    ? date.toLocaleDateString('id-ID', { month: 'short' })
-    : date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+    ? date.toLocaleDateString(intlLocale(), { month: 'short' })
+    : date.toLocaleDateString(intlLocale(), { day: 'numeric', month: 'short' })
 }
 
 function fullLabel(key: string) {
   const date = parseDate(key)
   return props.granularity === 'month'
-    ? date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
-    : date.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })
+    ? date.toLocaleDateString(intlLocale(), { month: 'long', year: 'numeric' })
+    : date.toLocaleDateString(intlLocale(), { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 const barHeight = (value: number) => (value > 0 ? `max(2px, ${(value / scale.value.top) * 100}%)` : '0')
@@ -56,15 +57,15 @@ const tooltipStyle = computed(() => {
 const summary = computed(() => {
   const income = props.series.reduce((sum, p) => sum + p.income, 0)
   const expense = props.series.reduce((sum, p) => sum + p.expense, 0)
-  return `Grafik uang masuk ${rupiah(income)} dan uang keluar ${rupiah(expense)}. Rincian ada di tabel di bawah grafik.`
+  return t('chart.summary', { income: rupiah(income), expense: rupiah(expense) })
 })
 </script>
 
 <template>
   <div class="[--series-in:#2a78d6] [--series-out:#eb6834] dark:[--series-in:#3987e5] dark:[--series-out:#d95926]">
     <div class="mb-4 flex items-center gap-4 text-xs text-muted-foreground">
-      <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-[3px] bg-(--series-in)" /> Uang masuk</span>
-      <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-[3px] bg-(--series-out)" /> Uang keluar</span>
+      <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-[3px] bg-(--series-in)" /> {{ t('chart.income') }}</span>
+      <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-[3px] bg-(--series-out)" /> {{ t('chart.expense') }}</span>
     </div>
 
     <div class="flex" role="img" :aria-label="summary">
@@ -105,8 +106,8 @@ const summary = computed(() => {
             :style="tooltipStyle"
           >
             <p class="mb-1.5 text-muted-foreground">{{ fullLabel(activePoint.date) }}</p>
-            <p class="flex items-center gap-2"><span class="h-0.5 w-3 bg-(--series-in)" /> <span class="font-semibold tabular-nums">{{ rupiah(activePoint.income) }}</span> <span class="ml-auto text-muted-foreground">Masuk</span></p>
-            <p class="mt-0.5 flex items-center gap-2"><span class="h-0.5 w-3 bg-(--series-out)" /> <span class="font-semibold tabular-nums">{{ rupiah(activePoint.expense) }}</span> <span class="ml-auto text-muted-foreground">Keluar</span></p>
+            <p class="flex items-center gap-2"><span class="h-0.5 w-3 bg-(--series-in)" /> <span class="font-semibold tabular-nums">{{ rupiah(activePoint.income) }}</span> <span class="ml-auto text-muted-foreground">{{ t('chart.in') }}</span></p>
+            <p class="mt-0.5 flex items-center gap-2"><span class="h-0.5 w-3 bg-(--series-out)" /> <span class="font-semibold tabular-nums">{{ rupiah(activePoint.expense) }}</span> <span class="ml-auto text-muted-foreground">{{ t('chart.out') }}</span></p>
           </div>
         </div>
 
@@ -119,11 +120,11 @@ const summary = computed(() => {
     </div>
 
     <details class="mt-4 text-sm">
-      <summary class="cursor-pointer text-xs text-muted-foreground hover:text-foreground">Lihat sebagai tabel</summary>
+      <summary class="cursor-pointer text-xs text-muted-foreground hover:text-foreground">{{ t('chart.table') }}</summary>
       <div class="mt-2 max-h-64 overflow-y-auto">
         <table class="w-full tabular-nums">
           <thead class="text-left text-xs text-muted-foreground">
-            <tr><th class="py-1 font-medium">{{ granularity === 'month' ? 'Bulan' : 'Tanggal' }}</th><th class="py-1 text-right font-medium">Masuk</th><th class="py-1 text-right font-medium">Keluar</th></tr>
+            <tr><th class="py-1 font-medium">{{ granularity === 'month' ? t('chart.month') : t('chart.date') }}</th><th class="py-1 text-right font-medium">{{ t('chart.in') }}</th><th class="py-1 text-right font-medium">{{ t('chart.out') }}</th></tr>
           </thead>
           <tbody class="divide-y divide-border/40">
             <tr v-for="point in series" :key="point.date">

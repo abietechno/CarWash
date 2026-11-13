@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { t } from '@/i18n'
 import { api, errorMessage, fieldErrors, type FieldErrors } from '@/lib/api'
 import type { PlatformSettings } from '@/types'
 
@@ -41,7 +42,7 @@ async function save() {
       contact_whatsapp: form.contact_whatsapp || null,
     })
     Object.assign(form, data)
-    toast.success('Pengaturan disimpan.')
+    toast.success(t('superSettings.saved'))
   } catch (e) {
     errors.value = fieldErrors(e)
     toast.error(errorMessage(e))
@@ -52,11 +53,11 @@ async function save() {
 </script>
 
 <template>
-  <PageHeader title="Pengaturan Platform" description="Harga Pro & cara pembayaran yang dilihat tenant">
+  <PageHeader :title="t('superSettings.title')" :description="t('superSettings.description')">
     <template #actions>
       <Button :disabled="!loaded || saving" @click="save">
         <LoaderCircle v-if="saving" class="animate-spin" />
-        Simpan
+        {{ t('common.save') }}
       </Button>
     </template>
   </PageHeader>
@@ -64,17 +65,17 @@ async function save() {
   <form class="space-y-4 p-4 sm:p-6" @submit.prevent="save">
     <Card>
       <CardHeader>
-        <CardTitle class="text-base">Harga paket Pro</CardTitle>
-        <CardDescription>Dipakai sebagai nilai awal saat mencatat pembayaran dan ditampilkan di halaman Langganan tenant.</CardDescription>
+        <CardTitle class="text-base">{{ t('superSettings.priceTitle') }}</CardTitle>
+        <CardDescription>{{ t('superSettings.priceText') }}</CardDescription>
       </CardHeader>
       <CardContent class="grid gap-4 sm:grid-cols-2">
         <div class="space-y-2">
-          <Label for="price-monthly">Bulanan (Rp)</Label>
+          <Label for="price-monthly">{{ t('superSettings.monthly') }}</Label>
           <Input id="price-monthly" v-model="form.pro_monthly_price" type="number" min="0" step="1000" />
           <p v-if="errors.pro_monthly_price" class="text-xs text-destructive">{{ errors.pro_monthly_price[0] }}</p>
         </div>
         <div class="space-y-2">
-          <Label for="price-yearly">Tahunan (Rp)</Label>
+          <Label for="price-yearly">{{ t('superSettings.yearly') }}</Label>
           <Input id="price-yearly" v-model="form.pro_yearly_price" type="number" min="0" step="1000" />
           <p v-if="errors.pro_yearly_price" class="text-xs text-destructive">{{ errors.pro_yearly_price[0] }}</p>
         </div>
@@ -83,16 +84,16 @@ async function save() {
 
     <Card>
       <CardHeader>
-        <CardTitle class="text-base">Cara pembayaran</CardTitle>
-        <CardDescription>Tampil di halaman Langganan tenant. Isi rekening/QRIS dan langkah konfirmasi.</CardDescription>
+        <CardTitle class="text-base">{{ t('superSettings.paymentTitle') }}</CardTitle>
+        <CardDescription>{{ t('superSettings.paymentText') }}</CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <div class="space-y-2">
-          <Label for="pay-instructions">Instruksi pembayaran</Label>
-          <Textarea id="pay-instructions" v-model="form.payment_instructions" rows="5" placeholder="Transfer ke BCA ... a.n. ..., lalu kirim bukti via WhatsApp." />
+          <Label for="pay-instructions">{{ t('superSettings.instructions') }}</Label>
+          <Textarea id="pay-instructions" v-model="form.payment_instructions" rows="5" :placeholder="t('superSettings.instructionsPlaceholder')" />
         </div>
         <div class="space-y-2">
-          <Label for="contact-wa">WhatsApp admin (untuk konfirmasi pembayaran)</Label>
+          <Label for="contact-wa">{{ t('superSettings.adminWhatsapp') }}</Label>
           <Input id="contact-wa" v-model="form.contact_whatsapp" inputmode="tel" placeholder="0812..." />
           <p v-if="errors.contact_whatsapp" class="text-xs text-destructive">{{ errors.contact_whatsapp[0] }}</p>
         </div>

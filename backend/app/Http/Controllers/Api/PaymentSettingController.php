@@ -26,8 +26,8 @@ class PaymentSettingController extends Controller
             'methods' => ['required', 'array', 'min:1'],
             'methods.*' => ['distinct', Rule::in(Transaction::PAYMENT_METHODS)],
         ], [
-            'methods.required' => 'Pilih minimal satu metode bayar.',
-            'methods.min' => 'Pilih minimal satu metode bayar.',
+            'methods.required' => __('Pilih minimal satu metode bayar.'),
+            'methods.min' => __('Pilih minimal satu metode bayar.'),
         ]);
 
         $tenant->update(['payment_settings' => ['methods' => $data['methods']] + ($tenant->payment_settings ?? [])]);

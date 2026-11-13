@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { label, t } from '@/i18n'
 import { api, errorMessage } from '@/lib/api'
 import { rupiah, TRANSACTION_METHODS } from '@/lib/format'
 import { fitsVehicle, scopedPrice } from '@/lib/vehicles'
@@ -44,13 +45,6 @@ const saving = ref(false)
 const receipt = ref<Transaction | null>(null)
 const receiptOpen = ref(false)
 
-const STATUS_LABEL: Record<string, string> = {
-  waiting: 'Menunggu',
-  in_progress: 'Dikerjakan',
-  done: 'Siap diambil',
-  picked_up: 'Sudah diambil',
-}
-
 async function load() {
   try {
     const { data } = await api.get<PosCatalog>('/pos/catalog')
@@ -63,11 +57,11 @@ async function load() {
     if (fromQueue) {
       const target = data.unpaid.find((b) => b.id === fromQueue)
       if (target) pickBooking(target)
-      else toast.info('Antrian itu sudah dibayar atau tidak ditemukan.')
+      else toast.info(t('pos.alreadyPaid'))
       router.replace({ query: {} })
     }
   } catch (e) {
-    toast.error(errorMessage(e, 'Gagal memuat data kasir.'))
+    toast.error(errorMessage(e, t('pos.loadFailed')))
   }
 }
 
@@ -100,7 +94,7 @@ watch(activeVehicle, (code) => {
   const kept = lines.value.filter((l) => l.type !== 'package' || fitsVehicle(l.scope ?? 'car', code))
   if (kept.length === lines.value.length) return
   lines.value = kept
-  toast.info('Paket yang tidak berlaku untuk kendaraan ini dikeluarkan dari pesanan.')
+  toast.info(t('pos.packagesRemoved'))
 })
 
 function qtyOf(key: string) {
@@ -171,7 +165,7 @@ async function pay() {
     reset()
     await load()
   } catch (e) {
-    toast.error(errorMessage(e, 'Pembayaran gagal disimpan.'))
+    toast.error(errorMessage(e, t('pos.payFailed')))
   } finally {
     saving.value = false
   }
@@ -179,7 +173,7 @@ async function pay() {
 </script>
 
 <template>
-  <PageHeader title="Kasir" description="Catat pembayaran pelanggan" />
+  <PageHeader :title="t('nav.pos')" :description="t('pos.description')" />
 
   <div v-if="!catalog" class="grid gap-4 p-4 sm:p-6 lg:grid-cols-[1fr_22rem]">
     <Skeleton class="h-96 rounded-2xl" />
@@ -189,7 +183,7 @@ async function pay() {
   <div v-else class="grid items-start gap-4 p-4 sm:p-6 lg:grid-cols-[1fr_22rem]">
     <div class="min-w-0 space-y-4">
       <Card v-if="catalog.unpaid.length" size="sm">
-        <CardHeader><CardTitle class="text-base">Antrian belum bayar</CardTitle></CardHeader>
+        <CardHeader><CardTitle class="text-base">{{ t('pos.unpaid') }}</CardTitle></CardHeader>
         <CardContent class="grid gap-2 sm:grid-cols-2">
           <button
             v-for="b in catalog.unpaid"
@@ -205,7 +199,7 @@ async function pay() {
             <CarTop :type="b.vehicle_type" :color="b.vehicle_color" class="h-9 w-14 shrink-0" />
             <span class="min-w-0 flex-1">
               <span class="block truncate text-sm font-medium">{{ b.ticket }} · {{ b.customer_name }}</span>
-              <span class="block truncate text-xs text-muted-foreground">{{ b.package_name }} · {{ STATUS_LABEL[b.status] }}</span>
+              <span class="block truncate text-xs text-muted-foreground">{{ b.package_name }} · {{ label('bookingStatus', b.status) }}</span>
             </span>
             <span class="shrink-0 text-sm font-semibold tabular-nums">{{ rupiah(b.price) }}</span>
           </button>
@@ -215,16 +209,16 @@ async function pay() {
       <Card size="sm">
         <CardContent class="space-y-4">
           <div v-if="!booking" class="space-y-2">
-            <p class="text-sm font-medium">Jenis kendaraan</p>
+            <p class="text-sm font-medium">{{ t('pos.vehicleType') }}</p>
             <div class="flex flex-wrap gap-2">
               <ChipButton v-for="v in catalog.vehicle_types" :key="v.code" :active="vehicle === v.code" @click="vehicle = v.code">{{ v.name }}</ChipButton>
             </div>
           </div>
 
           <div :class="['flex flex-wrap gap-2', !booking && 'border-t border-border/50 pt-4']">
-            <ChipButton :active="tab === 'packages'" @click="tab = 'packages'">Paket</ChipButton>
-            <ChipButton :active="tab === 'addons'" @click="tab = 'addons'">Add-on</ChipButton>
-            <ChipButton :active="tab === 'custom'" @click="tab = 'custom'">Item lain</ChipButton>
+            <ChipButton :active="tab === 'packages'" @click="tab = 'packages'">{{ t('pos.packages') }}</ChipButton>
+            <ChipButton :active="tab === 'addons'" @click="tab = 'addons'">{{ t('pos.addons') }}</ChipButton>
+            <ChipButton :active="tab === 'custom'" @click="tab = 'custom'">{{ t('pos.custom') }}</ChipButton>
           </div>
 
           <div v-if="tab === 'packages'" class="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -239,7 +233,7 @@ async function pay() {
               <span class="mt-1 block text-sm tabular-nums text-muted-foreground">{{ rupiah(unitPrice({ type: 'package', basePrice: p.price, scope: p.vehicle_scope })) }}</span>
               <span v-if="qtyOf(`package-${p.id}`)" class="absolute top-2 right-2 grid h-5 min-w-5 place-items-center rounded-full bg-foreground px-1 text-xs font-bold text-background">{{ qtyOf(`package-${p.id}`) }}</span>
             </button>
-            <p v-if="!vehiclePackages.length" class="col-span-full text-sm text-muted-foreground">Belum ada paket untuk kendaraan ini. Atur di Layanan &amp; Harga.</p>
+            <p v-if="!vehiclePackages.length" class="col-span-full text-sm text-muted-foreground">{{ t('queue.noPackages') }}</p>
           </div>
 
           <div v-else-if="tab === 'addons'" class="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -254,39 +248,39 @@ async function pay() {
               <span class="mt-1 block text-sm tabular-nums text-muted-foreground">{{ rupiah(a.price) }}</span>
               <span v-if="qtyOf(`addon-${a.id}`)" class="absolute top-2 right-2 grid h-5 min-w-5 place-items-center rounded-full bg-foreground px-1 text-xs font-bold text-background">{{ qtyOf(`addon-${a.id}`) }}</span>
             </button>
-            <p v-if="!catalog.addons.length" class="col-span-full text-sm text-muted-foreground">Belum ada add-on aktif.</p>
+            <p v-if="!catalog.addons.length" class="col-span-full text-sm text-muted-foreground">{{ t('pos.noAddons') }}</p>
           </div>
 
           <form v-else class="grid gap-3 sm:grid-cols-[1fr_10rem_auto] sm:items-end" @submit.prevent="addCustom">
             <div class="space-y-2">
-              <Label for="custom-name">Nama item</Label>
-              <Input id="custom-name" v-model="custom.name" maxlength="100" placeholder="Parfum mobil" />
+              <Label for="custom-name">{{ t('pos.itemName') }}</Label>
+              <Input id="custom-name" v-model="custom.name" maxlength="100" :placeholder="t('pos.itemPlaceholder')" />
             </div>
             <div class="space-y-2">
-              <Label for="custom-price">Harga</Label>
+              <Label for="custom-price">{{ t('pos.price') }}</Label>
               <Input id="custom-price" v-model="custom.price" type="number" inputmode="numeric" min="0" placeholder="25000" />
             </div>
-            <Button type="submit" variant="outline" :disabled="!custom.name.trim() || custom.price === ''"><Plus /> Tambah</Button>
+            <Button type="submit" variant="outline" :disabled="!custom.name.trim() || custom.price === ''"><Plus /> {{ t('pos.add') }}</Button>
           </form>
         </CardContent>
       </Card>
     </div>
 
     <Card class="lg:sticky lg:top-20">
-      <CardHeader><CardTitle class="flex items-center gap-2 text-base"><ShoppingCart class="h-4 w-4" /> Pesanan</CardTitle></CardHeader>
+      <CardHeader><CardTitle class="flex items-center gap-2 text-base"><ShoppingCart class="h-4 w-4" /> {{ t('pos.order') }}</CardTitle></CardHeader>
       <CardContent class="space-y-4">
         <p v-if="!hasItems" class="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          Pilih antrian atau tambahkan item.
+          {{ t('pos.empty') }}
         </p>
 
         <ul v-else class="space-y-3 text-sm">
           <li v-if="booking" class="flex items-start gap-2">
             <div class="min-w-0 flex-1">
               <p class="font-medium">{{ booking.package_name }}</p>
-              <p class="text-xs text-muted-foreground">Antrian {{ booking.ticket }}<template v-if="booking.plate"> · {{ booking.plate }}</template></p>
+              <p class="text-xs text-muted-foreground">{{ t('pos.queueTicket', { ticket: booking.ticket }) }}<template v-if="booking.plate"> · {{ booking.plate }}</template></p>
             </div>
             <span class="tabular-nums">{{ rupiah(booking.price) }}</span>
-            <button type="button" class="text-muted-foreground hover:text-foreground" aria-label="Lepas antrian" @click="pickBooking(booking!)"><X class="h-4 w-4" /></button>
+            <button type="button" class="text-muted-foreground hover:text-foreground" :aria-label="t('pos.removeBooking')" @click="pickBooking(booking!)"><X class="h-4 w-4" /></button>
           </li>
           <li v-for="line in lines" :key="line.key" class="flex items-center gap-2">
             <div class="min-w-0 flex-1">
@@ -294,11 +288,11 @@ async function pay() {
               <p class="text-xs tabular-nums text-muted-foreground">{{ rupiah(unitPrice(line)) }}</p>
             </div>
             <div class="flex items-center gap-1">
-              <Button type="button" variant="outline" size="icon-sm" :aria-label="`Kurangi ${line.name}`" @click="changeQty(line, -1)">
+              <Button type="button" variant="outline" size="icon-sm" :aria-label="t('pos.decrease', { name: line.name })" @click="changeQty(line, -1)">
                 <Trash2 v-if="line.qty === 1" /><Minus v-else />
               </Button>
               <span class="w-6 text-center tabular-nums">{{ line.qty }}</span>
-              <Button type="button" variant="outline" size="icon-sm" :aria-label="`Tambah ${line.name}`" @click="changeQty(line, 1)"><Plus /></Button>
+              <Button type="button" variant="outline" size="icon-sm" :aria-label="t('pos.increase', { name: line.name })" @click="changeQty(line, 1)"><Plus /></Button>
             </div>
             <span class="w-20 text-right tabular-nums">{{ rupiah(unitPrice(line) * line.qty) }}</span>
           </li>
@@ -306,24 +300,24 @@ async function pay() {
 
         <div class="grid grid-cols-2 gap-3 border-t border-border/60 pt-4">
           <div class="space-y-2">
-            <Label for="customer-name">Pelanggan</Label>
-            <Input id="customer-name" v-model="customer.name" maxlength="100" placeholder="Opsional" />
+            <Label for="customer-name">{{ t('pos.customer') }}</Label>
+            <Input id="customer-name" v-model="customer.name" maxlength="100" :placeholder="t('common.optional')" />
           </div>
           <div class="space-y-2">
-            <Label for="customer-phone">No. HP</Label>
-            <Input id="customer-phone" v-model="customer.phone" type="tel" maxlength="20" placeholder="Opsional" />
+            <Label for="customer-phone">{{ t('pos.phone') }}</Label>
+            <Input id="customer-phone" v-model="customer.phone" type="tel" maxlength="20" :placeholder="t('common.optional')" />
           </div>
         </div>
 
         <div class="space-y-2">
-          <Label for="discount">Diskon (Rp)</Label>
+          <Label for="discount">{{ t('pos.discount') }}</Label>
           <Input id="discount" v-model="discount" type="number" inputmode="numeric" min="0" placeholder="0" />
-          <p v-if="discountTooBig" class="text-xs text-destructive">Diskon melebihi subtotal.</p>
+          <p v-if="discountTooBig" class="text-xs text-destructive">{{ t('pos.discountTooBig') }}</p>
         </div>
 
         <div class="space-y-2 border-t border-border/60 pt-4">
-          <p v-if="discountValue" class="flex justify-between text-sm text-muted-foreground"><span>Subtotal</span> <span class="tabular-nums">{{ rupiah(subtotal) }}</span></p>
-          <p class="flex items-baseline justify-between"><span class="text-sm font-medium">Total</span> <span class="font-display text-2xl font-bold tabular-nums">{{ rupiah(total) }}</span></p>
+          <p v-if="discountValue" class="flex justify-between text-sm text-muted-foreground"><span>{{ t('pos.subtotal') }}</span> <span class="tabular-nums">{{ rupiah(subtotal) }}</span></p>
+          <p class="flex items-baseline justify-between"><span class="text-sm font-medium">{{ t('pos.total') }}</span> <span class="font-display text-2xl font-bold tabular-nums">{{ rupiah(total) }}</span></p>
         </div>
 
         <div class="flex flex-wrap gap-2">
@@ -331,23 +325,23 @@ async function pay() {
         </div>
 
         <div v-if="method === 'cash'" class="space-y-2">
-          <Label for="paid">Uang diterima</Label>
-          <Input id="paid" v-model="paid" type="number" inputmode="numeric" min="0" placeholder="Kosongkan kalau uang pas" />
+          <Label for="paid">{{ t('pos.received') }}</Label>
+          <Input id="paid" v-model="paid" type="number" inputmode="numeric" min="0" :placeholder="t('pos.receivedPlaceholder')" />
           <div class="flex flex-wrap gap-2">
-            <ChipButton :active="isExactCash" @click="paid = ''">Uang pas</ChipButton>
+            <ChipButton :active="isExactCash" @click="paid = ''">{{ t('pos.exact') }}</ChipButton>
             <ChipButton v-for="v in quickCash" :key="v" :active="paidValue === v" @click="paid = v">{{ rupiah(v) }}</ChipButton>
           </div>
-          <p v-if="cashShort" class="text-xs text-destructive">Uang diterima kurang {{ rupiah(total - paidValue) }}.</p>
-          <p v-else-if="!isExactCash" class="flex justify-between text-sm font-medium"><span>Kembalian</span> <span class="tabular-nums">{{ rupiah(change) }}</span></p>
+          <p v-if="cashShort" class="text-xs text-destructive">{{ t('pos.short', { amount: rupiah(total - paidValue) }) }}</p>
+          <p v-else-if="!isExactCash" class="flex justify-between text-sm font-medium"><span>{{ t('pos.change') }}</span> <span class="tabular-nums">{{ rupiah(change) }}</span></p>
         </div>
 
         <Button class="h-11 w-full" :disabled="!canPay" @click="pay">
           <LoaderCircle v-if="saving" class="animate-spin" />
-          Bayar {{ rupiah(total) }}
+          {{ t('pos.pay', { amount: rupiah(total) }) }}
         </Button>
       </CardContent>
     </Card>
   </div>
 
-  <TransactionDialog v-model:open="receiptOpen" :transaction="receipt" title="Pembayaran berhasil" @voided="load" />
+  <TransactionDialog v-model:open="receiptOpen" :transaction="receipt" :title="t('pos.success')" @voided="load" />
 </template>

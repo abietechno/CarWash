@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureSuperadmin;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Production di belakang Cloudflare + nginx: pakai IP & host asli dari header X-Forwarded-*
         // (dibutuhkan untuk rate limit per pengunjung). Aman karena PHP hanya bisa diakses lewat nginx.
         $middleware->trustProxies(at: '*');
+
+        $middleware->appendToGroup('web', SetLocale::class);
+        $middleware->appendToGroup('api', SetLocale::class);
 
         $middleware->alias(['superadmin' => EnsureSuperadmin::class]);
     })

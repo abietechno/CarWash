@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { t } from '@/i18n'
 import { api, errorMessage, fieldErrors, type FieldErrors } from '@/lib/api'
 import { dateInputValue, PAYMENT_METHODS, rupiah, shortDate } from '@/lib/format'
 import type { PaymentPeriod, SuperTenantDetail } from '@/types'
@@ -64,10 +65,10 @@ async function submit() {
     })
     emit('saved', data)
     open.value = false
-    toast.success(`Pembayaran dicatat. Pro aktif sampai ${shortDate(data.pro_until)}.`)
+    toast.success(t('paymentDialog.saved', { date: shortDate(data.pro_until) }))
   } catch (e) {
     errors.value = fieldErrors(e)
-    toast.error(errorMessage(e, 'Gagal mencatat pembayaran.'))
+    toast.error(errorMessage(e, t('paymentDialog.failed')))
   } finally {
     saving.value = false
   }
@@ -78,8 +79,8 @@ async function submit() {
   <Dialog v-model:open="open">
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Catat pembayaran</DialogTitle>
-        <DialogDescription>{{ tenant.name }} · Pro aktif sampai {{ shortDate(newUntil) }} setelah dicatat.</DialogDescription>
+        <DialogTitle>{{ t('paymentDialog.title') }}</DialogTitle>
+        <DialogDescription>{{ t('paymentDialog.description', { name: tenant.name, date: shortDate(newUntil) }) }}</DialogDescription>
       </DialogHeader>
 
       <form id="payment-form" class="space-y-4" @submit.prevent="submit">
@@ -91,24 +92,24 @@ async function submit() {
             :class="['rounded-xl border p-3 text-left text-sm', form.period === p ? 'border-foreground bg-accent' : 'border-border/60']"
             @click="form.period = p"
           >
-            <span class="block font-medium">{{ p === 'monthly' ? 'Bulanan' : 'Tahunan' }}</span>
+            <span class="block font-medium">{{ p === 'monthly' ? t('common.monthly') : t('common.yearly') }}</span>
             <span class="text-muted-foreground">{{ rupiah(tenant.prices[p]) }}</span>
           </button>
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-2">
-            <Label for="pay-amount">Jumlah dibayar (Rp)</Label>
+            <Label for="pay-amount">{{ t('paymentDialog.amount') }}</Label>
             <Input id="pay-amount" v-model="form.amount" type="number" min="0" step="1000" required />
             <p v-if="errors.amount" class="text-xs text-destructive">{{ errors.amount[0] }}</p>
           </div>
           <div class="space-y-2">
-            <Label for="pay-date">Tanggal bayar</Label>
+            <Label for="pay-date">{{ t('paymentDialog.date') }}</Label>
             <Input id="pay-date" v-model="form.paid_at" type="date" required />
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-2">
-            <Label>Metode</Label>
+            <Label>{{ t('paymentDialog.method') }}</Label>
             <Select v-model="form.method">
               <SelectTrigger class="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -117,21 +118,21 @@ async function submit() {
             </Select>
           </div>
           <div class="space-y-2">
-            <Label for="pay-ref">No. referensi</Label>
-            <Input id="pay-ref" v-model="form.reference" maxlength="100" placeholder="opsional" />
+            <Label for="pay-ref">{{ t('paymentDialog.reference') }}</Label>
+            <Input id="pay-ref" v-model="form.reference" maxlength="100" :placeholder="t('common.optionalLower')" />
           </div>
         </div>
         <div class="space-y-2">
-          <Label for="pay-note">Catatan</Label>
-          <Input id="pay-note" v-model="form.note" maxlength="255" placeholder="opsional" />
+          <Label for="pay-note">{{ t('paymentDialog.note') }}</Label>
+          <Input id="pay-note" v-model="form.note" maxlength="255" :placeholder="t('common.optionalLower')" />
         </div>
       </form>
 
       <DialogFooter>
-        <Button variant="outline" @click="open = false">Batal</Button>
+        <Button variant="outline" @click="open = false">{{ t('common.cancel') }}</Button>
         <Button type="submit" form="payment-form" :disabled="saving">
           <LoaderCircle v-if="saving" class="animate-spin" />
-          Catat & aktifkan Pro
+          {{ t('paymentDialog.submit') }}
         </Button>
       </DialogFooter>
     </DialogContent>

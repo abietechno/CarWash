@@ -76,9 +76,9 @@ class PosController extends Controller
             'payment_method' => ['required', Rule::in($tenant->paymentMethods())],
             'paid_amount' => ['nullable', 'integer', 'min:0', 'max:2000000000'],
         ], [
-            'customer_phone.regex' => 'Nomor HP tidak valid.',
-            'booking_id.exists' => 'Antrian tidak ditemukan.',
-            'payment_method.in' => 'Metode bayar ini tidak aktif. Atur di menu Pembayaran.',
+            'customer_phone.regex' => __('Nomor HP tidak valid.'),
+            'booking_id.exists' => __('Antrian tidak ditemukan.'),
+            'payment_method.in' => __('Metode bayar ini tidak aktif. Atur di menu Pembayaran.'),
         ]);
 
         $transaction = $cashier->recordSale($tenant, $request->user(), $data);

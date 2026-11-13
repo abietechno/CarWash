@@ -56,7 +56,7 @@ class ServicePackageController extends Controller
 
         if ($tenant->packages()->where('is_active', true)->count() >= $max) {
             throw ValidationException::withMessages([
-                'is_active' => "Paket Gratis maksimal {$max} paket aktif. Nonaktifkan paket lain atau upgrade ke Pro.",
+                'is_active' => __('Paket Gratis maksimal :max paket aktif. Nonaktifkan paket lain atau upgrade ke Pro.', ['max' => $max]),
             ]);
         }
     }

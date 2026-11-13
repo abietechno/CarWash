@@ -24,6 +24,7 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { t } from '@/i18n'
 import { api, errorMessage } from '@/lib/api'
 import { ADDON_CATEGORIES, duration, PACKAGE_CATEGORIES, PROMO_THEMES, rupiah, VEHICLE_SCOPES } from '@/lib/format'
 import { PRO_MAX_PROMOS } from '@/lib/plans'
@@ -112,7 +113,7 @@ async function confirmDelete() {
     if (target.kind === 'packages') packages.value = packages.value.filter((x) => x.id !== target.id)
     else if (target.kind === 'addons') addons.value = addons.value.filter((x) => x.id !== target.id)
     else promos.value = promos.value.filter((x) => x.id !== target.id)
-    toast.success(`"${target.name}" dihapus.`)
+    toast.success(t('services.deleted', { name: target.name }))
   } catch (e) {
     toast.error(errorMessage(e))
   } finally {
@@ -139,9 +140,9 @@ async function saveVehicles() {
       })),
     })
     vehicleTypes.value = data
-    toast.success('Jenis kendaraan disimpan.')
+    toast.success(t('services.vehiclesSaved'))
   } catch (e) {
-    toast.error(errorMessage(e, 'Gagal menyimpan jenis kendaraan.'))
+    toast.error(errorMessage(e, t('services.vehiclesFailed')))
   } finally {
     savingVehicles.value = false
   }
@@ -149,14 +150,14 @@ async function saveVehicles() {
 </script>
 
 <template>
-  <PageHeader title="Layanan & Harga" description="Paket, add-on, dan harga per jenis kendaraan">
+  <PageHeader :title="t('nav.services')" :description="t('services.description')">
     <template #actions>
-      <Button v-if="tab === 'packages'" :disabled="!loaded" @click="openPackage(null)"><Plus /> Paket</Button>
-      <Button v-else-if="tab === 'addons'" :disabled="!loaded" @click="openAddon(null)"><Plus /> Add-on</Button>
-      <Button v-else-if="tab === 'promos'" :disabled="!loaded || promosFull" @click="openPromo(null)"><Plus /> Promo</Button>
+      <Button v-if="tab === 'packages'" :disabled="!loaded" @click="openPackage(null)"><Plus /> {{ t('services.tabs.packages') }}</Button>
+      <Button v-else-if="tab === 'addons'" :disabled="!loaded" @click="openAddon(null)"><Plus /> {{ t('services.tabs.addons') }}</Button>
+      <Button v-else-if="tab === 'promos'" :disabled="!loaded || promosFull" @click="openPromo(null)"><Plus /> {{ t('services.tabs.promos') }}</Button>
       <Button v-else :disabled="!loaded || savingVehicles" @click="saveVehicles">
         <LoaderCircle v-if="savingVehicles" class="animate-spin" />
-        Simpan
+        {{ t('common.save') }}
       </Button>
     </template>
   </PageHeader>
@@ -164,10 +165,10 @@ async function saveVehicles() {
   <div class="p-4 sm:p-6">
     <Tabs v-model="tab">
       <TabsList class="mb-4">
-        <TabsTrigger value="packages">Paket</TabsTrigger>
-        <TabsTrigger value="addons">Add-on</TabsTrigger>
-        <TabsTrigger value="promos">Promo</TabsTrigger>
-        <TabsTrigger value="vehicles">Kendaraan</TabsTrigger>
+        <TabsTrigger value="packages">{{ t('services.tabs.packages') }}</TabsTrigger>
+        <TabsTrigger value="addons">{{ t('services.tabs.addons') }}</TabsTrigger>
+        <TabsTrigger value="promos">{{ t('services.tabs.promos') }}</TabsTrigger>
+        <TabsTrigger value="vehicles">{{ t('services.tabs.vehicles') }}</TabsTrigger>
       </TabsList>
 
       <div v-if="!loaded" class="space-y-3">
@@ -178,21 +179,21 @@ async function saveVehicles() {
         <TabsContent value="packages" class="space-y-3">
           <UpgradeNotice
             v-if="features?.max_packages"
-            :message="`${activePackages}/${features.max_packages} paket aktif (batas paket Gratis). Pro: tanpa batas.`"
+            :message="t('services.packageLimit', { active: activePackages, max: features.max_packages })"
           />
           <p v-if="!packages.length" class="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            Belum ada paket. Tambahkan minimal satu paket aktif sebelum publikasi.
+            {{ t('services.noPackages') }}
           </p>
           <Card v-for="item in packages" :key="item.id" size="sm" :class="{ 'opacity-60': !item.is_active }">
             <CardContent class="flex items-start gap-4">
               <img v-if="item.image_url" :src="item.image_url" alt="" class="h-16 w-20 shrink-0 rounded-xl object-cover" />
-              <div v-else class="flex h-16 w-20 shrink-0 items-center justify-center rounded-xl bg-muted text-[10px] text-muted-foreground">Foto default</div>
+              <div v-else class="flex h-16 w-20 shrink-0 items-center justify-center rounded-xl bg-muted text-[10px] text-muted-foreground">{{ t('services.defaultPhoto') }}</div>
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
                   <p class="font-medium">{{ item.name }}</p>
                   <Badge variant="secondary">{{ PACKAGE_CATEGORIES[item.category] }}</Badge>
                   <Badge variant="secondary">{{ VEHICLE_SCOPES[item.vehicle_scope] }}</Badge>
-                  <Badge v-if="item.is_popular" variant="outline"><Star class="fill-current" /> Terlaris</Badge>
+                  <Badge v-if="item.is_popular" variant="outline"><Star class="fill-current" /> {{ t('services.popular') }}</Badge>
                 </div>
                 <p v-if="item.tagline" class="mt-1 truncate text-sm text-muted-foreground">{{ item.tagline }}</p>
                 <p class="mt-2 text-sm">
@@ -203,15 +204,15 @@ async function saveVehicles() {
               <div class="flex shrink-0 items-center gap-1">
                 <Switch
                   :model-value="item.is_active"
-                  :aria-label="`Aktifkan ${item.name}`"
+                  :aria-label="t('services.activate', { name: item.name })"
                   class="mr-2"
                   @update:model-value="(v: boolean) => toggleActive('packages', item, v)"
                 />
-                <Button variant="ghost" size="icon-sm" :aria-label="`Edit ${item.name}`" @click="openPackage(item)"><Pencil /></Button>
+                <Button variant="ghost" size="icon-sm" :aria-label="t('services.editItem', { name: item.name })" @click="openPackage(item)"><Pencil /></Button>
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  :aria-label="`Hapus ${item.name}`"
+                  :aria-label="t('services.deleteItem', { name: item.name })"
                   @click="pendingDelete = { kind: 'packages', id: item.id, name: item.name }"
                 >
                   <Trash2 />
@@ -223,7 +224,7 @@ async function saveVehicles() {
 
         <TabsContent value="addons" class="space-y-3">
           <p v-if="!addons.length" class="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            Belum ada add-on.
+            {{ t('services.noAddons') }}
           </p>
           <Card v-for="item in addons" :key="item.id" size="sm" :class="{ 'opacity-60': !item.is_active }">
             <CardContent class="flex items-start gap-4">
@@ -241,15 +242,15 @@ async function saveVehicles() {
               <div class="flex shrink-0 items-center gap-1">
                 <Switch
                   :model-value="item.is_active"
-                  :aria-label="`Aktifkan ${item.name}`"
+                  :aria-label="t('services.activate', { name: item.name })"
                   class="mr-2"
                   @update:model-value="(v: boolean) => toggleActive('addons', item, v)"
                 />
-                <Button variant="ghost" size="icon-sm" :aria-label="`Edit ${item.name}`" @click="openAddon(item)"><Pencil /></Button>
+                <Button variant="ghost" size="icon-sm" :aria-label="t('services.editItem', { name: item.name })" @click="openAddon(item)"><Pencil /></Button>
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  :aria-label="`Hapus ${item.name}`"
+                  :aria-label="t('services.deleteItem', { name: item.name })"
                   @click="pendingDelete = { kind: 'addons', id: item.id, name: item.name }"
                 >
                   <Trash2 />
@@ -262,13 +263,17 @@ async function saveVehicles() {
         <TabsContent value="promos" class="space-y-3">
           <UpgradeNotice
             v-if="features && features.max_promos < PRO_MAX_PROMOS"
-            :message="`${promos.length}/${features.max_promos} foto promo (batas Gratis).${promos.length > features.max_promos ? ' Hanya promo aktif teratas yang tampil di situs.' : ''} Pro: sampai ${PRO_MAX_PROMOS} foto.`"
+            :message="[
+              t('services.promoLimit', { count: promos.length, max: features.max_promos }),
+              promos.length > features.max_promos ? t('services.promoOverflow') : '',
+              t('services.promoProLimit', { max: PRO_MAX_PROMOS }),
+            ].filter(Boolean).join(' ')"
           />
           <p v-else-if="features && promosFull" class="text-sm text-muted-foreground">
-            Sudah {{ features.max_promos }} foto promo (batas Pro). Hapus promo lama untuk menambah yang baru.
+            {{ t('services.promoFull', { max: features.max_promos }) }}
           </p>
           <p v-if="!promos.length" class="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            Belum ada promo. Tanpa promo, slider di situs menampilkan nama & tagline bisnismu.
+            {{ t('services.noPromos') }}
           </p>
           <Card v-for="item in promos" :key="item.id" size="sm" :class="{ 'opacity-60': !item.is_active }">
             <CardContent class="flex items-start gap-4">
@@ -283,21 +288,21 @@ async function saveVehicles() {
                 </div>
                 <p v-if="item.subtitle" class="mt-1 line-clamp-2 text-sm text-muted-foreground">{{ item.subtitle }}</p>
                 <p v-if="item.service_package_id" class="mt-1 text-xs text-muted-foreground">
-                  → {{ packages.find((p) => p.id === item.service_package_id)?.name ?? 'paket dihapus' }}
+                  → {{ packages.find((p) => p.id === item.service_package_id)?.name ?? t('services.deletedPackage') }}
                 </p>
               </div>
               <div class="flex shrink-0 items-center gap-1">
                 <Switch
                   :model-value="item.is_active"
-                  :aria-label="`Tampilkan ${item.title}`"
+                  :aria-label="t('services.showItem', { name: item.title })"
                   class="mr-2"
                   @update:model-value="(v: boolean) => toggleActive('promos', item, v)"
                 />
-                <Button variant="ghost" size="icon-sm" :aria-label="`Edit ${item.title}`" @click="openPromo(item)"><Pencil /></Button>
+                <Button variant="ghost" size="icon-sm" :aria-label="t('services.editItem', { name: item.title })" @click="openPromo(item)"><Pencil /></Button>
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  :aria-label="`Hapus ${item.title}`"
+                  :aria-label="t('services.deleteItem', { name: item.title })"
                   @click="pendingDelete = { kind: 'promos', id: item.id, name: item.title }"
                 >
                   <Trash2 />
@@ -310,20 +315,19 @@ async function saveVehicles() {
         <TabsContent value="vehicles">
           <Card>
             <CardHeader>
-              <CardTitle class="text-base">Pengali harga per jenis kendaraan</CardTitle>
+              <CardTitle class="text-base">{{ t('services.multiplierTitle') }}</CardTitle>
               <CardDescription>
-                Harga paket = harga dasar × pengali, kecuali paket Motor yang memakai harganya sendiri. Contoh memakai paket aktif termurah.
-                Jenis kendaraan tampil di reservasi situs kalau ada paket untuknya.
+                {{ t('services.multiplierText') }}
               </CardDescription>
             </CardHeader>
             <CardContent class="divide-y divide-border/50">
               <div v-for="type in vehicleTypes" :key="type.code" class="grid gap-3 py-4 first:pt-0 last:pb-0 sm:grid-cols-[1fr_1fr_7rem]">
                 <div class="space-y-1">
-                  <Input v-model="type.name" :aria-label="`Nama ${type.code}`" maxlength="100" />
+                  <Input v-model="type.name" :aria-label="t('services.vehicleName', { code: type.code })" maxlength="100" />
                   <Input
                     :model-value="type.examples ?? ''"
-                    :aria-label="`Contoh ${type.code}`"
-                    placeholder="Contoh kendaraan"
+                    :aria-label="t('services.vehicleExamples', { code: type.code })"
+                    :placeholder="t('services.examplesPlaceholder')"
                     maxlength="255"
                     class="text-muted-foreground"
                     @update:model-value="(v) => (type.examples = String(v))"
@@ -334,7 +338,7 @@ async function saveVehicles() {
                 </div>
                 <div class="flex items-center gap-1">
                   <span class="text-sm text-muted-foreground">×</span>
-                  <Input v-model="type.price_multiplier" type="number" min="0.1" max="5" step="0.05" :aria-label="`Pengali ${type.code}`" />
+                  <Input v-model="type.price_multiplier" type="number" min="0.1" max="5" step="0.05" :aria-label="t('services.multiplier', { code: type.code })" />
                 </div>
               </div>
             </CardContent>
@@ -351,12 +355,12 @@ async function saveVehicles() {
   <AlertDialog :open="pendingDelete !== null" @update:open="(v: boolean) => !v && (pendingDelete = null)">
     <AlertDialogContent>
       <AlertDialogHeader>
-        <AlertDialogTitle>Hapus "{{ pendingDelete?.name }}"?</AlertDialogTitle>
-        <AlertDialogDescription>Tidak bisa dibatalkan. Matikan saja kalau hanya ingin menyembunyikan dari situs.</AlertDialogDescription>
+        <AlertDialogTitle>{{ t('services.deleteTitle', { name: pendingDelete?.name ?? '' }) }}</AlertDialogTitle>
+        <AlertDialogDescription>{{ t('services.deleteText') }}</AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel>Batal</AlertDialogCancel>
-        <AlertDialogAction variant="destructive" @click="confirmDelete">Hapus</AlertDialogAction>
+        <AlertDialogCancel>{{ t('common.cancel') }}</AlertDialogCancel>
+        <AlertDialogAction variant="destructive" @click="confirmDelete">{{ t('common.delete') }}</AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>

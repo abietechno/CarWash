@@ -6,6 +6,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { t } from '@/i18n'
 import { api, errorMessage } from '@/lib/api'
 import { daysUntil, rupiah, shortDate } from '@/lib/format'
 import { renewalState, whatsappUrl } from '@/lib/plans'
@@ -34,7 +35,7 @@ async function refresh() {
   refreshing.value = true
   try {
     await Promise.all([load(), auth.fetchMe()])
-    toast.success(sub.value?.plan === 'pro' ? `Pro aktif sampai ${shortDate(sub.value.pro_until)}.` : 'Status diperbarui.')
+    toast.success(sub.value?.plan === 'pro' ? t('subscription.proActive', { date: shortDate(sub.value.pro_until) }) : t('subscription.refreshed'))
   } catch (e) {
     toast.error(errorMessage(e))
   } finally {
@@ -42,15 +43,15 @@ async function refresh() {
   }
 }
 
-const FEATURES = [
-  { label: 'Situs dengan subdomain sendiri', free: true },
-  { label: 'Papan antrian realtime & walk-in', free: true },
-  { label: 'Paket layanan aktif', free: 'Maks. 3', pro: 'Tanpa batas' },
-  { label: 'Foto promo slider di beranda', free: '1 foto', pro: '25 foto' },
-  { label: 'Reservasi online dari situs', free: false },
-  { label: 'Logo sendiri di header situs', free: false },
-  { label: 'Tanpa label "Dibuat dengan WashWuzz"', free: false },
-]
+const FEATURES = computed<{ label: string; free: boolean | string; pro?: string }[]>(() => [
+  { label: t('subscription.features.site'), free: true },
+  { label: t('subscription.features.queue'), free: true },
+  { label: t('subscription.features.packages'), free: t('subscription.packagesFree'), pro: t('subscription.unlimited') },
+  { label: t('subscription.features.promos'), free: t('subscription.promosFree'), pro: t('subscription.promosPro') },
+  { label: t('subscription.features.booking'), free: false },
+  { label: t('subscription.features.logo'), free: false },
+  { label: t('subscription.features.noBranding'), free: false },
+])
 
 const left = computed(() => daysUntil(sub.value?.pro_until ?? null))
 const renewal = computed(() => (sub.value ? renewalState(sub.value.plan, sub.value.pro_until) : null))
@@ -60,8 +61,13 @@ const periods = computed(() => {
   const { monthly, yearly } = sub.value.prices
   const saving = monthly * 12 - yearly
   return [
-    { value: 'monthly' as const, label: 'Bulanan', price: monthly, note: '1 bulan' },
-    { value: 'yearly' as const, label: 'Tahunan', price: yearly, note: saving > 0 ? `12 bulan · hemat ${rupiah(saving)}` : '12 bulan' },
+    { value: 'monthly' as const, label: t('common.monthly'), price: monthly, note: t('subscription.monthlyNote') },
+    {
+      value: 'yearly' as const,
+      label: t('common.yearly'),
+      price: yearly,
+      note: saving > 0 ? t('subscription.yearlySaving', { amount: rupiah(saving) }) : t('subscription.yearlyNote'),
+    },
   ]
 })
 const selected = computed(() => periods.value.find((p) => p.value === period.value))
@@ -69,11 +75,14 @@ const selected = computed(() => periods.value.find((p) => p.value === period.val
 const waConfirm = computed(() => {
   if (!sub.value || !selected.value) return null
   const text = [
-    `Halo admin WashWuzz, saya sudah transfer ${rupiah(selected.value.price)} untuk ${sub.value.plan === 'pro' ? 'perpanjang' : 'berlangganan'} Pro ${selected.value.label}.`,
-    `Bisnis: ${auth.tenant?.name}`,
-    `Situs: ${auth.tenant?.url}`,
-    `Email akun: ${auth.user?.email}`,
-    'Bukti transfer saya lampirkan.',
+    t(sub.value.plan === 'pro' ? 'subscription.waRenew' : 'subscription.waSubscribe', {
+      amount: rupiah(selected.value.price),
+      period: selected.value.label,
+    }),
+    t('subscription.waBusiness', { name: auth.tenant?.name ?? '' }),
+    t('subscription.waSite', { url: auth.tenant?.url ?? '' }),
+    t('subscription.waEmail', { email: auth.user?.email ?? '' }),
+    t('subscription.waProof'),
   ].join('\n')
   return whatsappUrl(sub.value.contact_whatsapp, text)
 })
@@ -81,13 +90,13 @@ const waConfirm = computed(() => {
 const waAsk = computed(() =>
   whatsappUrl(
     sub.value?.contact_whatsapp,
-    `Halo admin WashWuzz, saya dari ${auth.tenant?.name} (${auth.tenant?.url}). Saya mau tanya soal langganan Pro.`,
+    t('subscription.waAsk', { name: auth.tenant?.name ?? '', url: auth.tenant?.url ?? '' }),
   ),
 )
 </script>
 
 <template>
-  <PageHeader title="Langganan" :description="auth.tenant?.name" />
+  <PageHeader :title="t('nav.subscription')" :description="auth.tenant?.name" />
 
   <div v-if="!sub" class="space-y-4 p-4 sm:p-6">
     <Skeleton v-for="i in 3" :key="i" class="h-40 rounded-2xl" />
@@ -101,11 +110,11 @@ const waAsk = computed(() =>
             <Crown class="h-5 w-5" />
           </span>
           <div>
-            <CardTitle class="text-lg">Paket {{ sub.plan === 'pro' ? 'Pro' : 'Gratis' }}</CardTitle>
+            <CardTitle class="text-lg">{{ t('common.planName', { plan: sub.plan === 'pro' ? 'Pro' : t('common.free') }) }}</CardTitle>
             <CardDescription :class="renewal ? (renewal.kind === 'expiring' ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400') : ''">
-              <template v-if="sub.plan === 'pro'">Aktif sampai {{ shortDate(sub.pro_until) }} · {{ left }} hari lagi</template>
-              <template v-else-if="sub.pro_until">Pro berakhir {{ shortDate(sub.pro_until) }}. Perpanjang untuk mengaktifkan lagi fitur Pro.</template>
-              <template v-else>Upgrade ke Pro untuk reservasi online, 25 foto promo, dan logo sendiri.</template>
+              <template v-if="sub.plan === 'pro'">{{ t('subscription.activeUntil', { date: shortDate(sub.pro_until), days: t('common.daysLeft', { count: left ?? 0 }) }) }}</template>
+              <template v-else-if="sub.pro_until">{{ t('subscription.ended', { date: shortDate(sub.pro_until) }) }}</template>
+              <template v-else>{{ t('subscription.upgradeText') }}</template>
             </CardDescription>
           </div>
         </div>
@@ -113,11 +122,11 @@ const waAsk = computed(() =>
     </Card>
 
     <Card>
-      <CardHeader><CardTitle class="text-base">Gratis vs Pro</CardTitle></CardHeader>
+      <CardHeader><CardTitle class="text-base">{{ t('subscription.compare') }}</CardTitle></CardHeader>
       <CardContent>
         <div class="grid grid-cols-[1fr_5rem_6rem] gap-y-3 text-sm">
           <span />
-          <span class="text-center text-xs font-semibold text-muted-foreground">Gratis</span>
+          <span class="text-center text-xs font-semibold text-muted-foreground">{{ t('common.free') }}</span>
           <span class="text-center text-xs font-semibold text-violet-400">Pro</span>
           <template v-for="f in FEATURES" :key="f.label">
             <span>{{ f.label }}</span>
@@ -137,16 +146,16 @@ const waAsk = computed(() =>
 
     <Card>
       <CardHeader>
-        <CardTitle class="text-base">Cara {{ sub.plan === 'pro' ? 'memperpanjang' : 'berlangganan' }} Pro</CardTitle>
-        <CardDescription>Pembayaran sementara manual lewat transfer, dikonfirmasi admin.</CardDescription>
+        <CardTitle class="text-base">{{ sub.plan === 'pro' ? t('subscription.howToRenew') : t('subscription.howToSubscribe') }}</CardTitle>
+        <CardDescription>{{ t('subscription.manual') }}</CardDescription>
       </CardHeader>
       <CardContent>
         <ol class="space-y-6">
           <li class="flex gap-4">
             <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-bold text-background">1</span>
             <div class="min-w-0 flex-1 space-y-3">
-              <p class="font-medium">Pilih periode</p>
-              <div role="radiogroup" aria-label="Periode langganan" class="grid gap-2 sm:grid-cols-2">
+              <p class="font-medium">{{ t('subscription.step1') }}</p>
+              <div role="radiogroup" :aria-label="t('subscription.periodLabel')" class="grid gap-2 sm:grid-cols-2">
                 <button
                   v-for="p in periods"
                   :key="p.value"
@@ -170,40 +179,40 @@ const waAsk = computed(() =>
           <li class="flex gap-4">
             <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-bold text-background">2</span>
             <div class="min-w-0 flex-1 space-y-3">
-              <p class="font-medium">Transfer {{ selected ? rupiah(selected.price) : '' }}</p>
+              <p class="font-medium">{{ t('subscription.step2', { amount: selected ? rupiah(selected.price) : '' }) }}</p>
               <p v-if="sub.payment_instructions" class="rounded-xl bg-muted/60 p-4 text-sm whitespace-pre-line">{{ sub.payment_instructions }}</p>
-              <p v-else class="text-sm text-muted-foreground">Nomor rekening dikirim admin lewat WhatsApp. Tanyakan dulu lewat tombol di langkah 3.</p>
-              <p class="text-xs text-muted-foreground">Transfer sesuai nominal supaya pembayaranmu mudah dicek.</p>
+              <p v-else class="text-sm text-muted-foreground">{{ t('subscription.noInstructions') }}</p>
+              <p class="text-xs text-muted-foreground">{{ t('subscription.exactAmount') }}</p>
             </div>
           </li>
 
           <li class="flex gap-4">
             <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-bold text-background">3</span>
             <div class="min-w-0 flex-1 space-y-3">
-              <p class="font-medium">Kirim bukti transfer</p>
+              <p class="font-medium">{{ t('subscription.step3') }}</p>
               <p class="text-sm text-muted-foreground">
-                Pesan berisi nama bisnis, situs, dan nominal sudah disiapkan. Tinggal lampirkan foto/screenshot bukti transfer.
+                {{ t('subscription.step3Text') }}
               </p>
               <Button v-if="waConfirm" as="a" :href="waConfirm" target="_blank" rel="noopener" class="bg-emerald-500 text-white hover:bg-emerald-600">
-                <MessageCircle /> Kirim bukti via WhatsApp
+                <MessageCircle /> {{ t('subscription.sendProof') }}
               </Button>
-              <p v-else class="text-sm text-muted-foreground">Hubungi admin WashWuzz untuk konfirmasi.</p>
+              <p v-else class="text-sm text-muted-foreground">{{ t('subscription.contactAdmin') }}</p>
             </div>
           </li>
 
           <li class="flex gap-4">
             <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-bold text-background">4</span>
             <div class="min-w-0 flex-1 space-y-3">
-              <p class="font-medium">Pro aktif</p>
+              <p class="font-medium">{{ t('subscription.step4') }}</p>
               <p class="text-sm text-muted-foreground">
-                Admin mengecek pembayaran lalu mengaktifkan Pro di akunmu.
-                <template v-if="sub.plan === 'pro'">Masa aktif baru ditambahkan setelah masa aktif sekarang berakhir, jadi tidak ada hari yang hilang.</template>
-                <template v-else>Masa aktif dihitung sejak Pro diaktifkan.</template>
+                {{ t('subscription.step4Text') }}
+                <template v-if="sub.plan === 'pro'">{{ t('subscription.step4Renew') }}</template>
+                <template v-else>{{ t('subscription.step4New') }}</template>
               </p>
               <Button type="button" variant="outline" size="sm" :disabled="refreshing" @click="refresh">
                 <LoaderCircle v-if="refreshing" class="animate-spin" />
                 <RefreshCw v-else />
-                Cek status
+                {{ t('subscription.checkStatus') }}
               </Button>
             </div>
           </li>
@@ -212,10 +221,10 @@ const waAsk = computed(() =>
     </Card>
 
     <Card v-if="sub.payments.length">
-      <CardHeader><CardTitle class="text-base">Riwayat pembayaran</CardTitle></CardHeader>
+      <CardHeader><CardTitle class="text-base">{{ t('subscription.history') }}</CardTitle></CardHeader>
       <CardContent class="divide-y divide-border/50 text-sm">
         <div v-for="p in sub.payments" :key="p.id" class="flex justify-between gap-2 py-2 first:pt-0 last:pb-0">
-          <span>{{ shortDate(p.paid_at) }} · {{ p.period === 'yearly' ? 'Tahunan' : 'Bulanan' }}</span>
+          <span>{{ shortDate(p.paid_at) }} · {{ p.period === 'yearly' ? t('common.yearly') : t('common.monthly') }}</span>
           <span class="font-medium">{{ rupiah(p.amount) }}</span>
         </div>
       </CardContent>
@@ -228,10 +237,10 @@ const waAsk = computed(() =>
     :href="waAsk"
     target="_blank"
     rel="noopener"
-    aria-label="Chat admin lewat WhatsApp"
+    :aria-label="t('subscription.chatAdminLabel')"
     class="fixed right-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-2 rounded-full bg-[#25D366] p-3.5 text-sm font-semibold text-white shadow-lg shadow-black/25 transition-colors hover:bg-[#1ebe5b] sm:px-4 sm:py-3 md:right-6 md:bottom-6"
   >
     <MessageCircle class="h-5 w-5" />
-    <span class="hidden sm:inline">Chat admin</span>
+    <span class="hidden sm:inline">{{ t('subscription.chatAdmin') }}</span>
   </a>
 </template>

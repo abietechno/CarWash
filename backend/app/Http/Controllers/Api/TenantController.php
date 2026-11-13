@@ -34,6 +34,7 @@ class TenantController extends Controller
             'email' => ['nullable', 'email', 'max:150'],
             'address' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:100'],
+            'locale' => ['sometimes', Rule::in(config('saas.locales'))],
             'maps_url' => ['nullable', 'url', 'max:500'],
             'bay_count' => ['sometimes', 'integer', 'between:1,20'],
             'opening_hours' => ['required', 'array', 'size:7'],
@@ -42,13 +43,13 @@ class TenantController extends Controller
             'opening_hours.*.close' => ['required', 'date_format:H:i'],
             'opening_hours.*.closed' => ['required', 'boolean'],
         ], [
-            'whatsapp.regex' => 'Nomor WhatsApp tidak valid.',
+            'whatsapp.regex' => __('Nomor WhatsApp tidak valid.'),
         ]);
 
         foreach ($data['opening_hours'] as $i => $day) {
             if (! $day['closed'] && $day['close'] <= $day['open']) {
                 throw ValidationException::withMessages([
-                    "opening_hours.$i.close" => 'Jam tutup harus setelah jam buka.',
+                    "opening_hours.$i.close" => __('Jam tutup harus setelah jam buka.'),
                 ]);
             }
         }
@@ -74,7 +75,7 @@ class TenantController extends Controller
     public function uploadLogo(Request $request, TenantImages $images): TenantResource
     {
         $tenant = $this->tenant($request);
-        abort_unless($tenant->features()['custom_logo'], 403, 'Logo sendiri di header situs khusus paket Pro.');
+        abort_unless($tenant->features()['custom_logo'], 403, __('Logo sendiri di header situs khusus paket Pro.'));
         $request->validate(['image' => TenantImages::RULES]);
 
         $images->delete($tenant->logo_path);
@@ -98,12 +99,12 @@ class TenantController extends Controller
     {
         $tenant = $this->tenant($request);
 
-        abort_if($tenant->status === Tenant::STATUS_SUSPENDED, 403, 'Bisnis ini sedang dinonaktifkan. Hubungi admin.');
+        abort_if($tenant->status === Tenant::STATUS_SUSPENDED, 403, __('Bisnis ini sedang dinonaktifkan. Hubungi admin.'));
 
         $issues = $tenant->publishIssues();
         if ($issues !== []) {
             return response()->json([
-                'message' => 'Lengkapi data berikut sebelum mempublikasikan situs.',
+                'message' => __('Lengkapi data berikut sebelum mempublikasikan situs.'),
                 'issues' => $issues,
             ], 422);
         }
@@ -120,7 +121,7 @@ class TenantController extends Controller
     {
         $tenant = $this->tenant($request);
 
-        abort_if($tenant->status === Tenant::STATUS_SUSPENDED, 403, 'Bisnis ini sedang dinonaktifkan. Hubungi admin.');
+        abort_if($tenant->status === Tenant::STATUS_SUSPENDED, 403, __('Bisnis ini sedang dinonaktifkan. Hubungi admin.'));
 
         $tenant->update(['status' => Tenant::STATUS_DRAFT]);
 

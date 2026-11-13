@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Droplets, Loader2 } from 'lucide-react';
 import App from './App';
+import { I18nProvider, useI18n } from './i18n';
 import { fetchSite, Site } from './lib/site';
 import { SiteContext } from './lib/siteContext';
+import { landingUrl } from './lib/siteLinks';
 
 type State = { status: 'loading' } | { status: 'ready'; site: Site } | { status: 'missing' } | { status: 'error' };
 
-const LANDING_URL = import.meta.env.VITE_LANDING_URL || 'https://washwuzz.cloudbizz.my.id';
-
 // Muat data tenant dari subdomain yang dibuka, lalu tampilkan app (atau halaman "tidak ditemukan").
+// Bahasa bawaan mengikuti pilihan pemilik situs sampai pengunjung memilih sendiri.
 export function SiteGate() {
   const [state, setState] = useState<State>({ status: 'loading' });
 
@@ -38,18 +39,26 @@ export function SiteGate() {
     }
   }, [state]);
 
-  if (state.status === 'ready') {
-    return (
-      <SiteContext.Provider value={state.site}>
-        <App />
-      </SiteContext.Provider>
-    );
-  }
+  return (
+    <I18nProvider fallback={state.status === 'ready' ? state.site.business.locale : 'id'}>
+      {state.status === 'ready' ? (
+        <SiteContext.Provider value={state.site}>
+          <App />
+        </SiteContext.Provider>
+      ) : (
+        <GateScreen state={state} onRetry={load} />
+      )}
+    </I18nProvider>
+  );
+}
+
+function GateScreen({ state, onRetry }: { state: Exclude<State, { status: 'ready' }>; onRetry: () => void }) {
+  const { locale, t } = useI18n();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-900 p-6">
       {state.status === 'loading' ? (
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" aria-label="Memuat" />
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" aria-label={t('gate.loading')} />
       ) : (
         <div className="max-w-sm text-center">
           <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center">
@@ -57,28 +66,27 @@ export function SiteGate() {
           </div>
           {state.status === 'missing' ? (
             <>
-              <h1 className="mt-5 text-xl font-bold">Situs tidak ditemukan</h1>
+              <h1 className="mt-5 text-xl font-bold">{t('gate.notFound')}</h1>
               <p className="mt-2 text-sm text-slate-500">
-                <span className="font-medium text-slate-700">{window.location.hostname}</span> belum terdaftar atau belum
-                dipublikasikan oleh pemiliknya.
+                <span className="font-medium text-slate-700">{window.location.hostname}</span> {t('gate.notFoundText')}
               </p>
               <a
-                href={LANDING_URL}
+                href={landingUrl(locale)}
                 className="mt-6 inline-block rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-500"
               >
-                Buat situs cuci mobilmu
+                {t('gate.create')}
               </a>
             </>
           ) : (
             <>
-              <h1 className="mt-5 text-xl font-bold">Gagal memuat situs</h1>
-              <p className="mt-2 text-sm text-slate-500">Periksa koneksi internet, lalu coba lagi.</p>
+              <h1 className="mt-5 text-xl font-bold">{t('gate.loadFailed')}</h1>
+              <p className="mt-2 text-sm text-slate-500">{t('gate.checkConnection')}</p>
               <button
                 type="button"
-                onClick={load}
+                onClick={onRetry}
                 className="mt-6 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-500"
               >
-                Coba lagi
+                {t('gate.retry')}
               </button>
             </>
           )}

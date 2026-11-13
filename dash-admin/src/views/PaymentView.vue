@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
+import { t } from '@/i18n'
 import { api, errorMessage } from '@/lib/api'
 import { TRANSACTION_METHODS } from '@/lib/format'
 import type { PaymentSettings, TransactionMethod } from '@/types'
@@ -22,7 +23,7 @@ onMounted(async () => {
     const { data } = await api.get<PaymentSettings>('/payment-settings')
     methods.value = data.methods
   } catch (e) {
-    toast.error(errorMessage(e, 'Gagal memuat pengaturan pembayaran.'))
+    toast.error(errorMessage(e, t('payments.loadFailed')))
   }
 })
 
@@ -36,9 +37,9 @@ async function save() {
   try {
     const { data } = await api.put<PaymentSettings>('/payment-settings', { methods: methods.value })
     methods.value = data.methods
-    toast.success('Pengaturan pembayaran disimpan.')
+    toast.success(t('payments.saved'))
   } catch (e) {
-    toast.error(errorMessage(e, 'Gagal menyimpan pengaturan pembayaran.'))
+    toast.error(errorMessage(e, t('payments.saveFailed')))
   } finally {
     saving.value = false
   }
@@ -46,11 +47,11 @@ async function save() {
 </script>
 
 <template>
-  <PageHeader title="Pembayaran" description="Cara pelanggan membayar ke bisnismu">
+  <PageHeader :title="t('nav.payments')" :description="t('payments.description')">
     <template #actions>
       <Button :disabled="!methods?.length || saving" @click="save">
         <LoaderCircle v-if="saving" class="animate-spin" />
-        Simpan
+        {{ t('common.save') }}
       </Button>
     </template>
   </PageHeader>
@@ -62,32 +63,32 @@ async function save() {
   <div v-else class="space-y-4 p-4 sm:p-6">
     <Card>
       <CardHeader>
-        <CardTitle class="text-base">Metode bayar di kasir</CardTitle>
-        <CardDescription>Hanya metode yang aktif yang muncul saat menagih di Kasir.</CardDescription>
+        <CardTitle class="text-base">{{ t('payments.cashierTitle') }}</CardTitle>
+        <CardDescription>{{ t('payments.cashierText') }}</CardDescription>
       </CardHeader>
       <CardContent class="divide-y divide-border/50">
         <label v-for="key in ALL_METHODS" :key="key" class="flex items-center justify-between gap-4 py-3 text-sm first:pt-0 last:pb-0">
           {{ TRANSACTION_METHODS[key] }}
-          <Switch :model-value="methods.includes(key)" :aria-label="`Terima ${TRANSACTION_METHODS[key]}`" @update:model-value="(v: boolean) => toggle(key, v)" />
+          <Switch :model-value="methods.includes(key)" :aria-label="t('payments.accept', { method: TRANSACTION_METHODS[key] })" @update:model-value="(v: boolean) => toggle(key, v)" />
         </label>
-        <p v-if="!methods.length" class="pt-3 text-sm text-destructive">Pilih minimal satu metode bayar.</p>
+        <p v-if="!methods.length" class="pt-3 text-sm text-destructive">{{ t('payments.minOne') }}</p>
       </CardContent>
     </Card>
 
     <Card>
       <CardHeader>
         <div class="flex flex-wrap items-center gap-2">
-          <CardTitle class="text-base">Pembayaran online saat reservasi</CardTitle>
-          <Badge variant="secondary">Dalam pengembangan</Badge>
+          <CardTitle class="text-base">{{ t('payments.onlineTitle') }}</CardTitle>
+          <Badge variant="secondary">{{ t('payments.inDevelopment') }}</Badge>
         </div>
         <CardDescription>
-          Nantinya pelanggan bisa langsung membayar saat mengambil nomor antrian dari situsmu, dan antriannya otomatis tercatat lunas. Untuk sekarang pelanggan membayar di tempat lewat Kasir.
+          {{ t('payments.onlineText') }}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div class="flex items-center justify-between gap-4 text-sm text-muted-foreground">
-          Aktifkan pembayaran online
-          <Switch :model-value="false" disabled aria-label="Aktifkan pembayaran online" />
+          {{ t('payments.enableOnline') }}
+          <Switch :model-value="false" disabled :aria-label="t('payments.enableOnline')" />
         </div>
       </CardContent>
     </Card>

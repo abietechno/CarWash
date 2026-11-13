@@ -1,6 +1,7 @@
 import heroImage from '../assets/images/detailing_hero_studio_1794059425076.jpg';
 import foamImage from '../assets/images/snow_foam_wash_1794059440833.jpg';
 import interiorImage from '../assets/images/interior_spa_detail_1794059454770.jpg';
+import { isLocale, Locale, translate, translateLabel } from '../i18n';
 
 export type Day = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 export type PackageCategory = 'wash' | 'salon' | 'coating';
@@ -27,6 +28,7 @@ export interface Business {
   logo: string | null; // logo sendiri (paket Pro); null = inisial nama
   openingHours: OpeningHour[];
   openNow: boolean;
+  locale: Locale; // bahasa bawaan situs pilihan pemilik
 }
 
 export interface Package {
@@ -88,6 +90,7 @@ interface ApiSite {
     logo_url: string | null;
     opening_hours: OpeningHour[] | null;
     open_now: boolean;
+    locale: string;
   };
   features: { online_booking: boolean; branding: boolean };
   vehicle_types: { code: string; name: string; examples: string | null; price_multiplier: number | string }[];
@@ -124,11 +127,8 @@ const CATEGORY_IMAGES: Record<PackageCategory, string> = {
   coating: heroImage,
 };
 
-export const CATEGORY_LABELS: Record<PackageCategory, string> = {
-  wash: 'Cuci',
-  salon: 'Salon',
-  coating: 'Coating',
-};
+// Urutan tab kategori di beranda; labelnya di enums.categories.
+export const PACKAGE_CATEGORIES: PackageCategory[] = ['wash', 'salon', 'coating'];
 
 /** Data situs tenant sesuai subdomain yang sedang dibuka; null kalau belum terdaftar/dipublikasikan. */
 export async function fetchSite(): Promise<Site | null> {
@@ -153,6 +153,7 @@ export async function fetchSite(): Promise<Site | null> {
       logo: t.logo_url,
       openingHours: t.opening_hours ?? [],
       openNow: t.open_now,
+      locale: isLocale(t.locale) ? t.locale : 'id',
     },
     features: { onlineBooking: data.features.online_booking, branding: data.features.branding },
     packages: data.packages.map((p) => ({
@@ -186,9 +187,12 @@ export async function fetchSite(): Promise<Site | null> {
   };
 }
 
-const SCOPE_SUFFIX: Record<VehicleScope, string> = { car: ' Mobil', motor: ' Motor', all: '' };
-
-export const packageLabel = (pkg: Package) => `${CATEGORY_LABELS[pkg.category]}${SCOPE_SUFFIX[pkg.vehicleScope]}`;
+// Mis. "Cuci Mobil" / "Car Wash"; paket untuk semua kendaraan hanya nama kategorinya.
+export function packageLabel(pkg: Package, locale: Locale): string {
+  const category = translateLabel(locale, 'categories', pkg.category);
+  if (pkg.vehicleScope === 'all') return category;
+  return translate(locale, 'format.packageLabel', { category, scope: translateLabel(locale, 'scopes', pkg.vehicleScope) });
+}
 
 export const fitsVehicle = (pkg: Package, vehicle: VehicleType) =>
   pkg.vehicleScope === 'all' || pkg.vehicleScope === (vehicle.code.startsWith('motor_') ? 'motor' : 'car');
@@ -205,21 +209,15 @@ export function whatsappLink(number: string | null, text?: string): string | nul
   return `https://wa.me/${digits}${text ? `?text=${encodeURIComponent(text)}` : ''}`;
 }
 
-export const DAY_LABELS: Record<Day, string> = {
-  mon: 'Senin',
-  tue: 'Selasa',
-  wed: 'Rabu',
-  thu: 'Kamis',
-  fri: 'Jumat',
-  sat: 'Sabtu',
-  sun: 'Minggu',
-};
-
 const DAYS_BY_JS_INDEX: Day[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
 export function todayHours(hours: OpeningHour[], now = new Date()): OpeningHour | undefined {
   return hours.find((h) => h.day === DAYS_BY_JS_INDEX[now.getDay()]);
 }
 
-export const formatHours = (h: OpeningHour) =>
-  h.closed ? 'Tutup' : `${h.open.replace(':', '.')}–${h.close.replace(':', '.')}`;
+// Jam Indonesia ditulis "08.00", Malaysia & Inggris "08:00".
+export function formatHours(h: OpeningHour, locale: Locale): string {
+  if (h.closed) return translate(locale, 'format.closed');
+  const time = (value: string) => (locale === 'id' ? value.replace(':', '.') : value);
+  return `${time(h.open)}–${time(h.close)}`;
+}

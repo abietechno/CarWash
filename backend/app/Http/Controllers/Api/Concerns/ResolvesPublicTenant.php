@@ -14,7 +14,7 @@ trait ResolvesPublicTenant
         $subdomain = Subdomain::fromHost($request->getHost());
         $tenant = $subdomain ? Tenant::where('subdomain', $subdomain)->first() : null;
 
-        abort_unless($tenant?->isPublished(), 404, 'Situs tidak ditemukan atau belum dipublikasikan.');
+        abort_unless($tenant?->isPublished(), 404, __('Situs tidak ditemukan atau belum dipublikasikan.'));
 
         return $tenant;
     }

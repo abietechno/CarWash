@@ -10,6 +10,7 @@ class TenantProvisioner
 {
     /**
      * Buat tenant baru (status draft) beserta akun owner dan data awal yang bisa langsung diedit.
+     * Data awal dan bahasa bawaan situs mengikuti bahasa yang dipakai saat mendaftar.
      *
      * @param  array{business_name: string, subdomain: string, owner_name: string, email: string, phone: string, password: string}  $data
      * @return array{tenant: Tenant, user: User}
@@ -23,6 +24,7 @@ class TenantProvisioner
                 'status' => Tenant::STATUS_DRAFT,
                 'whatsapp' => $data['phone'],
                 'email' => $data['email'],
+                'locale' => app()->getLocale(),
                 'opening_hours' => Tenant::defaultOpeningHours(),
             ]);
 
@@ -42,53 +44,53 @@ class TenantProvisioner
         });
     }
 
+    // Nama & contoh kendaraan dari lang/{locale}/starter.php.
     public static function starterVehicleTypes(): array
     {
+        $text = trans('starter.vehicle_types');
+        $type = fn (string $code, float $multiplier, int $order) => [
+            'code' => $code,
+            'name' => $text[$code]['name'],
+            'examples' => $text[$code]['examples'],
+            'price_multiplier' => $multiplier,
+            'sort_order' => $order,
+        ];
+
         return [
-            ['code' => 'compact', 'name' => 'Sedan / Hatchback', 'examples' => 'Civic, City, Yaris, Brio', 'price_multiplier' => 1.0, 'sort_order' => 1],
-            ['code' => 'medium', 'name' => 'Medium SUV / Crossover', 'examples' => 'HR-V, CR-V, CX-5, Xforce', 'price_multiplier' => 1.2, 'sort_order' => 2],
-            ['code' => 'large', 'name' => 'Large SUV / MPV / Van', 'examples' => 'Fortuner, Pajero, Innova, Alphard', 'price_multiplier' => 1.35, 'sort_order' => 3],
-            ['code' => 'luxury', 'name' => 'Luxury / Sport', 'examples' => 'Porsche, G-Wagon, Defender, M4', 'price_multiplier' => 1.6, 'sort_order' => 4],
-            ['code' => 'motor_matic', 'name' => 'Motor Matic', 'examples' => 'Beat, Vario, Scoopy, NMAX', 'price_multiplier' => 0.3, 'sort_order' => 5],
-            ['code' => 'motor_listrik', 'name' => 'Electric Vehicle (Molis)', 'examples' => 'Gesits, Alva One, Polytron Fox', 'price_multiplier' => 0.3, 'sort_order' => 6],
-            ['code' => 'motor_manual', 'name' => 'Motor Manual', 'examples' => 'Supra, Vixion, CB150R, Ninja', 'price_multiplier' => 0.3, 'sort_order' => 7],
+            $type('compact', 1.0, 1),
+            $type('medium', 1.2, 2),
+            $type('large', 1.35, 3),
+            $type('luxury', 1.6, 4),
+            $type('motor_matic', 0.3, 5),
+            $type('motor_listrik', 0.3, 6),
+            $type('motor_manual', 0.3, 7),
         ];
     }
 
     public static function starterPackages(): array
     {
+        [$wash, $wax, $interior] = trans('starter.packages');
+
         return [
-            [
-                'name' => 'Cuci Hidrolik Snow Foam',
+            $wash + [
                 'category' => 'wash',
                 'vehicle_scope' => 'all',
-                'tagline' => 'Bersih menyeluruh luar dalam',
                 'price' => 65000,
                 'duration_minutes' => 45,
-                'description' => 'Cuci hidrolik dengan sampo pH-netral snow foam, pembersihan velg & kolong, vacuum kabin, dan semir ban.',
-                'features' => ['Cuci kolong hidrolik', 'Snow foam pH-netral', 'Vacuum kabin & bagasi', 'Semir ban'],
                 'is_popular' => false,
                 'sort_order' => 1,
             ],
-            [
-                'name' => 'Cuci + Wax & Interior',
+            $wax + [
                 'category' => 'wash',
-                'tagline' => 'Kilau & proteksi 30 hari',
                 'price' => 165000,
                 'duration_minutes' => 75,
-                'description' => 'Cuci snow foam plus spray sealant, dressing interior, dan fogging anti-bakteri.',
-                'features' => ['Semua fasilitas cuci snow foam', 'Spray sealant efek daun talas', 'Dressing dashboard & plastik', 'Fogging anti-bakteri'],
                 'is_popular' => true,
                 'sort_order' => 2,
             ],
-            [
-                'name' => 'Salon Interior Lengkap',
+            $interior + [
                 'category' => 'salon',
-                'tagline' => 'Kabin kembali seperti baru',
                 'price' => 450000,
                 'duration_minutes' => 150,
-                'description' => 'Pembersihan mendalam jok, plafon, dan karpet dengan uap panas, plus perawatan jok kulit.',
-                'features' => ['Cuci jok & karpet', 'Steam plafon & doortrim', 'Perawatan jok kulit', 'Ozone penghilang bau'],
                 'is_popular' => false,
                 'sort_order' => 3,
             ],
@@ -97,10 +99,12 @@ class TenantProvisioner
 
     public static function starterAddons(): array
     {
+        [$engine, $rain, $fogging] = trans('starter.addons');
+
         return [
-            ['name' => 'Detailing Ruang Mesin', 'category' => 'exterior', 'price' => 85000, 'duration_minutes' => 30, 'description' => 'Pembersihan ruang mesin aman tanpa siram air dan semir selang.', 'sort_order' => 1],
-            ['name' => 'Rain Repellent Kaca Depan', 'category' => 'protection', 'price' => 95000, 'duration_minutes' => 25, 'description' => 'Lapisan hidrofobik agar air hujan cepat meluncur.', 'sort_order' => 2],
-            ['name' => 'Fogging Anti-Bakteri', 'category' => 'interior', 'price' => 45000, 'duration_minutes' => 15, 'description' => 'Sterilisasi kabin dan saluran AC.', 'sort_order' => 3],
+            $engine + ['category' => 'exterior', 'price' => 85000, 'duration_minutes' => 30, 'sort_order' => 1],
+            $rain + ['category' => 'protection', 'price' => 95000, 'duration_minutes' => 25, 'sort_order' => 2],
+            $fogging + ['category' => 'interior', 'price' => 45000, 'duration_minutes' => 15, 'sort_order' => 3],
         ];
     }
 }

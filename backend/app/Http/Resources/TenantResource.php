@@ -24,6 +24,7 @@ class TenantResource extends JsonResource
             'email' => $this->email,
             'address' => $this->address,
             'city' => $this->city,
+            'locale' => $this->locale,
             'maps_url' => $this->maps_url,
             'logo_url' => $this->logoUrl(),
             'opening_hours' => $this->opening_hours ?? Tenant::defaultOpeningHours(),

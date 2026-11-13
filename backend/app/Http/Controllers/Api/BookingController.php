@@ -26,8 +26,8 @@ class BookingController extends Controller
     {
         $tenant = $this->tenant($request);
         $data = $request->validate($bookings->rules($tenant, phoneRequired: false), [
-            'phone.regex' => 'Nomor HP tidak valid.',
-            'package_id.exists' => 'Paket tidak tersedia.',
+            'phone.regex' => __('Nomor HP tidak valid.'),
+            'package_id.exists' => __('Paket tidak tersedia.'),
         ]);
 
         $bookings->create($tenant, $data, 'walk_in');

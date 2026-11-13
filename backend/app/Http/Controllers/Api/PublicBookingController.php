@@ -28,17 +28,17 @@ class PublicBookingController extends Controller
     {
         $tenant = $this->publicTenant($request);
 
-        abort_unless($tenant->features()['online_booking'], 403, 'Reservasi online belum tersedia di bisnis ini. Silakan datang langsung atau hubungi via WhatsApp.');
+        abort_unless($tenant->features()['online_booking'], 403, __('Reservasi online belum tersedia di bisnis ini. Silakan datang langsung atau hubungi via WhatsApp.'));
 
         if (! $tenant->isOpenAt(now())) {
             return response()->json([
-                'message' => 'Maaf, kami sedang tutup. Reservasi online bisa dilakukan saat jam buka.',
+                'message' => __('Maaf, kami sedang tutup. Reservasi online bisa dilakukan saat jam buka.'),
             ], 422);
         }
 
         $data = $request->validate($bookings->rules($tenant, phoneRequired: true), [
-            'phone.regex' => 'Nomor HP tidak valid.',
-            'package_id.exists' => 'Paket tidak tersedia.',
+            'phone.regex' => __('Nomor HP tidak valid.'),
+            'package_id.exists' => __('Paket tidak tersedia.'),
         ]);
 
         $active = $tenant->bookings()
@@ -49,8 +49,8 @@ class PublicBookingController extends Controller
 
         if ($active >= self::MAX_ACTIVE_PER_PHONE) {
             return response()->json([
-                'message' => 'Nomor HP ini sudah punya antrian aktif hari ini.',
-                'errors' => ['phone' => ['Nomor HP ini sudah punya antrian aktif hari ini.']],
+                'message' => __('Nomor HP ini sudah punya antrian aktif hari ini.'),
+                'errors' => ['phone' => [__('Nomor HP ini sudah punya antrian aktif hari ini.')]],
             ], 422);
         }
 

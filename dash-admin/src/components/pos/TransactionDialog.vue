@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { t } from '@/i18n'
 import { api, errorMessage } from '@/lib/api'
 import { dateTime, EXPENSE_CATEGORIES, rupiah, TRANSACTION_METHODS } from '@/lib/format'
 import { whatsappUrl } from '@/lib/plans'
@@ -43,9 +44,9 @@ async function confirmVoid() {
     const { data } = await api.post<Transaction>(`/transactions/${tx.value.id}/void`, { reason: reason.value })
     emit('voided', data)
     open.value = false
-    toast.success('Transaksi dibatalkan.')
+    toast.success(t('transaction.voided'))
   } catch (e) {
-    toast.error(errorMessage(e, 'Gagal membatalkan transaksi.'))
+    toast.error(errorMessage(e, t('transaction.voidFailed')))
   } finally {
     saving.value = false
   }
@@ -56,18 +57,18 @@ async function confirmVoid() {
   <Dialog v-model:open="open">
     <DialogContent v-if="tx" class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>{{ title ?? (isSale ? 'Struk penjualan' : 'Pengeluaran') }}</DialogTitle>
+        <DialogTitle>{{ title ?? (isSale ? t('transaction.sale') : t('transaction.expense')) }}</DialogTitle>
         <DialogDescription>{{ tx.number }} · {{ dateTime(tx.created_at) }}</DialogDescription>
       </DialogHeader>
 
       <p v-if="tx.voided_at" class="rounded-xl bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">
-        <strong>Dibatalkan {{ dateTime(tx.voided_at) }}.</strong> {{ tx.void_reason }}
+        <strong>{{ t('transaction.voidedAt', { date: dateTime(tx.voided_at) }) }}</strong> {{ tx.void_reason }}
       </p>
 
       <div class="space-y-3 text-sm">
         <template v-if="isSale">
           <p v-if="tx.customer_name || tx.description" class="text-muted-foreground">
-            <template v-if="tx.customer_name">Pelanggan: <span class="text-foreground">{{ tx.customer_name }}</span></template>
+            <template v-if="tx.customer_name">{{ t('transaction.customer') }} <span class="text-foreground">{{ tx.customer_name }}</span></template>
             <template v-if="tx.customer_name && tx.description"> · </template>{{ tx.description }}
           </p>
           <ul class="space-y-1.5">
@@ -78,39 +79,39 @@ async function confirmVoid() {
           </ul>
         </template>
         <template v-else>
-          <p class="flex justify-between gap-3"><span class="text-muted-foreground">Kategori</span> {{ EXPENSE_CATEGORIES[tx.category] ?? tx.category }}</p>
-          <p class="flex justify-between gap-3"><span class="text-muted-foreground">Tanggal</span> {{ tx.business_date }}</p>
+          <p class="flex justify-between gap-3"><span class="text-muted-foreground">{{ t('transaction.category') }}</span> {{ EXPENSE_CATEGORIES[tx.category] ?? tx.category }}</p>
+          <p class="flex justify-between gap-3"><span class="text-muted-foreground">{{ t('transaction.date') }}</span> {{ tx.business_date }}</p>
           <p v-if="tx.description" class="rounded-xl bg-muted/60 p-3">{{ tx.description }}</p>
         </template>
 
         <div class="space-y-1.5 border-t border-border/60 pt-3">
-          <p v-if="tx.discount" class="flex justify-between"><span class="text-muted-foreground">Subtotal</span> <span class="tabular-nums">{{ rupiah(tx.subtotal) }}</span></p>
-          <p v-if="tx.discount" class="flex justify-between"><span class="text-muted-foreground">Diskon</span> <span class="tabular-nums">-{{ rupiah(tx.discount) }}</span></p>
-          <p class="flex items-baseline justify-between text-base font-bold"><span>Total</span> <span class="tabular-nums">{{ rupiah(tx.amount) }}</span></p>
-          <p class="flex justify-between"><span class="text-muted-foreground">Metode</span> <Badge variant="secondary">{{ TRANSACTION_METHODS[tx.payment_method] }}</Badge></p>
+          <p v-if="tx.discount" class="flex justify-between"><span class="text-muted-foreground">{{ t('transaction.subtotal') }}</span> <span class="tabular-nums">{{ rupiah(tx.subtotal) }}</span></p>
+          <p v-if="tx.discount" class="flex justify-between"><span class="text-muted-foreground">{{ t('transaction.discount') }}</span> <span class="tabular-nums">-{{ rupiah(tx.discount) }}</span></p>
+          <p class="flex items-baseline justify-between text-base font-bold"><span>{{ t('transaction.total') }}</span> <span class="tabular-nums">{{ rupiah(tx.amount) }}</span></p>
+          <p class="flex justify-between"><span class="text-muted-foreground">{{ t('transaction.method') }}</span> <Badge variant="secondary">{{ TRANSACTION_METHODS[tx.payment_method] }}</Badge></p>
           <template v-if="tx.paid_amount !== null">
-            <p class="flex justify-between"><span class="text-muted-foreground">Diterima</span> <span class="tabular-nums">{{ rupiah(tx.paid_amount) }}</span></p>
-            <p class="flex justify-between font-medium"><span class="text-muted-foreground">Kembalian</span> <span class="tabular-nums">{{ rupiah(tx.change) }}</span></p>
+            <p class="flex justify-between"><span class="text-muted-foreground">{{ t('transaction.received') }}</span> <span class="tabular-nums">{{ rupiah(tx.paid_amount) }}</span></p>
+            <p class="flex justify-between font-medium"><span class="text-muted-foreground">{{ t('transaction.change') }}</span> <span class="tabular-nums">{{ rupiah(tx.change) }}</span></p>
           </template>
         </div>
       </div>
 
       <form v-if="voiding" class="space-y-2 border-t border-border/60 pt-3" @submit.prevent="confirmVoid">
-        <label for="void-reason" class="text-sm font-medium">Alasan pembatalan</label>
-        <Input id="void-reason" v-model="reason" maxlength="200" required placeholder="Salah input harga" />
+        <label for="void-reason" class="text-sm font-medium">{{ t('transaction.voidReason') }}</label>
+        <Input id="void-reason" v-model="reason" maxlength="200" required :placeholder="t('transaction.voidPlaceholder')" />
         <div class="flex justify-end gap-2">
-          <Button type="button" variant="ghost" size="sm" @click="voiding = false">Kembali</Button>
+          <Button type="button" variant="ghost" size="sm" @click="voiding = false">{{ t('common.back') }}</Button>
           <Button type="submit" variant="destructive" size="sm" :disabled="saving || !reason.trim()">
             <LoaderCircle v-if="saving" class="animate-spin" />
-            Batalkan transaksi
+            {{ t('transaction.confirmVoid') }}
           </Button>
         </div>
       </form>
 
       <div v-else class="flex flex-wrap gap-2">
-        <Button v-if="isSale && !tx.voided_at && auth.tenant" size="sm" @click="printReceipt(tx!, auth.tenant!)"><Printer /> Cetak</Button>
-        <Button v-if="waUrl && !tx.voided_at" size="sm" variant="outline" as="a" :href="waUrl" target="_blank" rel="noopener"><MessageCircle /> Kirim WhatsApp</Button>
-        <Button v-if="!tx.voided_at" size="sm" variant="ghost" class="ml-auto text-muted-foreground" @click="voiding = true"><Ban /> Batalkan</Button>
+        <Button v-if="isSale && !tx.voided_at && auth.tenant" size="sm" @click="printReceipt(tx!, auth.tenant!)"><Printer /> {{ t('transaction.print') }}</Button>
+        <Button v-if="waUrl && !tx.voided_at" size="sm" variant="outline" as="a" :href="waUrl" target="_blank" rel="noopener"><MessageCircle /> {{ t('transaction.sendWhatsapp') }}</Button>
+        <Button v-if="!tx.voided_at" size="sm" variant="ghost" class="ml-auto text-muted-foreground" @click="voiding = true"><Ban /> {{ t('transaction.void') }}</Button>
       </div>
     </DialogContent>
   </Dialog>

@@ -21,7 +21,9 @@ import {
 } from '@lucide/vue'
 import RenewalBanner from '@/components/RenewalBanner.vue'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import LocaleSwitcher from '@/components/LocaleSwitcher.vue'
 import { useDarkMode } from '@/composables/useDarkMode'
+import { t, type MessageKey } from '@/i18n'
 import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
@@ -29,21 +31,22 @@ const router = useRouter()
 const auth = useAuthStore()
 const { isDark, toggle: toggleDark } = useDarkMode()
 
-const TENANT_NAV = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/antrian', label: 'Antrian', icon: CarFront },
-  { to: '/kasir', label: 'Kasir', icon: ShoppingCart },
-  { to: '/laporan', label: 'Laporan', icon: ChartColumn },
-  { to: '/pembayaran', label: 'Pembayaran', icon: CreditCard },
-  { to: '/profil', label: 'Profil Bisnis', icon: Store },
-  { to: '/layanan', label: 'Layanan & Harga', icon: Tags },
-  { to: '/langganan', label: 'Langganan', icon: Crown },
+// label = kunci teks, diterjemahkan di template supaya ikut berganti saat bahasa diganti.
+const TENANT_NAV: { to: string; label: MessageKey; icon: typeof Store }[] = [
+  { to: '/', label: 'nav.dashboard', icon: LayoutDashboard },
+  { to: '/antrian', label: 'nav.queue', icon: CarFront },
+  { to: '/kasir', label: 'nav.pos', icon: ShoppingCart },
+  { to: '/laporan', label: 'nav.reports', icon: ChartColumn },
+  { to: '/pembayaran', label: 'nav.payments', icon: CreditCard },
+  { to: '/profil', label: 'nav.profile', icon: Store },
+  { to: '/layanan', label: 'nav.services', icon: Tags },
+  { to: '/langganan', label: 'nav.subscription', icon: Crown },
 ]
 
-const SUPER_NAV = [
-  { to: '/super', label: 'Ringkasan', icon: LayoutDashboard },
-  { to: '/super/tenants', label: 'Tenant', icon: Building2 },
-  { to: '/super/settings', label: 'Pengaturan', icon: Settings },
+const SUPER_NAV: typeof TENANT_NAV = [
+  { to: '/super', label: 'nav.overview', icon: LayoutDashboard },
+  { to: '/super/tenants', label: 'nav.tenants', icon: Building2 },
+  { to: '/super/settings', label: 'nav.settings', icon: Settings },
 ]
 
 const navItems = computed(() => (auth.isSuperadmin ? SUPER_NAV : TENANT_NAV))
@@ -97,7 +100,7 @@ async function backToSuper() {
             <TooltipTrigger as-child>
               <RouterLink
                 :to="item.to"
-                :aria-label="item.label"
+                :aria-label="t(item.label)"
                 :class="[
                   'flex h-12 w-12 items-center justify-center rounded-2xl transition-all duration-200',
                   isActive(item.to) ? 'text-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground',
@@ -106,7 +109,7 @@ async function backToSuper() {
                 <component :is="item.icon" class="h-[26px] w-[26px]" :stroke-width="isActive(item.to) ? 2.5 : 1.5" />
               </RouterLink>
             </TooltipTrigger>
-            <TooltipContent side="right" :side-offset="8" class="rounded-xl text-xs">{{ item.label }}</TooltipContent>
+            <TooltipContent side="right" :side-offset="8" class="rounded-xl text-xs">{{ t(item.label) }}</TooltipContent>
           </Tooltip>
 
           <Tooltip v-if="siteUrl">
@@ -115,22 +118,24 @@ async function backToSuper() {
                 :href="siteUrl"
                 target="_blank"
                 rel="noopener"
-                aria-label="Lihat situs"
+                :aria-label="t('nav.viewSite')"
                 class="flex h-12 w-12 items-center justify-center rounded-2xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
                 <Globe class="h-[26px] w-[26px]" :stroke-width="1.5" />
               </a>
             </TooltipTrigger>
-            <TooltipContent side="right" :side-offset="8" class="rounded-xl text-xs">Lihat situs</TooltipContent>
+            <TooltipContent side="right" :side-offset="8" class="rounded-xl text-xs">{{ t('nav.viewSite') }}</TooltipContent>
           </Tooltip>
         </nav>
 
         <div class="flex flex-col items-center gap-1">
+          <LocaleSwitcher variant="compact" />
+
           <Tooltip>
             <TooltipTrigger as-child>
               <button
                 type="button"
-                :aria-label="isDark ? 'Mode terang' : 'Mode gelap'"
+                :aria-label="isDark ? t('nav.lightMode') : t('nav.darkMode')"
                 class="flex h-12 w-12 items-center justify-center rounded-2xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 @click="toggleDark"
               >
@@ -139,7 +144,7 @@ async function backToSuper() {
               </button>
             </TooltipTrigger>
             <TooltipContent side="right" :side-offset="8" class="rounded-xl text-xs">
-              {{ isDark ? 'Mode terang' : 'Mode gelap' }}
+              {{ isDark ? t('nav.lightMode') : t('nav.darkMode') }}
             </TooltipContent>
           </Tooltip>
 
@@ -147,14 +152,14 @@ async function backToSuper() {
             <TooltipTrigger as-child>
               <button
                 type="button"
-                aria-label="Keluar"
+                :aria-label="t('nav.logout')"
                 class="flex h-12 w-12 items-center justify-center rounded-2xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 @click="handleLogout"
               >
                 <LogOut class="h-[26px] w-[26px]" :stroke-width="1.5" />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="right" :side-offset="8" class="rounded-xl text-xs">Keluar</TooltipContent>
+            <TooltipContent side="right" :side-offset="8" class="rounded-xl text-xs">{{ t('nav.logout') }}</TooltipContent>
           </Tooltip>
         </div>
       </aside>
@@ -168,10 +173,10 @@ async function backToSuper() {
           >
             <span class="flex items-center gap-2">
               <LifeBuoy class="h-4 w-4" />
-              Mode bantuan: kamu sedang di dashboard {{ auth.tenant?.name }}
+              {{ t('nav.impersonating', { name: auth.tenant?.name ?? '' }) }}
             </span>
             <button type="button" class="rounded-full bg-amber-950 px-3 py-1 text-xs font-semibold text-amber-50" @click="backToSuper">
-              Kembali ke super-admin
+              {{ t('nav.backToSuper') }}
             </button>
           </div>
           <RenewalBanner v-if="!auth.isSuperadmin" />
@@ -187,7 +192,7 @@ async function backToSuper() {
           v-for="item in mobileNav"
           :key="item.to"
           :to="item.to"
-          :aria-label="item.label"
+          :aria-label="t(item.label)"
           :class="['flex flex-1 flex-col items-center py-3 transition-colors', isActive(item.to) ? 'text-foreground' : 'text-muted-foreground']"
         >
           <component :is="item.icon" class="h-6 w-6" :stroke-width="isActive(item.to) ? 2.5 : 1.5" />
@@ -195,7 +200,7 @@ async function backToSuper() {
         <button
           v-if="moreNav.length"
           type="button"
-          aria-label="Menu lainnya"
+          :aria-label="t('nav.more')"
           :aria-expanded="moreOpen"
           :class="['flex flex-1 flex-col items-center py-3 transition-colors', moreActive || moreOpen ? 'text-foreground' : 'text-muted-foreground']"
           @click="moreOpen = !moreOpen"
@@ -203,11 +208,14 @@ async function backToSuper() {
           <Menu class="h-6 w-6" :stroke-width="moreActive ? 2.5 : 1.5" />
         </button>
         <template v-else>
-          <button type="button" aria-label="Ganti tema" class="flex flex-1 flex-col items-center py-3 text-muted-foreground" @click="toggleDark">
+          <div class="flex flex-1 justify-center">
+            <LocaleSwitcher variant="compact" />
+          </div>
+          <button type="button" :aria-label="t('nav.toggleTheme')" class="flex flex-1 flex-col items-center py-3 text-muted-foreground" @click="toggleDark">
             <Moon v-if="!isDark" class="h-6 w-6" :stroke-width="1.5" />
             <Sun v-else class="h-6 w-6" :stroke-width="1.5" />
           </button>
-          <button type="button" aria-label="Keluar" class="flex flex-1 flex-col items-center py-3 text-muted-foreground" @click="handleLogout">
+          <button type="button" :aria-label="t('nav.logout')" class="flex flex-1 flex-col items-center py-3 text-muted-foreground" @click="handleLogout">
             <LogOut class="h-6 w-6" :stroke-width="1.5" />
           </button>
         </template>
@@ -223,16 +231,17 @@ async function backToSuper() {
             :class="['flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-accent', isActive(item.to) && 'font-semibold']"
           >
             <component :is="item.icon" class="h-5 w-5" :stroke-width="1.5" />
-            {{ item.label }}
+            {{ t(item.label) }}
           </RouterLink>
+          <LocaleSwitcher variant="segmented" class="my-1" />
           <button type="button" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-accent" @click="toggleDark">
             <Moon v-if="!isDark" class="h-5 w-5" :stroke-width="1.5" />
             <Sun v-else class="h-5 w-5" :stroke-width="1.5" />
-            {{ isDark ? 'Mode terang' : 'Mode gelap' }}
+            {{ isDark ? t('nav.lightMode') : t('nav.darkMode') }}
           </button>
           <button type="button" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-accent" @click="handleLogout">
             <LogOut class="h-5 w-5" :stroke-width="1.5" />
-            Keluar
+            {{ t('nav.logout') }}
           </button>
         </div>
       </template>

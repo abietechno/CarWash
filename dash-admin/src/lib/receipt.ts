@@ -1,14 +1,16 @@
+import { t } from '@/i18n'
 import { dateTime, rupiah, TRANSACTION_METHODS } from '@/lib/format'
 import type { Tenant, Transaction } from '@/types'
 
 const HTML_ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (c) => HTML_ESCAPES[c] ?? c)
 
-function totals(tx: Transaction): [string, string][] {
-  const rows: [string, string][] = []
-  if (tx.discount) rows.push(['Subtotal', rupiah(tx.subtotal)], ['Diskon', `-${rupiah(tx.discount)}`])
-  rows.push(['Total', rupiah(tx.amount)], ['Bayar', TRANSACTION_METHODS[tx.payment_method]])
-  if (tx.paid_amount !== null) rows.push(['Diterima', rupiah(tx.paid_amount)], ['Kembali', rupiah(tx.change)])
+// Baris ringkasan struk; [label, nilai, tebal].
+function totals(tx: Transaction): [string, string, boolean][] {
+  const rows: [string, string, boolean][] = []
+  if (tx.discount) rows.push([t('receipt.subtotal'), rupiah(tx.subtotal), false], [t('receipt.discount'), `-${rupiah(tx.discount)}`, false])
+  rows.push([t('receipt.total'), rupiah(tx.amount), true], [t('receipt.method'), TRANSACTION_METHODS[tx.payment_method], false])
+  if (tx.paid_amount !== null) rows.push([t('receipt.received'), rupiah(tx.paid_amount), false], [t('receipt.change'), rupiah(tx.change), false])
   return rows
 }
 
@@ -22,7 +24,7 @@ export function receiptText(tx: Transaction, tenant: Pick<Tenant, 'name'>): stri
     '',
     ...totals(tx).map(([label, value]) => `${label}: ${value}`),
     '',
-    'Terima kasih!',
+    t('receipt.thanks'),
   ].join('\n')
 }
 
@@ -52,9 +54,9 @@ export function printReceipt(tx: Transaction, tenant: Pick<Tenant, 'name' | 'add
     <hr>
     <table>${tx.items.map((i) => row(`${i.qty}x ${i.name}`, rupiah(i.subtotal))).join('')}</table>
     <hr>
-    <table>${totals(tx).map(([l, v]) => row(l, v, l === 'Total')).join('')}</table>
+    <table>${totals(tx).map(([l, v, bold]) => row(l, v, bold)).join('')}</table>
     <hr>
-    <p>Terima kasih!</p>
+    <p>${escapeHtml(t('receipt.thanks'))}</p>
   </body></html>`
 
   const frame = document.createElement('iframe')

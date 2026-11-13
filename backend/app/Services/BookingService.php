@@ -41,7 +41,7 @@ class BookingService
         $vehicle = $tenant->vehicleTypes()->where('code', $data['vehicle_type'])->firstOrFail();
 
         if (! $package->fits($vehicle)) {
-            throw ValidationException::withMessages(['package_id' => "Paket {$package->name} tidak tersedia untuk {$vehicle->name}."]);
+            throw ValidationException::withMessages(['package_id' => __('Paket :package tidak tersedia untuk :vehicle.', ['package' => $package->name, 'vehicle' => $vehicle->name])]);
         }
 
         return DB::transaction(function () use ($tenant, $data, $source, $package, $vehicle) {
@@ -74,13 +74,13 @@ class BookingService
     {
         if (! in_array($status, Booking::TRANSITIONS[$booking->status] ?? [], true)) {
             throw ValidationException::withMessages([
-                'status' => "Status {$booking->ticket()} tidak bisa diubah dari {$booking->status} ke {$status}.",
+                'status' => __('Status :ticket tidak bisa diubah dari :from ke :to.', ['ticket' => $booking->ticket(), 'from' => $booking->status, 'to' => $status]),
             ]);
         }
 
         if ($status === Booking::CANCELLED && $booking->payments()->active()->exists()) {
             throw ValidationException::withMessages([
-                'status' => "Antrian {$booking->ticket()} sudah dibayar. Batalkan dulu transaksinya di Laporan.",
+                'status' => __('Antrian :ticket sudah dibayar. Batalkan dulu transaksinya di Laporan.', ['ticket' => $booking->ticket()]),
             ]);
         }
 

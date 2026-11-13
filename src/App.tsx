@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { BottomNav, Page, SiteHeader } from './components/SiteNav';
+import { useI18n } from './i18n';
 import { whatsappLink } from './lib/site';
 import { useSite } from './lib/siteContext';
+import { landingUrl } from './lib/siteLinks';
 import { BookingPage } from './pages/BookingPage';
 import { HomePage } from './pages/HomePage';
 import { StatusPage } from './pages/StatusPage';
-
-const LANDING_URL = import.meta.env.VITE_LANDING_URL || 'https://washwuzz.cloudbizz.my.id';
 
 // Halaman dibaca dari hash supaya link #reservasi / #status bisa dibagikan.
 const PAGE_HASH: Record<Page, string> = { home: '', booking: '#reservasi', status: '#status' };
@@ -19,6 +19,7 @@ function pageFromHash(): Page {
 
 export default function App() {
   const { business, features, packages } = useSite();
+  const { locale, t } = useI18n();
   const [page, setPage] = useState<Page>(pageFromHash);
   const [booking, setBooking] = useState<{ packageId: number | null; key: number }>({ packageId: null, key: 0 });
 
@@ -45,7 +46,8 @@ export default function App() {
   const book = (packageId: number | null) => {
     if (!features.onlineBooking) {
       const pkg = packages.find((p) => p.id === packageId);
-      const wa = whatsappLink(business.whatsapp, `Halo ${business.name}, saya mau pesan${pkg ? ` ${pkg.name}` : ' cuci mobil'}.`);
+      const text = pkg ? t('wa.orderPackage', { name: business.name, package: pkg.name }) : t('wa.order', { name: business.name });
+      const wa = whatsappLink(business.whatsapp, text);
       if (wa) {
         window.open(wa, '_blank', 'noopener');
         return;
@@ -69,8 +71,8 @@ export default function App() {
         © {new Date().getFullYear()} {business.name}
         {features.branding && (
           <>
-            {' · '}Dibuat dengan{' '}
-            <a href={LANDING_URL} className="font-semibold text-slate-500 hover:text-brand-600">
+            {' · '}{t('footer.madeWith')}{' '}
+            <a href={landingUrl(locale)} className="font-semibold text-slate-500 hover:text-brand-600">
               WashWuzz
             </a>
           </>

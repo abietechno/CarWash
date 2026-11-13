@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Crown } from '@lucide/vue'
+import { t } from '@/i18n'
 import { daysUntil } from '@/lib/format'
 import type { Plan } from '@/types'
 
@@ -18,6 +19,6 @@ const expiring = computed(() => props.plan === 'pro' && left.value !== null && l
     ]"
   >
     <Crown v-if="plan === 'pro'" class="h-3 w-3" />
-    {{ plan === 'pro' ? (expiring ? `Pro · ${left} hari lagi` : 'Pro') : 'Gratis' }}
+    {{ plan === 'pro' ? (expiring ? t('planBadge.proDays', { days: t('common.daysLeft', { count: left ?? 0 }) }) : 'Pro') : t('common.free') }}
   </span>
 </template>

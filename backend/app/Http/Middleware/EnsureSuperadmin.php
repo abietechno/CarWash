@@ -10,7 +10,7 @@ class EnsureSuperadmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        abort_unless($request->user()?->isSuperadmin(), 403, 'Khusus super-admin.');
+        abort_unless($request->user()?->isSuperadmin(), 403, __('Khusus super-admin.'));
 
         return $next($request);
     }

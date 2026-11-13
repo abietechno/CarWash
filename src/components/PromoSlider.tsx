@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { HERO_IMAGE, PromoTheme } from '../lib/site';
+import { useI18n } from '../i18n';
 import { useSite } from '../lib/siteContext';
 
 const AUTOPLAY_MS = 5000;
@@ -27,6 +28,7 @@ interface Slide {
 
 export function PromoSlider({ onBook }: { onBook: (packageId: number | null) => void }) {
   const { business, packages, promos } = useSite();
+  const { t } = useI18n();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const touchX = useRef<number | null>(null);
@@ -45,7 +47,7 @@ export function PromoSlider({ onBook }: { onBook: (packageId: number | null) => 
     : [
         {
           key: 'welcome',
-          title: business.tagline || `Cuci & salon mobil di ${business.name}`,
+          title: business.tagline || t('promo.welcome', { name: business.name }),
           subtitle: business.description,
           badge: business.city,
           image: HERO_IMAGE,
@@ -66,7 +68,7 @@ export function PromoSlider({ onBook }: { onBook: (packageId: number | null) => 
   return (
     <section
       aria-roledescription="carousel"
-      aria-label="Promo"
+      aria-label={t('promo.carousel')}
       className="relative overflow-hidden rounded-3xl bg-slate-900 shadow-xl shadow-brand-900/10"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -90,7 +92,7 @@ export function PromoSlider({ onBook }: { onBook: (packageId: number | null) => 
             className="relative h-64 w-full shrink-0 sm:h-80"
             role="group"
             aria-roledescription="slide"
-            aria-label={`${i + 1} dari ${count}`}
+            aria-label={t('promo.slideOf', { n: i + 1, count })}
             aria-hidden={i !== index}
           >
             <img src={slide.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
@@ -107,7 +109,7 @@ export function PromoSlider({ onBook }: { onBook: (packageId: number | null) => 
                 onClick={() => onBook(slide.packageId)}
                 className="mt-5 flex w-fit items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-ink-900 hover:bg-brand-50"
               >
-                Pesan sekarang <ArrowRight className="h-4 w-4" />
+                {t('promo.bookNow')} <ArrowRight className="h-4 w-4" />
               </button>
             </div>
           </div>
@@ -121,7 +123,7 @@ export function PromoSlider({ onBook }: { onBook: (packageId: number | null) => 
               <button
                 key={slide.key}
                 type="button"
-                aria-label={`Promo ${i + 1}`}
+                aria-label={t('promo.slide', { n: i + 1 })}
                 aria-current={i === index}
                 onClick={() => go(i)}
                 className={`h-2 rounded-full transition-all ${i === index ? 'w-6 bg-white' : 'w-2 bg-white/50'}`}
@@ -130,7 +132,7 @@ export function PromoSlider({ onBook }: { onBook: (packageId: number | null) => 
           </div>
           <button
             type="button"
-            aria-label="Promo sebelumnya"
+            aria-label={t('promo.previous')}
             onClick={() => go(index - 1)}
             className="absolute top-1/2 left-3 hidden -translate-y-1/2 rounded-full bg-white/20 p-2 text-white backdrop-blur hover:bg-white/30 sm:block"
           >
@@ -138,7 +140,7 @@ export function PromoSlider({ onBook }: { onBook: (packageId: number | null) => 
           </button>
           <button
             type="button"
-            aria-label="Promo berikutnya"
+            aria-label={t('promo.next')}
             onClick={() => go(index + 1)}
             className="absolute top-1/2 right-3 hidden -translate-y-1/2 rounded-full bg-white/20 p-2 text-white backdrop-blur hover:bg-white/30 sm:block"
           >

@@ -2,6 +2,7 @@
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { ImagePlus, X } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
+import { t } from '@/i18n'
 
 // Pilih foto (jpg/png/webp, maks 3 MB). File diunggah oleh parent setelah data utama tersimpan.
 const props = defineProps<{ currentUrl: string | null }>()
@@ -25,9 +26,9 @@ function pick(event: Event) {
   error.value = ''
   if (!selected) return
   if (!['image/jpeg', 'image/png', 'image/webp'].includes(selected.type)) {
-    error.value = 'Format harus JPG, PNG, atau WebP.'
+    error.value = t('image.badFormat')
   } else if (selected.size > 3 * 1024 * 1024) {
-    error.value = 'Ukuran maksimal 3 MB.'
+    error.value = t('image.tooLarge')
   } else {
     file.value = selected
     removed.value = false
@@ -45,12 +46,12 @@ function clear() {
   <div class="space-y-2">
     <div v-if="preview" class="relative overflow-hidden rounded-xl border border-border/60">
       <img :src="preview" alt="" class="aspect-[16/9] w-full object-cover" />
-      <Button type="button" variant="secondary" size="icon-sm" class="absolute top-2 right-2" aria-label="Hapus foto" @click="clear">
+      <Button type="button" variant="secondary" size="icon-sm" class="absolute top-2 right-2" :aria-label="t('image.remove')" @click="clear">
         <X />
       </Button>
     </div>
     <Button type="button" variant="outline" size="sm" @click="input?.click()">
-      <ImagePlus /> {{ preview ? 'Ganti foto' : 'Pilih foto' }}
+      <ImagePlus /> {{ preview ? t('image.change') : t('image.pick') }}
     </Button>
     <input ref="input" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" @change="pick" />
     <p v-if="error" class="text-xs text-destructive">{{ error }}</p>

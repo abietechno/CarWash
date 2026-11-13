@@ -7,6 +7,7 @@ import PlanBadge from '@/components/super/PlanBadge.vue'
 import StatusBadge from '@/components/super/StatusBadge.vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { t } from '@/i18n'
 import { api, errorMessage } from '@/lib/api'
 import { rupiah, shortDate } from '@/lib/format'
 import type { SuperOverview } from '@/types'
@@ -23,7 +24,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <PageHeader title="Ringkasan Platform" description="WashWuzz · semua tenant" />
+  <PageHeader :title="t('superOverview.title')" :description="t('superOverview.description')" />
 
   <div v-if="!data" class="grid gap-4 p-4 sm:grid-cols-2 sm:p-6 lg:grid-cols-4">
     <Skeleton v-for="i in 8" :key="i" class="h-24 rounded-2xl" />
@@ -32,60 +33,60 @@ onMounted(async () => {
   <div v-else class="space-y-4 p-4 sm:p-6">
     <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <RouterLink to="/super/tenants" class="rounded-2xl border border-border/60 bg-card p-4 hover:bg-accent">
-        <p class="text-xs text-muted-foreground">Total tenant</p>
+        <p class="text-xs text-muted-foreground">{{ t('superOverview.totalTenants') }}</p>
         <p class="mt-1 font-display text-3xl font-bold">{{ data.tenants.total }}</p>
-        <p class="text-xs text-muted-foreground">+{{ data.tenants.new_this_week }} minggu ini</p>
+        <p class="text-xs text-muted-foreground">{{ t('superOverview.newThisWeek', { count: data.tenants.new_this_week }) }}</p>
       </RouterLink>
       <RouterLink :to="{ path: '/super/tenants', query: { status: 'published' } }" class="rounded-2xl border border-border/60 bg-card p-4 hover:bg-accent">
-        <p class="text-xs text-muted-foreground">Situs online</p>
+        <p class="text-xs text-muted-foreground">{{ t('superOverview.sitesOnline') }}</p>
         <p class="mt-1 font-display text-3xl font-bold text-emerald-500">{{ data.tenants.published }}</p>
-        <p class="text-xs text-muted-foreground">{{ data.tenants.draft }} draft · {{ data.tenants.suspended }} nonaktif</p>
+        <p class="text-xs text-muted-foreground">{{ t('superOverview.draftSuspended', { draft: data.tenants.draft, suspended: data.tenants.suspended }) }}</p>
       </RouterLink>
       <RouterLink :to="{ path: '/super/tenants', query: { plan: 'pro' } }" class="rounded-2xl border border-border/60 bg-card p-4 hover:bg-accent">
-        <p class="text-xs text-muted-foreground">Berlangganan Pro</p>
+        <p class="text-xs text-muted-foreground">{{ t('superOverview.proSubscribers') }}</p>
         <p class="mt-1 font-display text-3xl font-bold text-violet-400">{{ data.plans.pro }}</p>
-        <p class="text-xs text-muted-foreground">{{ data.plans.free }} gratis</p>
+        <p class="text-xs text-muted-foreground">{{ t('superOverview.freeCount', { count: data.plans.free }) }}</p>
       </RouterLink>
       <RouterLink :to="{ path: '/super/tenants', query: { plan: 'expiring' } }" class="rounded-2xl border border-border/60 bg-card p-4 hover:bg-accent">
-        <p class="text-xs text-muted-foreground">Habis ≤ 7 hari</p>
+        <p class="text-xs text-muted-foreground">{{ t('superOverview.expiringSoon') }}</p>
         <p class="mt-1 font-display text-3xl font-bold" :class="data.plans.expiring_soon ? 'text-amber-500' : ''">{{ data.plans.expiring_soon }}</p>
-        <p class="text-xs text-muted-foreground">perlu diingatkan</p>
+        <p class="text-xs text-muted-foreground">{{ t('superOverview.needsReminder') }}</p>
       </RouterLink>
       <div class="rounded-2xl border border-border/60 bg-card p-4">
-        <p class="text-xs text-muted-foreground">Pembayaran bulan ini</p>
+        <p class="text-xs text-muted-foreground">{{ t('superOverview.paymentsThisMonth') }}</p>
         <p class="mt-1 font-display text-2xl font-bold">{{ rupiah(data.revenue.this_month) }}</p>
       </div>
       <div class="rounded-2xl border border-border/60 bg-card p-4">
-        <p class="text-xs text-muted-foreground">Perkiraan pendapatan/bulan</p>
+        <p class="text-xs text-muted-foreground">{{ t('superOverview.estimatedMrr') }}</p>
         <p class="mt-1 font-display text-2xl font-bold">{{ rupiah(data.revenue.estimated_mrr) }}</p>
-        <p class="text-xs text-muted-foreground">dari tenant Pro aktif</p>
+        <p class="text-xs text-muted-foreground">{{ t('superOverview.fromActivePro') }}</p>
       </div>
       <div class="col-span-2 rounded-2xl border border-border/60 bg-card p-4">
-        <p class="text-xs text-muted-foreground">Kendaraan di antrian semua tenant hari ini</p>
+        <p class="text-xs text-muted-foreground">{{ t('superOverview.bookingsToday') }}</p>
         <p class="mt-1 font-display text-2xl font-bold">{{ data.bookings_today }}</p>
       </div>
     </div>
 
     <div class="grid gap-4 lg:grid-cols-2">
       <Card v-for="list in [
-        { title: 'Pendaftar terbaru', items: data.recent_signups, empty: 'Belum ada tenant.', date: (t: SuperOverview['recent_signups'][number]) => `Daftar ${shortDate(t.created_at)}` },
-        { title: 'Langganan hampir habis', items: data.expiring, empty: 'Tidak ada yang habis dalam 7 hari.', date: (t: SuperOverview['expiring'][number]) => `Habis ${shortDate(t.pro_until)}` },
+        { title: t('superOverview.recentSignups'), items: data.recent_signups, empty: t('superOverview.noTenants'), date: (row: SuperOverview['recent_signups'][number]) => t('superOverview.signedUp', { date: shortDate(row.created_at) }) },
+        { title: t('superOverview.expiringList'), items: data.expiring, empty: t('superOverview.noExpiring'), date: (row: SuperOverview['expiring'][number]) => t('superOverview.expires', { date: shortDate(row.pro_until) }) },
       ]" :key="list.title">
         <CardHeader><CardTitle class="text-base">{{ list.title }}</CardTitle></CardHeader>
         <CardContent class="divide-y divide-border/50">
           <p v-if="!list.items.length" class="text-sm text-muted-foreground">{{ list.empty }}</p>
           <RouterLink
-            v-for="t in list.items"
-            :key="t.id"
-            :to="{ name: 'super-tenant', params: { id: t.id } }"
+            v-for="row in list.items"
+            :key="row.id"
+            :to="{ name: 'super-tenant', params: { id: row.id } }"
             class="group flex items-center gap-3 py-3 first:pt-0 last:pb-0"
           >
             <div class="min-w-0 flex-1">
-              <p class="truncate font-medium">{{ t.name }}</p>
-              <p class="truncate text-xs text-muted-foreground">{{ t.subdomain }} · {{ list.date(t) }}</p>
+              <p class="truncate font-medium">{{ row.name }}</p>
+              <p class="truncate text-xs text-muted-foreground">{{ row.subdomain }} · {{ list.date(row) }}</p>
             </div>
-            <StatusBadge :status="t.status" />
-            <PlanBadge :plan="t.plan" :pro-until="t.pro_until" />
+            <StatusBadge :status="row.status" />
+            <PlanBadge :plan="row.plan" :pro-until="row.pro_until" />
             <ChevronRight class="h-4 w-4 text-muted-foreground" />
           </RouterLink>
         </CardContent>

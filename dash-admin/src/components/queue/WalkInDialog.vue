@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { t } from '@/i18n'
 import { api, errorMessage, fieldErrors, type FieldErrors } from '@/lib/api'
 import { VEHICLE_COLORS } from '@/lib/carSvg'
-import { rupiah } from '@/lib/format'
+import { colorLabel, rupiah } from '@/lib/format'
 import { fitsVehicle, isMotor, scopedPrice } from '@/lib/vehicles'
 import type { QueueBoard, ServicePackage, VehicleType } from '@/types'
 
@@ -65,10 +66,10 @@ async function submit() {
     })
     emit('saved', data)
     open.value = false
-    toast.success(`${form.customer_name} masuk antrian.`)
+    toast.success(t('walkIn.added', { name: form.customer_name }))
   } catch (e) {
     errors.value = fieldErrors(e)
-    toast.error(errorMessage(e, 'Gagal menambah antrian.'))
+    toast.error(errorMessage(e, t('walkIn.failed')))
   } finally {
     saving.value = false
   }
@@ -79,26 +80,26 @@ async function submit() {
   <Dialog v-model:open="open">
     <DialogContent class="max-h-[90svh] overflow-y-auto sm:max-w-lg">
       <DialogHeader>
-        <DialogTitle>Pelanggan datang langsung</DialogTitle>
-        <DialogDescription>Masuk ke antrian hari ini dan langsung tampil di situs.</DialogDescription>
+        <DialogTitle>{{ t('walkIn.title') }}</DialogTitle>
+        <DialogDescription>{{ t('walkIn.description') }}</DialogDescription>
       </DialogHeader>
 
       <form id="walkin-form" class="space-y-4" @submit.prevent="submit">
         <div class="grid grid-cols-2 gap-4">
           <div class="col-span-2 space-y-2 sm:col-span-1">
-            <Label for="walkin-name">Nama</Label>
+            <Label for="walkin-name">{{ t('walkIn.name') }}</Label>
             <Input id="walkin-name" v-model="form.customer_name" maxlength="100" required />
             <p v-if="errors.customer_name" class="text-xs text-destructive">{{ errors.customer_name[0] }}</p>
           </div>
           <div class="col-span-2 space-y-2 sm:col-span-1">
-            <Label for="walkin-phone">No. HP (opsional)</Label>
+            <Label for="walkin-phone">{{ t('walkIn.phone') }}</Label>
             <Input id="walkin-phone" v-model="form.phone" inputmode="tel" />
             <p v-if="errors.phone" class="text-xs text-destructive">{{ errors.phone[0] }}</p>
           </div>
         </div>
 
         <div class="space-y-2">
-          <Label>Jenis kendaraan</Label>
+          <Label>{{ t('walkIn.vehicleType') }}</Label>
           <div class="grid grid-cols-2 gap-2">
             <button
               v-for="type in vehicleTypes"
@@ -117,20 +118,20 @@ async function submit() {
         </div>
 
         <div class="space-y-2">
-          <Label for="walkin-brand">Merk kendaraan (opsional)</Label>
+          <Label for="walkin-brand">{{ t('walkIn.brand') }}</Label>
           <Input id="walkin-brand" v-model="form.vehicle_brand" maxlength="60" :placeholder="isMotor(form.vehicle_type) ? 'Honda Beat' : 'Honda Accord'" />
           <p v-if="errors.vehicle_brand" class="text-xs text-destructive">{{ errors.vehicle_brand[0] }}</p>
         </div>
 
         <div class="space-y-2">
-          <Label>Warna <span class="font-normal text-muted-foreground">{{ VEHICLE_COLORS[form.vehicle_color]?.label }}</span></Label>
+          <Label>{{ t('walkIn.color') }} <span class="font-normal text-muted-foreground">{{ colorLabel(form.vehicle_color) }}</span></Label>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="(color, code) in VEHICLE_COLORS"
               :key="code"
               type="button"
-              :title="color.label"
-              :aria-label="color.label"
+              :title="colorLabel(code)"
+              :aria-label="colorLabel(code)"
               :class="['h-7 w-7 rounded-full border-2 transition-transform', form.vehicle_color === code ? 'scale-110 border-foreground' : 'border-border']"
               :style="{ background: color.body }"
               @click="form.vehicle_color = code"
@@ -139,7 +140,7 @@ async function submit() {
         </div>
 
         <div class="space-y-2">
-          <Label>Paket</Label>
+          <Label>{{ t('walkIn.package') }}</Label>
           <div class="space-y-2">
             <label
               v-for="pkg in vehiclePackages"
@@ -155,22 +156,22 @@ async function submit() {
               </span>
               <span class="font-display font-semibold">{{ rupiah(scopedPrice(pkg.price, pkg.vehicle_scope, multiplier)) }}</span>
             </label>
-            <p v-if="!vehiclePackages.length" class="text-sm text-muted-foreground">Belum ada paket untuk kendaraan ini. Atur di Layanan &amp; Harga.</p>
+            <p v-if="!vehiclePackages.length" class="text-sm text-muted-foreground">{{ t('queue.noPackages') }}</p>
           </div>
           <p v-if="errors.package_id" class="text-xs text-destructive">{{ errors.package_id[0] }}</p>
         </div>
 
         <div class="space-y-2">
-          <Label for="walkin-plate">Plat nomor (opsional, hanya terlihat admin)</Label>
-          <Input id="walkin-plate" v-model="form.plate" maxlength="20" placeholder="L 1234 AB" />
+          <Label for="walkin-plate">{{ t('walkIn.plate') }}</Label>
+          <Input id="walkin-plate" v-model="form.plate" maxlength="20" :placeholder="t('walkIn.platePlaceholder')" />
         </div>
       </form>
 
       <DialogFooter>
-        <Button variant="outline" @click="open = false">Batal</Button>
+        <Button variant="outline" @click="open = false">{{ t('common.cancel') }}</Button>
         <Button type="submit" form="walkin-form" :disabled="saving || !form.package_id">
           <LoaderCircle v-if="saving" class="animate-spin" />
-          Masukkan antrian
+          {{ t('walkIn.submit') }}
         </Button>
       </DialogFooter>
     </DialogContent>

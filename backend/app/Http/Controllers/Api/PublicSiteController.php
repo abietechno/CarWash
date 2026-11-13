@@ -19,7 +19,7 @@ class PublicSiteController extends Controller
         return response()->json([
             'tenant' => $tenant->only([
                 'name', 'subdomain', 'tagline', 'description', 'phone', 'whatsapp', 'email',
-                'address', 'city', 'maps_url', 'opening_hours',
+                'address', 'city', 'maps_url', 'opening_hours', 'locale',
             ]) + [
                 'open_now' => $tenant->isOpenAt(now()),
                 // Logo hanya tampil selama Pro; setelah Pro habis header kembali ke inisial nama.

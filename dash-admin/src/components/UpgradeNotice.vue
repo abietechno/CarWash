@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Crown } from '@lucide/vue'
+import { t } from '@/i18n'
 
 defineProps<{ message: string }>()
 </script>
@@ -11,6 +12,6 @@ defineProps<{ message: string }>()
   >
     <Crown class="h-4 w-4 shrink-0 text-violet-400" />
     <span class="flex-1">{{ message }}</span>
-    <span class="font-semibold text-violet-400">Lihat Pro →</span>
+    <span class="font-semibold text-violet-400">{{ t('renewal.seePro') }}</span>
   </RouterLink>
 </template>

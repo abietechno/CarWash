@@ -27,11 +27,11 @@ trait ResolvesPeriod
         $to = $data['to'] ?? $today;
 
         if ($to < $from) {
-            throw ValidationException::withMessages(['to' => 'Tanggal akhir harus setelah tanggal awal.']);
+            throw ValidationException::withMessages(['to' => __('Tanggal akhir harus setelah tanggal awal.')]);
         }
 
         if (CarbonImmutable::parse($from)->diffInDays($to) > self::MAX_PERIOD_DAYS) {
-            throw ValidationException::withMessages(['to' => 'Periode laporan maksimal 1 tahun.']);
+            throw ValidationException::withMessages(['to' => __('Periode laporan maksimal 1 tahun.')]);
         }
 
         return [$from, $to];

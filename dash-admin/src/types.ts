@@ -1,3 +1,5 @@
+import type { Locale } from '@/i18n'
+
 export type TenantStatus = 'draft' | 'published' | 'suspended'
 
 export type Day = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
@@ -22,6 +24,8 @@ export interface Tenant {
   email: string | null
   address: string | null
   city: string | null
+  // Bahasa bawaan situs publik tenant.
+  locale: Locale
   maps_url: string | null
   logo_url: string | null
   opening_hours: OpeningHour[]

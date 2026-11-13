@@ -22,7 +22,7 @@ class AuthController extends Controller
         $user = User::where('email', strtolower(trim($credentials['email'])))->first();
 
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
-            throw ValidationException::withMessages(['email' => 'Email atau password salah.']);
+            throw ValidationException::withMessages(['email' => __('Email atau password salah.')]);
         }
 
         $token = $user->createToken('dash-admin')->plainTextToken;
@@ -39,7 +39,7 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Berhasil keluar.']);
+        return response()->json(['message' => __('Berhasil keluar.')]);
     }
 
     private function payload(User $user, Request $request): array

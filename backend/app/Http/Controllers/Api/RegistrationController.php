@@ -33,7 +33,7 @@ class RegistrationController extends Controller
                 'required', 'string', 'regex:'.Subdomain::PATTERN, 'unique:tenants,subdomain',
                 function (string $attribute, string $value, Closure $fail) {
                     if (Subdomain::isReserved($value)) {
-                        $fail('Subdomain ini dicadangkan sistem, pilih nama lain.');
+                        $fail(__('Subdomain ini dicadangkan sistem, pilih nama lain.'));
                     }
                 },
             ],
@@ -42,22 +42,22 @@ class RegistrationController extends Controller
             'phone' => ['required', 'string', 'regex:/^[0-9+\-\s]{8,20}$/'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
-            'subdomain.regex' => 'Subdomain 3–32 karakter: huruf kecil, angka, atau tanda hubung (-).',
-            'subdomain.unique' => 'Subdomain sudah dipakai bisnis lain.',
-            'email.unique' => 'Email sudah terdaftar, silakan login.',
-            'phone.regex' => 'Nomor WhatsApp tidak valid.',
+            'subdomain.regex' => __('Subdomain 3–32 karakter: huruf kecil, angka, atau tanda hubung (-).'),
+            'subdomain.unique' => __('Subdomain sudah dipakai bisnis lain.'),
+            'email.unique' => __('Email sudah terdaftar, silakan login.'),
+            'phone.regex' => __('Nomor WhatsApp tidak valid.'),
         ]);
 
         ['tenant' => $tenant] = $provisioner->provision($data);
 
         return response()->json([
-            'message' => 'Pendaftaran berhasil.',
+            'message' => __('Pendaftaran berhasil.'),
             'tenant' => [
                 'name' => $tenant->name,
                 'subdomain' => $tenant->subdomain,
                 'url' => $tenant->url(),
             ],
-            'login_url' => rtrim(config('saas.admin_url'), '/').'/login?email='.urlencode($data['email']),
+            'login_url' => rtrim(config('saas.admin_url'), '/').'/login?'.http_build_query(['email' => $data['email'], 'lang' => app()->getLocale()]),
         ], 201);
     }
 
@@ -65,15 +65,15 @@ class RegistrationController extends Controller
     private function availability(string $subdomain): array
     {
         if (! preg_match(Subdomain::PATTERN, $subdomain)) {
-            return ['available' => false, 'reason' => '3–32 karakter: huruf kecil, angka, atau tanda hubung (-).'];
+            return ['available' => false, 'reason' => __('3–32 karakter: huruf kecil, angka, atau tanda hubung (-).')];
         }
 
         if (Subdomain::isReserved($subdomain)) {
-            return ['available' => false, 'reason' => 'Nama ini dicadangkan sistem.'];
+            return ['available' => false, 'reason' => __('Nama ini dicadangkan sistem.')];
         }
 
         if (Tenant::where('subdomain', $subdomain)->exists()) {
-            return ['available' => false, 'reason' => 'Sudah dipakai bisnis lain.'];
+            return ['available' => false, 'reason' => __('Sudah dipakai bisnis lain.')];
         }
 
         return ['available' => true, 'reason' => null];

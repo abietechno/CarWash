@@ -60,8 +60,8 @@ class TransactionController extends Controller
             'description' => ['nullable', 'required_if:category,other', 'string', 'max:255'],
             'business_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:'.$today],
         ], [
-            'description.required_if' => 'Tulis keterangan untuk pengeluaran lainnya.',
-            'business_date.before_or_equal' => 'Tanggal pengeluaran tidak boleh di masa depan.',
+            'description.required_if' => __('Tulis keterangan untuk pengeluaran lainnya.'),
+            'business_date.before_or_equal' => __('Tanggal pengeluaran tidak boleh di masa depan.'),
         ]);
 
         $transaction = $cashier->recordExpense($this->tenant($request), $request->user(), $data);

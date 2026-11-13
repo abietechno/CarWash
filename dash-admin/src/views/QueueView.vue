@@ -8,6 +8,7 @@ import QueueCard from '@/components/queue/QueueCard.vue'
 import WalkInDialog from '@/components/queue/WalkInDialog.vue'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { intlLocale, t } from '@/i18n'
 import { api, errorMessage } from '@/lib/api'
 import { clock } from '@/lib/format'
 import { useAuthStore } from '@/stores/auth'
@@ -24,7 +25,7 @@ const busyId = ref<number | null>(null)
 let timer: ReturnType<typeof setInterval> | undefined
 
 const dateLabel = computed(() =>
-  new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+  new Date().toLocaleDateString(intlLocale(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
 )
 const statusUrl = computed(() => (auth.tenant ? `${auth.tenant.url}/#status` : null))
 const history = computed(() => [...(board.value?.picked_up ?? []), ...(board.value?.cancelled ?? [])])
@@ -38,7 +39,7 @@ async function refresh() {
     const { data } = await api.get<QueueBoard>('/bookings')
     board.value = data
   } catch (e) {
-    toast.error(errorMessage(e, 'Gagal memuat antrian.'))
+    toast.error(errorMessage(e, t('queue.loadFailed')))
   }
 }
 
@@ -66,19 +67,19 @@ async function move(booking: BoardBooking, status: BookingStatus) {
 }
 
 const columns = computed(() => [
-  { key: 'waiting', title: 'Menunggu', items: board.value?.waiting ?? [], empty: 'Belum ada antrian.' },
-  { key: 'in_progress', title: 'Dikerjakan', items: board.value?.in_progress ?? [], empty: 'Bay kosong.' },
-  { key: 'ready', title: 'Siap diambil', items: board.value?.ready ?? [], empty: 'Belum ada yang selesai.' },
+  { key: 'waiting', title: t('queue.waiting'), items: board.value?.waiting ?? [], empty: t('queue.emptyWaiting') },
+  { key: 'in_progress', title: t('queue.inProgress'), items: board.value?.in_progress ?? [], empty: t('queue.emptyBays') },
+  { key: 'ready', title: t('queue.ready'), items: board.value?.ready ?? [], empty: t('queue.emptyReady') },
 ])
 </script>
 
 <template>
-  <PageHeader title="Antrian" :description="dateLabel">
+  <PageHeader :title="t('nav.queue')" :description="dateLabel">
     <template #actions>
-      <Button v-if="statusUrl" variant="ghost" size="icon" as="a" :href="statusUrl" target="_blank" rel="noopener" aria-label="Lihat papan di situs">
+      <Button v-if="statusUrl" variant="ghost" size="icon" as="a" :href="statusUrl" target="_blank" rel="noopener" :aria-label="t('queue.viewBoard')">
         <ExternalLink />
       </Button>
-      <Button :disabled="!vehicleTypes.length" @click="walkInOpen = true"><Plus /> Pelanggan</Button>
+      <Button :disabled="!vehicleTypes.length" @click="walkInOpen = true"><Plus /> {{ t('queue.customer') }}</Button>
     </template>
   </PageHeader>
 
@@ -91,15 +92,15 @@ const columns = computed(() => [
       <div class="grid grid-cols-3 gap-3">
         <div class="rounded-2xl border border-border/60 bg-card p-3">
           <p class="font-display text-2xl font-bold text-sky-500">{{ board.stats.in_progress }}</p>
-          <p class="text-xs text-muted-foreground">Dikerjakan · {{ board.bay_count }} bay</p>
+          <p class="text-xs text-muted-foreground">{{ t('queue.inProgressBays', { count: board.bay_count }) }}</p>
         </div>
         <div class="rounded-2xl border border-border/60 bg-card p-3">
           <p class="font-display text-2xl font-bold text-amber-500">{{ board.stats.waiting }}</p>
-          <p class="text-xs text-muted-foreground">Menunggu</p>
+          <p class="text-xs text-muted-foreground">{{ t('queue.waiting') }}</p>
         </div>
         <div class="rounded-2xl border border-border/60 bg-card p-3">
           <p class="font-display text-2xl font-bold text-emerald-500">{{ board.stats.finished_today }}</p>
-          <p class="text-xs text-muted-foreground">Selesai hari ini</p>
+          <p class="text-xs text-muted-foreground">{{ t('queue.finishedToday') }}</p>
         </div>
       </div>
 
@@ -124,17 +125,17 @@ const columns = computed(() => [
       </div>
 
       <details v-if="history.length" class="rounded-2xl border border-border/60 bg-card p-4">
-        <summary class="cursor-pointer text-sm font-semibold">Riwayat hari ini ({{ history.length }})</summary>
+        <summary class="cursor-pointer text-sm font-semibold">{{ t('queue.history', { count: history.length }) }}</summary>
         <ul class="mt-3 divide-y divide-border/50">
           <li v-for="b in history" :key="b.id" class="flex items-center gap-3 py-2 text-sm">
             <span class="w-14 font-display font-bold">{{ b.ticket }}</span>
             <CarTop :type="b.vehicle_type" :color="b.vehicle_color" class="h-7 w-12 shrink-0" />
             <span class="min-w-0 flex-1 truncate">{{ b.customer_name }} · {{ b.package_name }}</span>
             <span class="text-xs text-muted-foreground">
-              {{ b.status === 'cancelled' ? 'Batal' : `Diambil ${clock(b.finished_at)}` }}
+              {{ b.status === 'cancelled' ? t('queue.cancelled') : t('queue.pickedUpAt', { time: clock(b.finished_at) }) }}
             </span>
             <Button v-if="b.status !== 'cancelled' && !b.transaction_id" size="sm" variant="outline" as-child>
-              <RouterLink :to="{ name: 'pos', query: { booking: b.id } }">Bayar</RouterLink>
+              <RouterLink :to="{ name: 'pos', query: { booking: b.id } }">{{ t('queue.pay') }}</RouterLink>
             </Button>
             <Button
               size="sm"
@@ -142,7 +143,7 @@ const columns = computed(() => [
               :disabled="busyId === b.id"
               @click="move(b, b.status === 'cancelled' ? 'waiting' : 'done')"
             >
-              Kembalikan
+              {{ t('queue.restore') }}
             </Button>
           </li>
         </ul>

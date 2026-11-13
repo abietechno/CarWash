@@ -5,7 +5,8 @@ import { PackageCard } from '../components/PackageCard';
 import { PromoSlider } from '../components/PromoSlider';
 import { Page } from '../components/SiteNav';
 import { useQueue } from '../hooks/useQueue';
-import { CATEGORY_LABELS, DAY_LABELS, formatHours, PackageCategory, todayHours, whatsappLink } from '../lib/site';
+import { useI18n } from '../i18n';
+import { formatHours, PACKAGE_CATEGORIES, PackageCategory, todayHours, whatsappLink } from '../lib/site';
 import { useSite } from '../lib/siteContext';
 
 interface Props {
@@ -15,14 +16,15 @@ interface Props {
 
 export function HomePage({ onBook, onNavigate }: Props) {
   const { business, packages } = useSite();
+  const { locale, t, label } = useI18n();
   const { board } = useQueue();
   const [filter, setFilter] = useState<PackageCategory | 'all'>('all');
 
-  const categories = (Object.keys(CATEGORY_LABELS) as PackageCategory[]).filter((c) => packages.some((p) => p.category === c));
+  const categories = PACKAGE_CATEGORIES.filter((c) => packages.some((p) => p.category === c));
   const shown = filter === 'all' ? packages : packages.filter((p) => p.category === filter);
   const today = todayHours(business.openingHours);
   const location = [business.address, business.city].filter(Boolean).join(', ');
-  const wa = whatsappLink(business.whatsapp, `Halo ${business.name}, saya mau tanya layanan cuci mobil.`);
+  const wa = whatsappLink(business.whatsapp, t('wa.askService', { name: business.name }));
 
   return (
     <div className="space-y-10">
@@ -42,7 +44,7 @@ export function HomePage({ onBook, onNavigate }: Props) {
               </div>
             ))}
             {board.in_progress.length === 0 && (
-              <div className="bay-lane grid h-12 w-20 place-items-center rounded-xl text-[10px] font-semibold text-white/70">Kosong</div>
+              <div className="bay-lane grid h-12 w-20 place-items-center rounded-xl text-[10px] font-semibold text-white/70">{t('home.empty')}</div>
             )}
           </div>
           <div className="min-w-0 flex-1">
@@ -51,11 +53,11 @@ export function HomePage({ onBook, onNavigate }: Props) {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
-              Antrian sekarang
+              {t('home.queueNow')}
             </p>
             <p className="truncate text-sm text-slate-500">
-              {board.stats.in_progress} dicuci · {board.stats.waiting} menunggu ·{' '}
-              {board.stats.next_wait_minutes > 0 ? `tunggu ±${board.stats.next_wait_minutes} mnt` : 'bisa langsung dikerjakan'}
+              {t('home.queueStats', { progress: board.stats.in_progress, waiting: board.stats.waiting })} ·{' '}
+              {board.stats.next_wait_minutes > 0 ? t('home.waitAbout', { minutes: board.stats.next_wait_minutes }) : t('home.noWait')}
             </p>
           </div>
           <ChevronRight className="h-5 w-5 shrink-0 text-slate-400" />
@@ -65,11 +67,11 @@ export function HomePage({ onBook, onNavigate }: Props) {
       <section id="layanan">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-extrabold">Paket Layanan</h2>
-            <p className="mt-1 text-sm text-slate-500">Harga paket mobil untuk sedan/hatchback; jenis kendaraan lain menyesuaikan.</p>
+            <h2 className="text-2xl font-extrabold">{t('home.packagesTitle')}</h2>
+            <p className="mt-1 text-sm text-slate-500">{t('home.packagesText')}</p>
           </div>
           {categories.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto" role="tablist" aria-label="Kategori layanan">
+            <div className="flex gap-2 overflow-x-auto" role="tablist" aria-label={t('home.categoriesLabel')}>
               {(['all', ...categories] as const).map((c) => (
                 <button
                   key={c}
@@ -81,7 +83,7 @@ export function HomePage({ onBook, onNavigate }: Props) {
                     filter === c ? 'bg-ink-900 text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:text-ink-900'
                   }`}
                 >
-                  {c === 'all' ? 'Semua' : CATEGORY_LABELS[c]}
+                  {c === 'all' ? t('home.all') : label('categories', c)}
                 </button>
               ))}
             </div>
@@ -97,13 +99,13 @@ export function HomePage({ onBook, onNavigate }: Props) {
       <section className="grid gap-5 md:grid-cols-2">
         <div className="rounded-3xl border border-slate-200 bg-white p-6">
           <h2 className="flex items-center gap-2 text-lg font-bold">
-            <Clock className="h-5 w-5 text-brand-500" /> Jam buka
+            <Clock className="h-5 w-5 text-brand-500" /> {t('home.hours')}
           </h2>
           <dl className="mt-4 space-y-2 text-sm">
             {business.openingHours.map((h) => (
               <div key={h.day} className={`flex justify-between ${h.day === today?.day ? 'font-semibold text-ink-900' : 'text-slate-500'}`}>
-                <dt>{DAY_LABELS[h.day]}</dt>
-                <dd>{formatHours(h)}</dd>
+                <dt>{label('days', h.day)}</dt>
+                <dd>{formatHours(h, locale)}</dd>
               </div>
             ))}
           </dl>
@@ -111,7 +113,7 @@ export function HomePage({ onBook, onNavigate }: Props) {
 
         <div className="flex flex-col rounded-3xl border border-slate-200 bg-white p-6">
           <h2 className="flex items-center gap-2 text-lg font-bold">
-            <MapPin className="h-5 w-5 text-brand-500" /> Lokasi
+            <MapPin className="h-5 w-5 text-brand-500" /> {t('home.location')}
           </h2>
           {location && <p className="mt-4 text-sm text-slate-600">{location}</p>}
           {business.description && <p className="mt-3 text-sm text-slate-500">{business.description}</p>}
@@ -123,7 +125,7 @@ export function HomePage({ onBook, onNavigate }: Props) {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2.5 text-sm font-semibold hover:bg-slate-200"
               >
-                <Navigation className="h-4 w-4" /> Petunjuk arah
+                <Navigation className="h-4 w-4" /> {t('home.directions')}
               </a>
             )}
             {wa && (
@@ -133,7 +135,7 @@ export function HomePage({ onBook, onNavigate }: Props) {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600"
               >
-                <MessageCircle className="h-4 w-4" /> Chat WhatsApp
+                <MessageCircle className="h-4 w-4" /> {t('home.chat')}
               </a>
             )}
           </div>

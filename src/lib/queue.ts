@@ -1,3 +1,5 @@
+import { Locale, translate } from '../i18n';
+
 export type BookingStatus = 'waiting' | 'in_progress' | 'done';
 
 export interface QueueItem {
@@ -52,17 +54,18 @@ export async function fetchQueue(): Promise<QueueBoard> {
   return res.json();
 }
 
-export async function createBooking(input: BookingInput): Promise<QueueItem> {
+// X-Locale: pesan error dari backend ikut bahasa yang dipilih pengunjung.
+export async function createBooking(input: BookingInput, locale: Locale): Promise<QueueItem> {
   const res = await fetch('/api/public/bookings', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Locale': locale },
     body: JSON.stringify(input),
   });
   const data = await res.json().catch(() => ({}));
 
   if (res.status === 201) return data.booking;
-  if (res.status === 429) throw new BookingError('Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.');
-  throw new BookingError(data.message || 'Reservasi gagal. Coba lagi.', data.errors ?? {});
+  if (res.status === 429) throw new BookingError(translate(locale, 'booking.tooMany'));
+  throw new BookingError(data.message || translate(locale, 'booking.failed'), data.errors ?? {});
 }
 
 // Tiket reservasi terakhir di browser ini, supaya "mobil kamu" bisa disorot di papan antrian.

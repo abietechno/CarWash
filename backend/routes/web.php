@@ -4,7 +4,8 @@ use App\Services\Subscriptions;
 use Illuminate\Support\Facades\Route;
 
 // Landing page SaaS (washwuzz.cloudbizz.my.id). Situs tenant & dash-admin dilayani frontend masing-masing.
-Route::get('/', function () {
+// Bahasa Indonesia di "/", Melayu di "/ms", Inggris di "/en" (bahasa diset middleware SetLocale).
+Route::get('/{locale?}', function () {
     $demo = config('saas.demo_subdomain');
 
     return view('landing', [
@@ -13,4 +14,4 @@ Route::get('/', function () {
         'demoUrl' => $demo ? str_replace('{subdomain}', $demo, config('saas.tenant_url')) : null,
         'prices' => app(Subscriptions::class)->prices(),
     ]);
-})->name('landing');
+})->where('locale', 'ms|en')->name('landing');

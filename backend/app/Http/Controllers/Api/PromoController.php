@@ -83,8 +83,8 @@ class PromoController extends Controller
         if ($tenant->promos()->count() >= $max) {
             throw ValidationException::withMessages([
                 'promo' => $tenant->isPro()
-                    ? "Maksimal {$max} foto promo. Hapus promo lama untuk menambah yang baru."
-                    : "Paket Gratis maksimal {$max} foto promo. Upgrade ke Pro untuk sampai ".Tenant::PRO_MAX_PROMOS.' foto.',
+                    ? __('Maksimal :max foto promo. Hapus promo lama untuk menambah yang baru.', ['max' => $max])
+                    : __('Paket Gratis maksimal :max foto promo. Upgrade ke Pro untuk sampai :pro foto.', ['max' => $max, 'pro' => Tenant::PRO_MAX_PROMOS]),
             ]);
         }
     }

@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { intlLocale, label, t } from '@/i18n'
 import { api, errorMessage } from '@/lib/api'
 import { daysUntil, PAYMENT_METHODS, rupiah, shortDate } from '@/lib/format'
 import { whatsappUrl } from '@/lib/plans'
@@ -38,20 +39,12 @@ const confirm = ref<'suspend' | 'activate' | 'impersonate' | null>(null)
 const reason = ref('')
 const busy = ref(false)
 
-const ACTIONS: Record<string, string> = {
-  'payment.recorded': 'Pembayaran dicatat',
-  'plan.updated': 'Masa aktif diubah',
-  'tenant.suspended': 'Dinonaktifkan',
-  'tenant.activated': 'Diaktifkan kembali',
-  'tenant.impersonated': 'Super-admin masuk sebagai tenant',
-}
-
 function describe(meta: Record<string, unknown> | null): string {
   if (!meta) return ''
-  if (meta.amount) return `${rupiah(Number(meta.amount))} · sampai ${shortDate(String(meta.until))}`
+  if (meta.amount) return t('superTenant.paymentMeta', { amount: rupiah(Number(meta.amount)), date: shortDate(String(meta.until)) })
   if ('to' in meta) {
-    const label = (iso: unknown) => (iso ? shortDate(String(iso)) : 'Gratis')
-    return `${label(meta.from)} → ${label(meta.to)}${meta.note ? ` · ${meta.note}` : ''}`
+    const until = (iso: unknown) => (iso ? shortDate(String(iso)) : t('common.free'))
+    return `${until(meta.from)} → ${until(meta.to)}${meta.note ? ` · ${meta.note}` : ''}`
   }
   if (meta.reason) return String(meta.reason)
   if (meta.owner) return String(meta.owner)
@@ -79,7 +72,7 @@ async function runConfirmed(action: 'suspend' | 'activate' | 'impersonate') {
     }
     const { data } = await api.post<SuperTenantDetail>(`/super/tenants/${tenant.value.id}/${action}`, { reason: reason.value || null })
     tenant.value = data
-    toast.success(action === 'suspend' ? 'Tenant dinonaktifkan, situs offline.' : 'Tenant diaktifkan kembali.')
+    toast.success(action === 'suspend' ? t('superTenant.suspended') : t('superTenant.activated'))
   } catch (e) {
     toast.error(errorMessage(e))
   } finally {
@@ -91,9 +84,9 @@ async function runConfirmed(action: 'suspend' | 'activate' | 'impersonate') {
 </script>
 
 <template>
-  <PageHeader :title="tenant?.name ?? 'Tenant'" :description="tenant?.subdomain">
+  <PageHeader :title="tenant?.name ?? t('nav.tenantDetail')" :description="tenant?.subdomain">
     <template #actions>
-      <Button variant="ghost" size="icon" aria-label="Kembali" @click="router.push({ name: 'super-tenants' })"><ArrowLeft /></Button>
+      <Button variant="ghost" size="icon" :aria-label="t('common.back')" @click="router.push({ name: 'super-tenants' })"><ArrowLeft /></Button>
     </template>
   </PageHeader>
 
@@ -113,45 +106,45 @@ async function runConfirmed(action: 'suspend' | 'activate' | 'impersonate') {
     <div class="grid grid-cols-3 gap-3">
       <div class="rounded-2xl border border-border/60 bg-card p-3">
         <p class="font-display text-2xl font-bold">{{ tenant.bookings_today }}</p>
-        <p class="text-xs text-muted-foreground">Antrian hari ini</p>
+        <p class="text-xs text-muted-foreground">{{ t('superTenant.bookingsToday') }}</p>
       </div>
       <div class="rounded-2xl border border-border/60 bg-card p-3">
         <p class="font-display text-2xl font-bold">{{ tenant.bookings_this_month }}</p>
-        <p class="text-xs text-muted-foreground">Antrian bulan ini</p>
+        <p class="text-xs text-muted-foreground">{{ t('superTenant.bookingsMonth') }}</p>
       </div>
       <div class="rounded-2xl border border-border/60 bg-card p-3">
         <p class="font-display text-2xl font-bold">{{ tenant.active_packages }}</p>
-        <p class="text-xs text-muted-foreground">Paket aktif</p>
+        <p class="text-xs text-muted-foreground">{{ t('superTenant.activePackages') }}</p>
       </div>
     </div>
 
     <div class="grid gap-4 lg:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle class="text-base">Langganan</CardTitle>
+          <CardTitle class="text-base">{{ t('superTenant.subscription') }}</CardTitle>
           <CardDescription>
             <template v-if="tenant.plan === 'pro'">
-              Pro sampai {{ shortDate(tenant.pro_until) }} ({{ daysUntil(tenant.pro_until) }} hari lagi)
+              {{ t('superTenant.proUntil', { date: shortDate(tenant.pro_until), days: t('common.daysLeft', { count: daysUntil(tenant.pro_until) ?? 0 }) }) }}
             </template>
-            <template v-else-if="tenant.pro_until">Gratis · Pro terakhir habis {{ shortDate(tenant.pro_until) }}</template>
-            <template v-else>Gratis, belum pernah berlangganan</template>
+            <template v-else-if="tenant.pro_until">{{ t('superTenant.freeEnded', { date: shortDate(tenant.pro_until) }) }}</template>
+            <template v-else>{{ t('superTenant.freeNever') }}</template>
           </CardDescription>
         </CardHeader>
         <CardContent class="flex flex-wrap gap-2">
-          <Button @click="paymentOpen = true"><Receipt /> Catat pembayaran</Button>
-          <Button variant="outline" @click="planOpen = true">Ubah masa aktif</Button>
+          <Button @click="paymentOpen = true"><Receipt /> {{ t('superTenant.recordPayment') }}</Button>
+          <Button variant="outline" @click="planOpen = true">{{ t('superTenant.changePeriod') }}</Button>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle class="text-base">Pemilik</CardTitle>
-          <CardDescription>Daftar {{ shortDate(tenant.created_at) }}<template v-if="tenant.published_at"> · online sejak {{ shortDate(tenant.published_at) }}</template></CardDescription>
+          <CardTitle class="text-base">{{ t('superTenant.owner') }}</CardTitle>
+          <CardDescription>{{ t('superOverview.signedUp', { date: shortDate(tenant.created_at) }) }}<template v-if="tenant.published_at"> · {{ t('superTenant.onlineSince', { date: shortDate(tenant.published_at) }) }}</template></CardDescription>
         </CardHeader>
         <CardContent class="space-y-1 text-sm">
           <p class="font-medium">{{ tenant.owner?.name }}</p>
           <p class="text-muted-foreground">{{ tenant.owner?.email }}</p>
-          <p class="text-muted-foreground">{{ [tenant.address, tenant.city].filter(Boolean).join(', ') || 'Alamat belum diisi' }}</p>
+          <p class="text-muted-foreground">{{ [tenant.address, tenant.city].filter(Boolean).join(', ') || t('superTenant.noAddress') }}</p>
           <a
             v-if="whatsappUrl(tenant.whatsapp ?? tenant.owner?.phone)"
             :href="whatsappUrl(tenant.whatsapp ?? tenant.owner?.phone)!"
@@ -166,27 +159,27 @@ async function runConfirmed(action: 'suspend' | 'activate' | 'impersonate') {
     </div>
 
     <Card>
-      <CardHeader><CardTitle class="text-base">Aksi</CardTitle></CardHeader>
+      <CardHeader><CardTitle class="text-base">{{ t('superTenant.actions') }}</CardTitle></CardHeader>
       <CardContent class="flex flex-wrap gap-2">
-        <Button variant="outline" @click="confirm = 'impersonate'"><LifeBuoy /> Masuk sebagai tenant</Button>
+        <Button variant="outline" @click="confirm = 'impersonate'"><LifeBuoy /> {{ t('superTenant.impersonate') }}</Button>
         <Button v-if="tenant.status !== 'suspended'" variant="outline" class="text-destructive" @click="confirm = 'suspend'">
-          <Power /> Nonaktifkan
+          <Power /> {{ t('superTenant.suspend') }}
         </Button>
-        <Button v-else variant="outline" @click="confirm = 'activate'"><Power /> Aktifkan kembali</Button>
+        <Button v-else variant="outline" @click="confirm = 'activate'"><Power /> {{ t('superTenant.activate') }}</Button>
       </CardContent>
     </Card>
 
     <Card>
-      <CardHeader><CardTitle class="text-base">Riwayat pembayaran</CardTitle></CardHeader>
+      <CardHeader><CardTitle class="text-base">{{ t('superTenant.payments') }}</CardTitle></CardHeader>
       <CardContent>
-        <p v-if="!tenant.payments.length" class="text-sm text-muted-foreground">Belum ada pembayaran.</p>
+        <p v-if="!tenant.payments.length" class="text-sm text-muted-foreground">{{ t('superTenant.noPayments') }}</p>
         <div v-else class="divide-y divide-border/50 text-sm">
           <div v-for="p in tenant.payments" :key="p.id" class="flex flex-wrap items-center justify-between gap-2 py-2 first:pt-0 last:pb-0">
             <div>
-              <p class="font-medium">{{ rupiah(p.amount) }} · {{ p.period === 'yearly' ? 'Tahunan' : 'Bulanan' }}</p>
+              <p class="font-medium">{{ rupiah(p.amount) }} · {{ p.period === 'yearly' ? t('common.yearly') : t('common.monthly') }}</p>
               <p class="text-xs text-muted-foreground">
                 {{ shortDate(p.paid_at) }} · {{ PAYMENT_METHODS[p.method] ?? p.method }}<template v-if="p.reference"> · {{ p.reference }}</template>
-                <template v-if="p.recorded_by"> · dicatat {{ p.recorded_by }}</template>
+                <template v-if="p.recorded_by"> · {{ t('superTenant.recordedBy', { name: p.recorded_by }) }}</template>
               </p>
             </div>
             <p class="text-xs text-muted-foreground">{{ shortDate(p.period_start) }} – {{ shortDate(p.period_end) }}</p>
@@ -196,42 +189,42 @@ async function runConfirmed(action: 'suspend' | 'activate' | 'impersonate') {
     </Card>
 
     <Card>
-      <CardHeader><CardTitle class="text-base">Log aktivitas</CardTitle></CardHeader>
+      <CardHeader><CardTitle class="text-base">{{ t('superTenant.activity') }}</CardTitle></CardHeader>
       <CardContent>
-        <p v-if="!tenant.activity.length" class="text-sm text-muted-foreground">Belum ada aktivitas super-admin.</p>
+        <p v-if="!tenant.activity.length" class="text-sm text-muted-foreground">{{ t('superTenant.noActivity') }}</p>
         <ul v-else class="space-y-2 text-sm">
           <li v-for="log in tenant.activity" :key="log.id" class="flex flex-wrap justify-between gap-2">
             <span>
-              <span class="font-medium">{{ ACTIONS[log.action] ?? log.action }}</span>
+              <span class="font-medium">{{ label('activity', log.action.replaceAll('.', '_')) }}</span>
               <span v-if="describe(log.meta)" class="text-muted-foreground"> · {{ describe(log.meta) }}</span>
             </span>
-            <span class="text-xs text-muted-foreground">{{ log.user }} · {{ new Date(log.created_at).toLocaleString('id-ID') }}</span>
+            <span class="text-xs text-muted-foreground">{{ log.user }} · {{ new Date(log.created_at).toLocaleString(intlLocale()) }}</span>
           </li>
         </ul>
       </CardContent>
     </Card>
 
-    <PaymentDialog v-model:open="paymentOpen" :tenant="tenant" @saved="(t) => (tenant = t)" />
-    <PlanDialog v-model:open="planOpen" :tenant="tenant" @saved="(t) => (tenant = t)" />
+    <PaymentDialog v-model:open="paymentOpen" :tenant="tenant" @saved="(updated) => (tenant = updated)" />
+    <PlanDialog v-model:open="planOpen" :tenant="tenant" @saved="(updated) => (tenant = updated)" />
 
     <AlertDialog :open="confirm !== null" @update:open="(v: boolean) => !v && (confirm = null)">
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {{ confirm === 'suspend' ? 'Nonaktifkan tenant?' : confirm === 'activate' ? 'Aktifkan kembali?' : `Masuk sebagai ${tenant.name}?` }}
+            {{ confirm === 'suspend' ? t('superTenant.suspendTitle') : confirm === 'activate' ? t('superTenant.activateTitle') : t('superTenant.impersonateTitle', { name: tenant.name }) }}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            <template v-if="confirm === 'suspend'">Situs {{ tenant.url }} langsung offline dan pemilik tidak bisa mempublikasikan ulang.</template>
-            <template v-else-if="confirm === 'activate'">Situs kembali seperti sebelum dinonaktifkan.</template>
-            <template v-else>Kamu akan membuka dashboard tenant ini selama maks. 2 jam untuk membantu. Akses ini tercatat di log.</template>
+            <template v-if="confirm === 'suspend'">{{ t('superTenant.suspendText', { url: tenant.url }) }}</template>
+            <template v-else-if="confirm === 'activate'">{{ t('superTenant.activateText') }}</template>
+            <template v-else>{{ t('superTenant.impersonateText') }}</template>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <Input v-if="confirm === 'suspend'" v-model="reason" placeholder="Alasan (opsional, tercatat di log)" maxlength="255" />
+        <Input v-if="confirm === 'suspend'" v-model="reason" :placeholder="t('superTenant.reason')" maxlength="255" />
         <AlertDialogFooter>
-          <AlertDialogCancel>Batal</AlertDialogCancel>
+          <AlertDialogCancel>{{ t('common.cancel') }}</AlertDialogCancel>
           <Button :variant="confirm === 'suspend' ? 'destructive' : 'default'" :disabled="busy" @click="confirm && runConfirmed(confirm)">
             <LoaderCircle v-if="busy" class="animate-spin" />
-            {{ confirm === 'suspend' ? 'Nonaktifkan' : confirm === 'activate' ? 'Aktifkan' : 'Masuk' }}
+            {{ confirm === 'suspend' ? t('superTenant.suspend') : confirm === 'activate' ? t('superTenant.activateConfirm') : t('superTenant.impersonateConfirm') }}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

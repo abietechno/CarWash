@@ -1,8 +1,11 @@
+import { useI18n } from '../i18n';
 import { QueueItem } from '../lib/queue';
 import { CarTop } from './CarTop';
 
 // Mobil yang sedang dicuci: ilustrasi di bay + progress.
 export function BayCard({ item, vehicleName, mine }: { item: QueueItem; vehicleName: string; mine: boolean }) {
+  const { t } = useI18n();
+
   return (
     <article
       className={`overflow-hidden rounded-3xl border bg-white ${mine ? 'border-brand-400 ring-4 ring-brand-100' : 'border-slate-200'}`}
@@ -20,7 +23,7 @@ export function BayCard({ item, vehicleName, mine }: { item: QueueItem; vehicleN
         {item.bay && (
           <span className="absolute top-4 left-4 z-30 rounded-full bg-brand-500 px-2.5 py-0.5 text-xs font-bold text-white">BAY {item.bay}</span>
         )}
-        {mine && <span className="absolute top-4 right-4 z-30 rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-brand-700">Kendaraan kamu</span>}
+        {mine && <span className="absolute top-4 right-4 z-30 rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-brand-700">{t('bay.yours')}</span>}
       </div>
 
       <div className="p-5">
@@ -37,7 +40,7 @@ export function BayCard({ item, vehicleName, mine }: { item: QueueItem; vehicleN
           <div className="h-full rounded-full bg-gradient-to-r from-brand-500 to-cyan-400 transition-all duration-700" style={{ width: `${item.progress ?? 0}%` }} />
         </div>
         <p className="mt-2 text-sm text-slate-500">
-          <span className="font-semibold text-ink-900">{item.progress ?? 0}%</span> · sisa ±{item.remaining_minutes} menit
+          <span className="font-semibold text-ink-900">{item.progress ?? 0}%</span> · {t('bay.remaining', { minutes: item.remaining_minutes ?? 0 })}
         </p>
       </div>
     </article>

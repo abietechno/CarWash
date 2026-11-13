@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { CarFront, ChevronRight, Crown, CircleAlert, CircleCheck, Copy, ExternalLink, LoaderCircle, Rocket, Store, Tags } from '@lucide/vue'
 import PageHeader from '@/components/PageHeader.vue'
@@ -17,10 +17,11 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { locale, t } from '@/i18n'
 import { api, errorMessage } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth'
 import PlanBadge from '@/components/super/PlanBadge.vue'
-import { rupiah, shortDate } from '@/lib/format'
+import { rupiah, shortDate, TENANT_STATUS } from '@/lib/format'
 import type { QueueBoard, ReportSummary, Tenant } from '@/types'
 
 const auth = useAuthStore()
@@ -31,27 +32,29 @@ const today = ref<ReportSummary | null>(null)
 
 const firstName = computed(() => auth.user?.name.split(' ')[0] ?? '')
 const isOnline = computed(() => tenant.value?.status === 'published')
-const statusLabel = computed(
-  () => ({ published: 'Online', draft: 'Draft', suspended: 'Dinonaktifkan' })[tenant.value?.status ?? 'draft'],
-)
+const statusLabel = computed(() => TENANT_STATUS[tenant.value?.status ?? 'draft'])
 
-onMounted(async () => {
+async function load() {
   try {
-    const [t, q, r] = await Promise.all([api.get<Tenant>('/tenant'), api.get<QueueBoard>('/bookings'), api.get<ReportSummary>('/reports/summary')])
-    auth.setTenant(t.data)
+    const [profile, q, r] = await Promise.all([api.get<Tenant>('/tenant'), api.get<QueueBoard>('/bookings'), api.get<ReportSummary>('/reports/summary')])
+    auth.setTenant(profile.data)
     queue.value = q.data
     today.value = r.data
   } catch (e) {
     toast.error(errorMessage(e))
   }
-})
+}
+
+onMounted(load)
+// Daftar data yang kurang (publish_issues) dikirim server dalam bahasa aktif; muat ulang saat bahasa diganti.
+watch(locale, load)
 
 async function setPublished(publish: boolean) {
   busy.value = true
   try {
     const { data } = await api.post<Tenant>(publish ? '/tenant/publish' : '/tenant/unpublish')
     auth.setTenant(data)
-    toast.success(publish ? 'Situs sudah online!' : 'Situs disembunyikan dari publik.')
+    toast.success(publish ? t('dashboard.published') : t('dashboard.hidden'))
   } catch (e) {
     toast.error(errorMessage(e))
   } finally {
@@ -63,35 +66,35 @@ async function copyUrl() {
   if (!tenant.value) return
   try {
     await navigator.clipboard.writeText(tenant.value.url)
-    toast.success('Alamat situs disalin.')
+    toast.success(t('dashboard.copied'))
   } catch {
-    toast.error('Gagal menyalin. Salin manual dari kolom alamat.')
+    toast.error(t('dashboard.copyFailed'))
   }
 }
 </script>
 
 <template>
-  <PageHeader :title="`Halo, ${firstName}`" :description="tenant?.name" />
+  <PageHeader :title="t('dashboard.greeting', { name: firstName })" :description="tenant?.name" />
 
   <div v-if="tenant" class="space-y-4 p-4 sm:p-6">
     <Card>
       <CardHeader>
         <div class="flex items-center justify-between gap-3">
-          <CardTitle class="text-base">Status situs</CardTitle>
+          <CardTitle class="text-base">{{ t('dashboard.siteStatus') }}</CardTitle>
           <Badge :variant="isOnline ? 'default' : 'secondary'">
             <span :class="['h-1.5 w-1.5 rounded-full', isOnline ? 'bg-emerald-500' : 'bg-muted-foreground']" />
             {{ statusLabel }}
           </Badge>
         </div>
         <CardDescription>
-          {{ isOnline ? 'Situsmu bisa dibuka siapa saja.' : 'Situs belum tampil ke publik sampai kamu publikasikan.' }}
+          {{ isOnline ? t('dashboard.onlineText') : t('dashboard.offlineText') }}
         </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <div class="flex items-center gap-2 rounded-xl border border-border/60 bg-muted/40 px-3 py-2">
           <span class="min-w-0 flex-1 truncate font-mono text-sm">{{ tenant.url }}</span>
-          <Button variant="ghost" size="icon-sm" aria-label="Salin alamat" @click="copyUrl"><Copy /></Button>
-          <Button v-if="isOnline" variant="ghost" size="icon-sm" as="a" :href="tenant.url" target="_blank" rel="noopener" aria-label="Buka situs">
+          <Button variant="ghost" size="icon-sm" :aria-label="t('dashboard.copyUrl')" @click="copyUrl"><Copy /></Button>
+          <Button v-if="isOnline" variant="ghost" size="icon-sm" as="a" :href="tenant.url" target="_blank" rel="noopener" :aria-label="t('dashboard.openSite')">
             <ExternalLink />
           </Button>
         </div>
@@ -104,34 +107,34 @@ async function copyUrl() {
             </li>
           </ul>
           <p v-else class="flex items-center gap-2 text-sm">
-            <CircleCheck class="h-4 w-4 text-emerald-500" /> Data sudah lengkap, siap dipublikasikan.
+            <CircleCheck class="h-4 w-4 text-emerald-500" /> {{ t('dashboard.ready') }}
           </p>
           <Button class="w-full sm:w-auto" :disabled="busy || tenant.publish_issues.length > 0" @click="setPublished(true)">
             <LoaderCircle v-if="busy" class="animate-spin" />
             <Rocket v-else />
-            Publikasikan situs
+            {{ t('dashboard.publish') }}
           </Button>
         </div>
 
         <AlertDialog v-else-if="isOnline">
           <AlertDialogTrigger as-child>
-            <Button variant="outline" :disabled="busy">Sembunyikan situs</Button>
+            <Button variant="outline" :disabled="busy">{{ t('dashboard.unpublish') }}</Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Sembunyikan situs?</AlertDialogTitle>
+              <AlertDialogTitle>{{ t('dashboard.unpublishTitle') }}</AlertDialogTitle>
               <AlertDialogDescription>
-                Pelanggan tidak bisa membuka {{ tenant.url }} sampai kamu publikasikan lagi. Data tidak hilang.
+                {{ t('dashboard.unpublishText', { url: tenant.url }) }}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Batal</AlertDialogCancel>
-              <AlertDialogAction variant="destructive" @click="setPublished(false)">Sembunyikan</AlertDialogAction>
+              <AlertDialogCancel>{{ t('common.cancel') }}</AlertDialogCancel>
+              <AlertDialogAction variant="destructive" @click="setPublished(false)">{{ t('dashboard.unpublishConfirm') }}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
 
-        <p v-else class="text-sm text-destructive">Bisnis ini sedang dinonaktifkan. Hubungi admin WashWuzz.</p>
+        <p v-else class="text-sm text-destructive">{{ t('dashboard.suspended') }}</p>
       </CardContent>
     </Card>
 
@@ -143,9 +146,9 @@ async function copyUrl() {
         <Crown class="h-5 w-5" :stroke-width="1.75" />
       </span>
       <span class="min-w-0 flex-1">
-        <span class="block font-medium">Paket {{ tenant.plan === 'pro' ? 'Pro' : 'Gratis' }}</span>
+        <span class="block font-medium">{{ t('common.planName', { plan: tenant.plan === 'pro' ? 'Pro' : t('common.free') }) }}</span>
         <span class="block truncate text-sm text-muted-foreground">
-          {{ tenant.plan === 'pro' ? `Aktif sampai ${shortDate(tenant.pro_until)}` : 'Upgrade untuk reservasi online, 25 foto promo & logo sendiri' }}
+          {{ tenant.plan === 'pro' ? t('dashboard.activeUntil', { date: shortDate(tenant.pro_until) }) : t('dashboard.upgradeHint') }}
         </span>
       </span>
       <PlanBadge :plan="tenant.plan" :pro-until="tenant.pro_until" />
@@ -161,9 +164,9 @@ async function copyUrl() {
         <CarFront class="h-5 w-5" :stroke-width="1.75" />
       </span>
       <span class="min-w-0 flex-1">
-        <span class="block font-medium">Antrian hari ini</span>
+        <span class="block font-medium">{{ t('dashboard.queueToday') }}</span>
         <span class="block text-sm text-muted-foreground">
-          {{ queue.stats.in_progress }} dikerjakan · {{ queue.stats.waiting }} menunggu · {{ queue.stats.finished_today }} selesai
+          {{ t('dashboard.queueStats', { progress: queue.stats.in_progress, waiting: queue.stats.waiting, done: queue.stats.finished_today }) }}
         </span>
       </span>
       <ChevronRight class="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
@@ -172,16 +175,16 @@ async function copyUrl() {
     <Card v-if="today" size="sm">
       <CardContent class="flex flex-wrap items-center gap-x-8 gap-y-3">
         <div>
-          <p class="text-sm text-muted-foreground">Uang masuk hari ini</p>
+          <p class="text-sm text-muted-foreground">{{ t('dashboard.incomeToday') }}</p>
           <p class="mt-1 font-display text-2xl font-bold tabular-nums">{{ rupiah(today.income) }}</p>
         </div>
         <div>
-          <p class="text-sm text-muted-foreground">Uang keluar hari ini</p>
+          <p class="text-sm text-muted-foreground">{{ t('dashboard.expenseToday') }}</p>
           <p class="mt-1 font-display text-2xl font-bold tabular-nums">{{ rupiah(today.expense) }}</p>
         </div>
         <div class="flex gap-2 sm:ml-auto">
-          <Button as-child><RouterLink to="/kasir">Buka kasir</RouterLink></Button>
-          <Button variant="outline" as-child><RouterLink to="/laporan">Laporan</RouterLink></Button>
+          <Button as-child><RouterLink to="/kasir">{{ t('dashboard.openPos') }}</RouterLink></Button>
+          <Button variant="outline" as-child><RouterLink to="/laporan">{{ t('nav.reports') }}</RouterLink></Button>
         </div>
       </CardContent>
     </Card>
@@ -189,13 +192,13 @@ async function copyUrl() {
     <div class="grid grid-cols-2 gap-4">
       <Card size="sm">
         <CardContent>
-          <p class="text-sm text-muted-foreground">Paket aktif</p>
+          <p class="text-sm text-muted-foreground">{{ t('dashboard.activePackages') }}</p>
           <p class="mt-1 font-display text-3xl font-bold">{{ tenant.stats.packages }}</p>
         </CardContent>
       </Card>
       <Card size="sm">
         <CardContent>
-          <p class="text-sm text-muted-foreground">Add-on aktif</p>
+          <p class="text-sm text-muted-foreground">{{ t('dashboard.activeAddons') }}</p>
           <p class="mt-1 font-display text-3xl font-bold">{{ tenant.stats.addons }}</p>
         </CardContent>
       </Card>
@@ -204,8 +207,8 @@ async function copyUrl() {
     <div class="grid gap-3 sm:grid-cols-2">
       <RouterLink
         v-for="link in [
-          { to: '/profil', icon: Store, title: 'Profil bisnis', text: 'Alamat, WhatsApp, deskripsi, jam buka' },
-          { to: '/layanan', icon: Tags, title: 'Layanan & harga', text: 'Paket, add-on, harga per kendaraan' },
+          { to: '/profil', icon: Store, title: t('dashboard.profileTitle'), text: t('dashboard.profileText') },
+          { to: '/layanan', icon: Tags, title: t('dashboard.servicesTitle'), text: t('dashboard.servicesText') },
         ]"
         :key="link.to"
         :to="link.to"

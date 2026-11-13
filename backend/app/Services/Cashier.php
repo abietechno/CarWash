@@ -34,20 +34,20 @@ class Cashier
             $lines = $this->lines($tenant, $data, $booking);
             $subtotal = array_sum(array_column($lines, 'subtotal'));
             if ($subtotal > self::MAX_AMOUNT) {
-                throw ValidationException::withMessages(['items' => 'Total transaksi terlalu besar.']);
+                throw ValidationException::withMessages(['items' => __('Total transaksi terlalu besar.')]);
             }
 
             $discount = (int) ($data['discount'] ?? 0);
 
             if ($discount > $subtotal) {
-                throw ValidationException::withMessages(['discount' => 'Diskon tidak boleh melebihi subtotal.']);
+                throw ValidationException::withMessages(['discount' => __('Diskon tidak boleh melebihi subtotal.')]);
             }
 
             $amount = $subtotal - $discount;
             $paid = $data['payment_method'] === 'cash' ? (int) ($data['paid_amount'] ?? $amount) : null;
 
             if ($paid !== null && $paid < $amount) {
-                throw ValidationException::withMessages(['paid_amount' => 'Uang diterima kurang dari total.']);
+                throw ValidationException::withMessages(['paid_amount' => __('Uang diterima kurang dari total.')]);
             }
 
             $date = $this->bookings->today();
@@ -59,7 +59,7 @@ class Cashier
                 'sequence' => $sequence,
                 'number' => $this->number('TRX', $date, $sequence),
                 'category' => Transaction::CATEGORY_SALE,
-                'description' => $booking ? "Antrian {$booking->ticket()}" : null,
+                'description' => $booking ? __('Antrian :ticket', ['ticket' => $booking->ticket()]) : null,
                 'booking_id' => $booking?->id,
                 'customer_name' => $this->clean($data['customer_name'] ?? null) ?? $booking?->customer_name,
                 'customer_phone' => $this->clean($data['customer_phone'] ?? null) ?? $booking?->phone,
@@ -105,7 +105,7 @@ class Cashier
     public function void(Transaction $transaction, User $user, string $reason): Transaction
     {
         if ($transaction->isVoided()) {
-            throw ValidationException::withMessages(['reason' => 'Transaksi ini sudah dibatalkan.']);
+            throw ValidationException::withMessages(['reason' => __('Transaksi ini sudah dibatalkan.')]);
         }
 
         $transaction->update([
@@ -120,11 +120,11 @@ class Cashier
     private function ensurePayable(Booking $booking): void
     {
         if ($booking->status === Booking::CANCELLED) {
-            throw ValidationException::withMessages(['booking_id' => "Antrian {$booking->ticket()} sudah dibatalkan."]);
+            throw ValidationException::withMessages(['booking_id' => __('Antrian :ticket sudah dibatalkan.', ['ticket' => $booking->ticket()])]);
         }
 
         if ($booking->payments()->active()->exists()) {
-            throw ValidationException::withMessages(['booking_id' => "Antrian {$booking->ticket()} sudah dibayar."]);
+            throw ValidationException::withMessages(['booking_id' => __('Antrian :ticket sudah dibayar.', ['ticket' => $booking->ticket()])]);
         }
     }
 
@@ -150,11 +150,11 @@ class Cashier
             switch ($item['type']) {
                 case 'package':
                     if ($vehicle === null) {
-                        throw ValidationException::withMessages(['vehicle_type' => 'Pilih jenis kendaraan untuk paket ini.']);
+                        throw ValidationException::withMessages(['vehicle_type' => __('Pilih jenis kendaraan untuk paket ini.')]);
                     }
                     $package = $tenant->packages()->where('is_active', true)->find($item['id']) ?? $this->unavailable();
                     if (! $package->fits($vehicle)) {
-                        throw ValidationException::withMessages(['items' => "Paket {$package->name} tidak tersedia untuk {$vehicle->name}."]);
+                        throw ValidationException::withMessages(['items' => __('Paket :package tidak tersedia untuk :vehicle.', ['package' => $package->name, 'vehicle' => $vehicle->name])]);
                     }
                     $lines[] = $this->line('package', $package->id, $package->name, $qty, $package->priceFor($vehicle));
                     break;
@@ -168,7 +168,7 @@ class Cashier
         }
 
         if ($lines === []) {
-            throw ValidationException::withMessages(['items' => 'Keranjang masih kosong.']);
+            throw ValidationException::withMessages(['items' => __('Keranjang masih kosong.')]);
         }
 
         return $lines;
@@ -176,7 +176,7 @@ class Cashier
 
     private function unavailable(): never
     {
-        throw ValidationException::withMessages(['items' => 'Ada item yang tidak tersedia. Muat ulang halaman kasir.']);
+        throw ValidationException::withMessages(['items' => __('Ada item yang tidak tersedia. Muat ulang halaman kasir.')]);
     }
 
     private function line(string $type, ?int $id, string $name, int $qty, int $unitPrice): array

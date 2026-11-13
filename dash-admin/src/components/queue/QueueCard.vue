@@ -4,6 +4,7 @@ import { Check, CircleCheck, CircleX, Phone, Play, Undo2, Wallet } from '@lucide
 import CarTop from '@/components/CarTop.vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { t } from '@/i18n'
 import { clock, rupiah } from '@/lib/format'
 import type { BoardBooking, BookingStatus } from '@/types'
 
@@ -18,9 +19,9 @@ const b = computed(() => props.booking)
     <div class="flex items-center justify-between gap-2">
       <div class="flex items-center gap-2">
         <span class="font-display text-lg font-bold">{{ b.ticket }}</span>
-        <Badge v-if="b.bay && b.status === 'in_progress'" variant="secondary">Bay {{ b.bay }}</Badge>
+        <Badge v-if="b.bay && b.status === 'in_progress'" variant="secondary">{{ t('queueCard.bay', { n: b.bay }) }}</Badge>
       </div>
-      <Badge variant="outline">{{ b.source === 'online' ? 'Online' : 'Datang langsung' }}</Badge>
+      <Badge variant="outline">{{ b.source === 'online' ? t('queueCard.online') : t('queueCard.walkIn') }}</Badge>
     </div>
 
     <div class="mt-2 flex items-center gap-3">
@@ -47,30 +48,30 @@ const b = computed(() => props.booking)
         <div class="h-full rounded-full bg-sky-500 transition-all" :style="{ width: `${b.progress ?? 0}%` }" />
       </div>
       <p class="mt-1 text-xs text-muted-foreground">
-        {{ b.progress }}% · sisa ±{{ b.remaining_minutes }} mnt · mulai {{ clock(b.started_at) }}
+        {{ t('queueCard.progress', { progress: b.progress ?? 0, minutes: b.remaining_minutes ?? 0, time: clock(b.started_at) }) }}
       </p>
     </div>
     <p v-else-if="b.status === 'waiting'" class="mt-1 text-xs text-muted-foreground">
-      Masuk {{ clock(b.created_at) }} · est. mulai {{ b.est_wait_minutes ? clock(b.est_start_at) : 'sekarang' }}
+      {{ t('queueCard.waitingInfo', { time: clock(b.created_at), start: b.est_wait_minutes ? clock(b.est_start_at) : t('queueCard.now') }) }}
     </p>
-    <p v-else-if="b.status === 'done'" class="mt-1 text-xs text-muted-foreground">Selesai {{ clock(b.finished_at) }}</p>
+    <p v-else-if="b.status === 'done'" class="mt-1 text-xs text-muted-foreground">{{ t('queueCard.finishedAt', { time: clock(b.finished_at) }) }}</p>
 
     <div class="mt-3 flex gap-2">
       <template v-if="b.status === 'waiting'">
-        <Button size="sm" class="flex-1" :disabled="busy" @click="emit('move', 'in_progress')"><Play /> Mulai</Button>
-        <Button v-if="!b.transaction_id" size="sm" variant="ghost" :disabled="busy" aria-label="Batalkan" @click="emit('move', 'cancelled')"><CircleX /></Button>
+        <Button size="sm" class="flex-1" :disabled="busy" @click="emit('move', 'in_progress')"><Play /> {{ t('queueCard.start') }}</Button>
+        <Button v-if="!b.transaction_id" size="sm" variant="ghost" :disabled="busy" :aria-label="t('queueCard.cancel')" @click="emit('move', 'cancelled')"><CircleX /></Button>
       </template>
       <template v-else-if="b.status === 'in_progress'">
-        <Button size="sm" class="flex-1" :disabled="busy" @click="emit('move', 'done')"><Check /> Selesai</Button>
-        <Button size="sm" variant="ghost" :disabled="busy" aria-label="Kembalikan ke antrian" @click="emit('move', 'waiting')"><Undo2 /></Button>
+        <Button size="sm" class="flex-1" :disabled="busy" @click="emit('move', 'done')"><Check /> {{ t('queueCard.finish') }}</Button>
+        <Button size="sm" variant="ghost" :disabled="busy" :aria-label="t('queueCard.backToQueue')" @click="emit('move', 'waiting')"><Undo2 /></Button>
       </template>
       <template v-else-if="b.status === 'done'">
-        <Button size="sm" class="flex-1" :disabled="busy" @click="emit('move', 'picked_up')"><Check /> Sudah diambil</Button>
-        <Button size="sm" variant="ghost" :disabled="busy" aria-label="Kembalikan ke dikerjakan" @click="emit('move', 'in_progress')"><Undo2 /></Button>
+        <Button size="sm" class="flex-1" :disabled="busy" @click="emit('move', 'picked_up')"><Check /> {{ t('queueCard.pickedUp') }}</Button>
+        <Button size="sm" variant="ghost" :disabled="busy" :aria-label="t('queueCard.backToProgress')" @click="emit('move', 'in_progress')"><Undo2 /></Button>
       </template>
-      <Badge v-if="b.transaction_id" variant="secondary" class="self-center"><CircleCheck /> Lunas</Badge>
+      <Badge v-if="b.transaction_id" variant="secondary" class="self-center"><CircleCheck /> {{ t('queueCard.paid') }}</Badge>
       <Button v-else size="sm" variant="outline" as-child>
-        <RouterLink :to="{ name: 'pos', query: { booking: b.id } }"><Wallet /> Bayar</RouterLink>
+        <RouterLink :to="{ name: 'pos', query: { booking: b.id } }"><Wallet /> {{ t('queue.pay') }}</RouterLink>
       </Button>
     </div>
   </div>
